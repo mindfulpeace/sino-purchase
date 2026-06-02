@@ -1,0 +1,597 @@
+/* ═══════════════════════════════════════════════
+   VS Code Theme — Dark (default)
+   ═══════════════════════════════════════════════ */
+
+.vscode {
+  --bg-darkest: #1e1e1e;
+  --bg-dark: #252526;
+  --bg-medium: #2d2d2d;
+  --bg-light: #3c3c3c;
+  --bg-hover: #2a2d2e;
+  --border: #3c3c3c;
+  --text: #cccccc;
+  --text-dim: #858585;
+  --text-bright: #e0e0e0;
+  --accent: #007acc;
+  --accent-hover: #1a8ad4;
+  --tab-active-bg: #1e1e1e;
+  --tab-inactive-bg: #2d2d2d;
+  --tab-border: #252526;
+  --sidebar-bg: #252526;
+  --activitybar-bg: #333333;
+  --activitybar-hover: #3c3c3c;
+  --activitybar-active-border: #ffffff;
+  --titlebar-bg: #3c3c3c;
+  --statusbar-bg: #007acc;
+  --panel-bg: #1e1e1e;
+  --panel-header-bg: #252526;
+  --scrollbar-bg: transparent;
+  --scrollbar-thumb: #424242;
+  --scrollbar-thumb-hover: #4f4f4f;
+
+  --bp-intent-default-rest: #5f6b7c;
+  --bp-intent-default-hover: #404854;
+  --bp-intent-default-active: #383e47;
+  --bp-intent-default-foreground: #ffffff;
+  --bp-typography-color-default-rest: #cccccc;
+  --bp-typography-color-default-disabled: #5f6b7c;
+
+  /* BP6 surface overrides — match VS Code dark */
+  --bp-surface-background-color-default-rest: #252526;
+  --bp-surface-background-color-default-hover: #2d2d2d;
+  --bp-surface-background-color-default-active: #3c3c3c;
+  --bp-surface-background-color-default-disabled: #252526;
+  --bp-typography-color-default-hover: #858585;
+  --bp-typography-color-default-active: #cccccc;
+
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--bg-darkest);
+  color: var(--text);
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  user-select: none;
+}
+
+/* Remove blue focus outline on all buttons */
+.vscode button:focus,
+.vscode button:focus-visible,
+.vscode .bp6-button:focus,
+.vscode .bp6-button:focus-visible {
+  outline: none !important;
+}
+
+/* ═══════════════════════════════════════════════
+   VS Code Theme — Light
+   ═══════════════════════════════════════════════ */
+
+.vscode.light {
+  --bg-darkest: #ffffff;
+  --bg-dark: #f3f3f3;
+  --bg-medium: #ececec;
+  --bg-light: #e0e0e0;
+  --bg-hover: #e8e8e8;
+  --border: #d4d4d4;
+  --text: #333333;
+  --text-dim: #888888;
+  --text-bright: #1a1a1a;
+  --accent: #0066b8;
+  --accent-hover: #005a9e;
+  --tab-active-bg: #ffffff;
+  --tab-inactive-bg: #ececec;
+  --tab-border: #e0e0e0;
+  --sidebar-bg: #f3f3f3;
+  --activitybar-bg: #e8e8e8;
+  --activitybar-hover: #dcdcdc;
+  --activitybar-active-border: #0066b8;
+  --titlebar-bg: #dddddd;
+  --statusbar-bg: #0066b8;
+  --panel-bg: #ffffff;
+  --panel-header-bg: #f3f3f3;
+  --scrollbar-bg: transparent;
+  --scrollbar-thumb: #c1c1c1;
+  --scrollbar-thumb-hover: #a0a0a0;
+
+  --bp-intent-default-rest: #5f6b7c;
+  --bp-intent-default-hover: #4a525d;
+  --bp-intent-default-active: #383e47;
+  --bp-intent-default-foreground: #ffffff;
+  --bp-typography-color-default-rest: #333333;
+  --bp-typography-color-default-disabled: #abb3bf;
+
+  /* BP6 surface overrides — match VS Code light */
+  --bp-surface-background-color-default-rest: #ffffff;
+  --bp-surface-background-color-default-hover: #f3f3f3;
+  --bp-surface-background-color-default-active: #ececec;
+  --bp-surface-background-color-default-disabled: #ffffff;
+  --bp-typography-color-default-hover: #888888;
+  --bp-typography-color-default-active: #333333;
+}
+
+/* ═══════════════════════════════════════════════
+   Title Bar
+   ═══════════════════════════════════════════════ */
+
+.vscode-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  background: var(--titlebar-bg);
+  color: var(--text);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.vscode-titlebar-text {
+  opacity: 0.7;
+}
+
+/* ═══════════════════════════════════════════════
+   Body
+   ═══════════════════════════════════════════════ */
+
+.vscode-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════
+   Activity Bar
+   ═══════════════════════════════════════════════ */
+
+.vscode-activitybar {
+  display: flex;
+  flex-direction: column;
+  width: 48px;
+  background: var(--activitybar-bg);
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.vscode-activitybar-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.vscode-activitybar-item svg {
+  fill: #ffffffcc;
+}
+
+.vscode-activitybar-item:hover {
+  background: var(--activitybar-hover);
+}
+
+.vscode-activitybar-item:hover svg {
+  fill: #ffffff;
+}
+
+.vscode-activitybar-item.active svg {
+  fill: #ffffff;
+}
+
+.vscode-activitybar-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 1px;
+  bottom: 1px;
+  width: 2px;
+  background: var(--activitybar-active-border);
+  border-radius: 0 1px 1px 0;
+}
+
+.vscode.light .vscode-activitybar-item svg {
+  fill: #33333399;
+}
+
+.vscode.light .vscode-activitybar-item:hover svg,
+.vscode.light .vscode-activitybar-item.active svg {
+  fill: #1a1a1a;
+}
+
+.vscode.light .vscode-activitybar-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--activitybar-active-border);
+  border-radius: 0 1px 1px 0;
+}
+
+/* ═══════════════════════════════════════════════
+   Side Bar
+   ═══════════════════════════════════════════════ */
+
+.vscode-sidebar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.vscode-sidebar-header {
+  display: flex;
+  align-items: center;
+  height: 35px;
+  padding: 0 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-bright);
+  flex-shrink: 0;
+}
+
+.vscode-sidebar-content {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+}
+
+.vscode-sidebar-resize {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+}
+
+/* ═══════════════════════════════════════════════
+   Editor Area
+   ═══════════════════════════════════════════════ */
+
+.vscode-editor-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-darkest);
+}
+
+.vscode-tabs {
+  display: flex;
+  background: var(--tab-inactive-bg);
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+
+.vscode-tabs::-webkit-scrollbar {
+  height: 0;
+}
+
+.vscode-tab {
+  display: flex;
+  align-items: center;
+  height: 35px;
+  padding: 0 14px;
+  border: none;
+  background: var(--tab-inactive-bg);
+  color: var(--text-dim);
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  border-right: 1px solid var(--tab-border);
+  flex-shrink: 0;
+}
+
+.vscode-tab:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+.vscode-tab.active {
+  background: var(--tab-active-bg);
+  color: var(--text-bright);
+  border-bottom: 1px solid var(--tab-active-bg);
+  margin-bottom: -1px;
+}
+
+.vscode-editor-content {
+  flex: 1;
+  overflow: hidden;
+  background: var(--bg-darkest);
+}
+
+/* ═══════════════════════════════════════════════
+   Panel
+   ═══════════════════════════════════════════════ */
+
+.vscode-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--panel-bg);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.vscode-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+  padding: 0 12px;
+  background: var(--panel-header-bg);
+  color: var(--text-bright);
+  font-size: 11px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.vscode-panel-close {
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.vscode-panel-close:hover {
+  color: var(--text-bright);
+}
+
+.vscode-panel-content {
+  flex: 1;
+  overflow: auto;
+  padding: 8px 12px;
+  font-family: "Cascadia Code", "Fira Code", "JetBrains Mono", Consolas, monospace;
+  font-size: 13px;
+}
+
+.vscode-panel-placeholder {
+  color: var(--text-dim);
+}
+
+/* ═══════════════════════════════════════════════
+   Status Bar
+   ═══════════════════════════════════════════════ */
+
+.vscode-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 22px;
+  padding: 0 8px;
+  background: var(--statusbar-bg);
+  color: #ffffff;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.vscode-statusbar-left,
+.vscode-statusbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.vscode-statusbar-item {
+  padding: 0 6px;
+  cursor: pointer;
+  line-height: 22px;
+  white-space: nowrap;
+}
+
+.vscode-statusbar-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.vscode.light .vscode-statusbar-item:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* ═══════════════════════════════════════════════
+   File Tree
+   ═══════════════════════════════════════════════ */
+
+.vscode-file-tree {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+}
+
+.vscode-file-tree ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 16px;
+}
+
+.vscode-file-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px 3px 12px;
+  cursor: pointer;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.vscode-file-item:hover {
+  background: var(--bg-hover);
+}
+
+.vscode-file-item.active {
+  background: rgba(0, 122, 204, 0.2);
+}
+
+.vscode-file-item .vscode-chevron {
+  font-size: 10px;
+  width: 12px;
+  text-align: center;
+  flex-shrink: 0;
+  color: var(--text-dim);
+}
+
+.vscode-file-icon {
+  display: inline-flex;
+  align-items: center;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+.vscode-file-icon svg {
+  fill: var(--text-dim);
+}
+
+/* ═══════════════════════════════════════════════
+   Scrollbar
+   ═══════════════════════════════════════════════ */
+
+.vscode ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.vscode ::-webkit-scrollbar-track {
+  background: var(--scrollbar-bg);
+}
+
+.vscode ::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+}
+
+.vscode ::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* ═══════════════════════════════════════════════
+   CSV Editor — toolbar
+   ═══════════════════════════════════════════════ */
+
+.vscode .csv-editor {
+  height: 100%;
+  background: var(--bg-darkest);
+}
+
+.vscode .csv-editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg-dark);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* Unified Blueprint button + switch text color */
+.vscode .csv-editor-toolbar .bp6-button {
+  color: var(--text-bright);
+}
+
+.vscode .csv-editor-toolbar .bp6-button:hover {
+  background: var(--bg-light);
+}
+
+.vscode .csv-editor-toolbar .bp6-switch {
+  color: var(--text);
+}
+
+/* ═══════════════════════════════════════════════
+   Blueprint Table — dark theme
+   ═══════════════════════════════════════════════ */
+
+.vscode .csv-editor-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.vscode .csv-editor-panel {
+  flex: 1;
+  overflow: auto;
+}
+
+.vscode .csv-editor-panel-editor {
+  border-right: 1px solid var(--border);
+}
+
+.vscode .csv-editor-panel-table {
+  padding: 8px;
+}
+
+/* Blueprint 6 table cells */
+.vscode .bp6-table-container {
+  background: var(--bg-darkest);
+}
+
+.vscode .bp6-table-quadrant-stack {
+  background: var(--bg-darkest);
+}
+
+.vscode .bp6-table-header-cell {
+  background: var(--bg-medium);
+  color: var(--text-dim);
+  border-color: var(--border);
+}
+
+.vscode .bp6-table-cell {
+  background: var(--bg-darkest);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.vscode .bp6-table-cell:hover {
+  background: var(--bg-hover);
+}
+
+.vscode .bp6-editable-text {
+  color: var(--text);
+}
+
+.vscode .bp6-editable-text:hover {
+  background: var(--bg-light);
+}
+
+.vscode .bp6-editable-text-input {
+  color: var(--text-bright);
+  background: var(--bg-medium);
+}
+
+.vscode .bp6-table-column-name-text,
+.vscode .bp6-table-header-cell-content {
+  color: var(--text-dim);
+}
+
+.vscode .bp6-table-row-header-cell {
+  background: var(--bg-medium);
+  border-color: var(--border);
+  color: var(--text-dim);
+}
+
+/* Light theme table */
+.vscode.light .bp6-table-cell {
+  background: #ffffff;
+}
+
+.vscode.light .bp6-table-container,
+.vscode.light .bp6-table-quadrant-stack {
+  background: #ffffff;
+}
+
+.vscode.light .bp6-editable-text-input {
+  color: #1a1a1a;
+  background: #ffffff;
+}
+
+.vscode.light .bp6-table-header-cell {
+  background: #f6f7f9;
+}
