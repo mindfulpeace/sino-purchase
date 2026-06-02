@@ -232,15 +232,15 @@ function SlidersSection() {
     <SectionBox title="Sliders">
       <div style={{ width: "100%" }}>
         <div style={{ marginBottom: 4, fontSize: 12, color: "var(--text-dim)" }}>Slider: {s}</div>
-        <Slider value={s} onChange={setS} min={0} max={100} />
+        <Slider value={s} onChange={setS} min={0} max={100} labelStepSize={10} />
       </div>
       <div style={{ width: "100%" }}>
         <div style={{ marginBottom: 4, fontSize: 12, color: "var(--text-dim)" }}>RangeSlider: {r[0]} &ndash; {r[1]}</div>
-        <RangeSlider value={r} onChange={setR} min={0} max={100} />
+        <RangeSlider value={r} onChange={setR} min={0} max={100} labelStepSize={10} />
       </div>
       <div style={{ width: "100%" }}>
         <div style={{ marginBottom: 4, fontSize: 12, color: "var(--text-dim)" }}>MultiSlider: [{m.join(", ")}]</div>
-        <MultiSlider min={0} max={100}>
+        <MultiSlider min={0} max={100} labelStepSize={10}>
           <MultiSlider.Handle value={m[0]} onChange={handleChange(0)} />
           <MultiSlider.Handle value={m[1]} onChange={handleChange(1)} />
           <MultiSlider.Handle value={m[2]} onChange={handleChange(2)} />
