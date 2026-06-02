@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react"
+import { useMemo, useState, type ReactNode } from "react"
 import { PortalProvider } from "@blueprintjs/core"
 import { useTheme } from "../theme/ThemeContext"
 import { TitleBar } from "./TitleBar"
@@ -25,18 +25,45 @@ interface EditorTab {
 
 interface AppLayoutProps {
   activities: ActivityItem[]
-  sidePanels: Record<string, { id: string; label: string; render: () => ReactNode }>
+  sidePanels: Record<string, { id: string; label: string; render: (callbacks: { openTab: (id: string) => void }) => ReactNode }>
   tabs: EditorTab[]
-  defaultTab?: string
-  propertiesPanel?: PropertiesPanelConfig
+  propertiesPanel?: (activeTabId: string | null) => PropertiesPanelConfig | undefined
 }
 
-export default function AppLayout({ activities, sidePanels, tabs, defaultTab, propertiesPanel }: AppLayoutProps) {
+export default function AppLayout({ activities, sidePanels, tabs, propertiesPanel }: AppLayoutProps) {
   const { theme } = useTheme()
   const [activeActivity, setActiveActivity] = useState(activities[0]?.id ?? "")
-  const [activeTab, setActiveTab] = useState(defaultTab ?? tabs[0]?.id ?? "")
+  const [openIds, setOpenIds] = useState<string[]>([])
+  const [activeId, setActiveId] = useState<string | null>(null)
   const [showPanel, setShowPanel] = useState(false)
-  const [showProperties, setShowProperties] = useState(!!propertiesPanel)
+  const [showProperties, setShowProperties] = useState(false)
+
+  const currentProperties = useMemo(
+    () => (propertiesPanel ? propertiesPanel(activeId) : undefined),
+    [propertiesPanel, activeId],
+  )
+
+  const openTab = (id: string) => {
+    setOpenIds((prev) => (prev.includes(id) ? prev : [...prev, id]))
+    setActiveId(id)
+    setShowProperties(true)
+  }
+
+  const closeTab = (id: string) => {
+    setOpenIds((prev) => {
+      const idx = prev.indexOf(id)
+      const next = prev.filter((t) => t !== id)
+      if (activeId === id) {
+        if (next.length > 0) {
+          const newIdx = Math.min(idx, next.length - 1)
+          setActiveId(next[newIdx])
+        } else {
+          setActiveId(null)
+        }
+      }
+      return next
+    })
+  }
 
   const sidebarPanel = sidePanels[activeActivity]
   const rootClass = theme === "dark" ? "bp6-dark" : "bp6-light light"
@@ -51,18 +78,25 @@ export default function AppLayout({ activities, sidePanels, tabs, defaultTab, pr
             activeActivity={activeActivity}
             onActivityChange={setActiveActivity}
           />
-          <SiderBar panel={sidebarPanel} />
+          <SiderBar panel={sidebarPanel} onOpenTab={openTab} />
           <EditorArea
+            openIds={openIds}
+            activeId={activeId}
             tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
+            onTabChange={setActiveId}
+            onTabClose={closeTab}
           />
-          {showProperties && propertiesPanel && (
-            <PropertiesBar panel={propertiesPanel} onClose={() => setShowProperties(false)} />
+          {showProperties && currentProperties && (
+            <PropertiesBar panel={currentProperties} onClose={() => setShowProperties(false)} />
           )}
         </div>
         <Panel show={showPanel} height={200} onClose={() => setShowPanel(false)} />
-        <StatusBar showPanel={showPanel} onPanelToggle={() => setShowPanel((p) => !p)} />
+        <StatusBar
+          showPanel={showPanel}
+          onPanelToggle={() => setShowPanel((p) => !p)}
+          showProperties={showProperties}
+          onPropertiesToggle={() => setShowProperties((p) => !p)}
+        />
       </div>
     </PortalProvider>
   )

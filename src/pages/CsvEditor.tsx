@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Button, ButtonGroup, Switch } from "@blueprintjs/core"
-import { Table2, Column, EditableCell2 } from "@blueprintjs/table"
+import { Table2, Column, ColumnHeaderCell, EditableCell2 } from "@blueprintjs/table"
 import MonacoEditor from "@monaco-editor/react"
 import Papa from "papaparse"
 import { useTheme } from "../theme/ThemeContext"
+import { useCsv } from "../context/CsvContext"
 
 interface CsvData {
   headers: string[]
@@ -36,6 +37,13 @@ export default function CsvEditor() {
   const csvData = useMemo(() => parseCsv(csvText), [csvText])
   const csvDataRef = useRef(csvData)
   csvDataRef.current = csvData
+
+  const { selectedColumn, selectColumn, setColumns, setRows } = useCsv()
+
+  useEffect(() => {
+    setColumns(csvData.headers)
+    setRows(csvData.rows.length)
+  }, [csvData, setColumns, setRows])
 
   const handleEditorChange = useCallback((value: string | undefined) => {
     if (value !== undefined) setCsvText(value)
@@ -78,6 +86,24 @@ export default function CsvEditor() {
     [handleCellChange],
   )
 
+  const headerRenderer = useCallback(
+    (colIndex: number) => (
+      <ColumnHeaderCell
+        name={csvData.headers[colIndex]}
+        isColumnSelected={selectedColumn === colIndex}
+        nameRenderer={(name) => (
+          <div
+            onClick={() => selectColumn(selectedColumn === colIndex ? null : colIndex)}
+            style={{ cursor: "pointer", width: "100%", padding: "0 4px" }}
+          >
+            {name}
+          </div>
+        )}
+      />
+    ),
+    [csvData.headers, selectedColumn, selectColumn],
+  )
+
   return (
     <div className="csv-editor">
       <div className="csv-editor-toolbar">
@@ -112,7 +138,12 @@ export default function CsvEditor() {
         <div className="csv-editor-panel csv-editor-panel-table">
           <Table2 numRows={csvData.rows.length} enableGhostCells cellRendererDependencies={[csvText]}>
             {csvData.headers.map((header, colIndex) => (
-              <Column key={colIndex} name={header} cellRenderer={cellRenderer} />
+              <Column
+                key={colIndex}
+                name={header}
+                cellRenderer={cellRenderer}
+                columnHeaderCellRenderer={headerRenderer}
+              />
             ))}
           </Table2>
         </div>
