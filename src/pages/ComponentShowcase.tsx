@@ -50,8 +50,6 @@ import {
   RadioCard,
   RadioGroup,
   RangeSlider,
-  Section,
-  SectionCard,
   SegmentedControl,
   Slider,
   Spinner,
@@ -70,23 +68,7 @@ import { Breadcrumbs } from "@blueprintjs/core/lib/esm/components/breadcrumbs/br
 import type { Toaster } from "@blueprintjs/core/lib/esm/components/toast/toaster"
 import { IconNames } from "@blueprintjs/icons"
 import { Cell, Column, Table2 } from "@blueprintjs/table"
-
-/* ─────────── Section wrapper ─────────── */
-
-function SectionBox({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <Section style={{ marginBottom: 24 }}>
-      <SectionCard style={{ padding: 0 }}>
-        <div style={{ padding: "12px 16px", fontWeight: 600, fontSize: 15, borderBottom: "1px solid var(--border)", color: "var(--text-bright)" }}>
-          {title}
-        </div>
-        <div style={{ padding: 16, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-          {children}
-        </div>
-      </SectionCard>
-    </Section>
-  )
-}
+import { SectionBox } from "./showcase/SectionBox"
 
 /* ─────────── 1. Typography ─────────── */
 

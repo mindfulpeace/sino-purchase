@@ -138,7 +138,6 @@ export default function MonacoShowcase() {
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
             fontSize: 13,
-            readOnly: true,
             lineNumbers: "on",
             renderWhitespace: "selection",
           }}

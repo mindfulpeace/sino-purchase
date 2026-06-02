@@ -1,15 +1,16 @@
+import { lazy, Suspense } from "react"
 import { HotkeysProvider, Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { ThemeProvider } from "./theme/ThemeContext"
 import { CsvProvider } from "./context/CsvContext"
 import AppLayout from "./layout/AppLayout"
-import CsvEditor from "./pages/CsvEditor"
 import CsvProperties from "./components/CsvProperties"
-import ComponentShowcase from "./pages/ComponentShowcase"
-import IconShowcase from "./pages/IconShowcase"
-import MonacoShowcase from "./pages/MonacoShowcase"
 import { sidePanels } from "./config/sidePanels"
-import "./App.css"
+
+const CsvEditor = lazy(() => import("./pages/CsvEditor"))
+const ComponentShowcase = lazy(() => import("./pages/ComponentShowcase"))
+const IconShowcase = lazy(() => import("./pages/IconShowcase"))
+const MonacoShowcase = lazy(() => import("./pages/MonacoShowcase"))
 
 const activities = [
   { id: "files", icon: <Icon icon={IconNames.FOLDER_OPEN} size={20} />, label: "Explorer" },
@@ -19,11 +20,13 @@ const activities = [
   { id: "examples", icon: <Icon icon={IconNames.CUBE} size={20} />, label: "范例" },
 ]
 
+const fallback = <div style={{ padding: 20, color: "var(--text-dim)" }}>Loading…</div>
+
 const tabs = [
-  { id: "csv", label: "data.csv", render: () => <CsvEditor /> },
-  { id: "showcase", label: "Blueprint Showcase", render: () => <ComponentShowcase /> },
-  { id: "icons", label: "Icons", render: () => <IconShowcase /> },
-  { id: "monaco", label: "Monaco Showcase", render: () => <MonacoShowcase /> },
+  { id: "csv", label: "data.csv", render: () => <Suspense fallback={fallback}><CsvEditor /></Suspense> },
+  { id: "showcase", label: "Blueprint Showcase", render: () => <Suspense fallback={fallback}><ComponentShowcase /></Suspense> },
+  { id: "icons", label: "Icons", render: () => <Suspense fallback={fallback}><IconShowcase /></Suspense> },
+  { id: "monaco", label: "Monaco Showcase", render: () => <Suspense fallback={fallback}><MonacoShowcase /></Suspense> },
 ]
 
 function App() {

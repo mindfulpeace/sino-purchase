@@ -20,7 +20,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 30px;
+  height: 26px;
   background: var(--titlebar-bg);
   color: var(--text);
   font-size: 12px;
@@ -129,6 +129,13 @@
   flex: 1;
   overflow: auto;
   padding: 0;
+}
+
+.menu-content div,
+.menu-content span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .menu-resize {
@@ -377,6 +384,8 @@
   cursor: pointer;
   color: var(--text);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .file-item:hover { background: var(--bg-hover); }

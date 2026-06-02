@@ -3,7 +3,7 @@ import { useState } from "react"
 /**
  * Left-side panel resize: drag right edge → moving right grows the panel.
  */
-export function useSidebarResize(initialWidth = 260, minWidth = 120, maxWidth = 500) {
+export function useSidebarResize(initialWidth = 300, minWidth = 120, maxWidth = 600) {
   const [sidebarWidth, setSidebarWidth] = useState(initialWidth)
   const [startX, setStartX] = useState(0)
   const [startWidth, setStartWidth] = useState(0)

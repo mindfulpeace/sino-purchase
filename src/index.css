@@ -1,4 +1,6 @@
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -10,5 +12,5 @@ body {
 }
 
 #root {
-  min-height: 100vh;
+  height: 100vh;
 }

@@ -36,7 +36,10 @@ export default function CsvEditor() {
 
   const csvData = useMemo(() => parseCsv(csvText), [csvText])
   const csvDataRef = useRef(csvData)
-  csvDataRef.current = csvData
+
+  useEffect(() => {
+    csvDataRef.current = csvData
+  }, [csvData])
 
   const { selectedColumn, selectColumn, setColumns, setRows } = useCsv()
 
