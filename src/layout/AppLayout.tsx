@@ -1,4 +1,5 @@
-import { useMemo, useState, type ReactNode } from "react"
+import { useMemo, useReducer, useState, type ReactNode } from "react"
+import { useSearchParams } from "react-router-dom"
 import { PortalProvider } from "@blueprintjs/core"
 import { useTheme } from "../theme/ThemeContext"
 import { TitleBar } from "./TitleBar"
@@ -30,39 +31,91 @@ interface AppLayoutProps {
   propertiesPanel?: (activeTabId: string | null) => PropertiesPanelConfig | undefined
 }
 
+interface TabState {
+  openIds: string[]
+  activeId: string | null
+}
+
+type TabAction =
+  | { type: "open"; id: string }
+  | { type: "close"; id: string }
+  | { type: "activate"; id: string }
+
+function tabReducer(state: TabState, action: TabAction): TabState {
+  switch (action.type) {
+    case "open": {
+      const openIds = state.openIds.includes(action.id) ? state.openIds : [...state.openIds, action.id]
+      return { openIds, activeId: action.id }
+    }
+    case "close": {
+      const idx = state.openIds.indexOf(action.id)
+      const openIds = state.openIds.filter((t) => t !== action.id)
+      let activeId = state.activeId
+      if (state.activeId === action.id) {
+        if (openIds.length > 0) {
+          activeId = openIds[Math.min(idx, openIds.length - 1)]
+        } else {
+          activeId = null
+        }
+      }
+      return { openIds, activeId }
+    }
+    case "activate":
+      return state.openIds.includes(action.id) ? { ...state, activeId: action.id } : state
+  }
+}
+
+function parseSearchParams(searchParams: URLSearchParams): { tabIds: string[]; navId: string } {
+  const tabIds = (searchParams.get("tabs") ?? "").split(",").filter(Boolean)
+  const navId = searchParams.get("nav") ?? ""
+  return { tabIds, navId }
+}
+
 export default function AppLayout({ activities, sidePanels, tabs, propertiesPanel }: AppLayoutProps) {
   const { theme } = useTheme()
-  const [activeActivity, setActiveActivity] = useState(activities[0]?.id ?? "")
-  const [openIds, setOpenIds] = useState<string[]>([])
-  const [activeId, setActiveId] = useState<string | null>(null)
+  const [searchParams] = useSearchParams()
   const [showPanel, setShowPanel] = useState(false)
   const [showProperties, setShowProperties] = useState(false)
+
+  const initialParams = useMemo(() => parseSearchParams(searchParams), [])
+  const initialNav = initialParams.navId && activities.some((a) => a.id === initialParams.navId) ? initialParams.navId : activities[0]?.id ?? ""
+
+  const [activeActivity, setActiveActivity] = useState(initialNav)
+  const [tabState, dispatch] = useReducer(tabReducer, {
+    openIds: initialParams.tabIds.filter((id) => tabs.some((t) => t.id === id)),
+    activeId: null,
+  })
+
+  const { openIds, activeId } = tabState
 
   const currentProperties = useMemo(
     () => (propertiesPanel ? propertiesPanel(activeId) : undefined),
     [propertiesPanel, activeId],
   )
 
+  const syncSearchParams = (ids: string[], nav: string) => {
+    const parts: string[] = []
+    if (ids.length > 0) parts.push(`tabs=${ids.join(",")}`)
+    if (nav) parts.push(`nav=${nav}`)
+    window.history.replaceState(null, "", parts.length > 0 ? `?${parts.join("&")}` : window.location.pathname)
+  }
+
+  const handleActivityChange = (id: string) => {
+    setActiveActivity(id)
+    syncSearchParams(openIds, id)
+  }
+
   const openTab = (id: string) => {
-    setOpenIds((prev) => (prev.includes(id) ? prev : [...prev, id]))
-    setActiveId(id)
+    const next = openIds.includes(id) ? openIds : [...openIds, id]
+    dispatch({ type: "open", id })
     setShowProperties(true)
+    syncSearchParams(next, activeActivity)
   }
 
   const closeTab = (id: string) => {
-    setOpenIds((prev) => {
-      const idx = prev.indexOf(id)
-      const next = prev.filter((t) => t !== id)
-      if (activeId === id) {
-        if (next.length > 0) {
-          const newIdx = Math.min(idx, next.length - 1)
-          setActiveId(next[newIdx])
-        } else {
-          setActiveId(null)
-        }
-      }
-      return next
-    })
+    const next = openIds.filter((t) => t !== id)
+    dispatch({ type: "close", id })
+    syncSearchParams(next, activeActivity)
   }
 
   const sidebarPanel = sidePanels[activeActivity]
@@ -76,14 +129,14 @@ export default function AppLayout({ activities, sidePanels, tabs, propertiesPane
           <ActivityBar
             activities={activities}
             activeActivity={activeActivity}
-            onActivityChange={setActiveActivity}
+            onActivityChange={handleActivityChange}
           />
           <SiderBar panel={sidebarPanel} onOpenTab={openTab} />
           <EditorArea
             openIds={openIds}
             activeId={activeId}
             tabs={tabs}
-            onTabChange={setActiveId}
+            onTabChange={(id) => dispatch({ type: "activate", id })}
             onTabClose={closeTab}
           />
           {showProperties && currentProperties && (

@@ -1,9 +1,9 @@
 import { useState } from "react"
 
-const MIN_WIDTH = 170
-const MAX_WIDTH = 500
-
-export function useSidebarResize(initialWidth = 260) {
+/**
+ * Left-side panel resize: drag right edge → moving right grows the panel.
+ */
+export function useSidebarResize(initialWidth = 260, minWidth = 120, maxWidth = 500) {
   const [sidebarWidth, setSidebarWidth] = useState(initialWidth)
   const [startX, setStartX] = useState(0)
   const [startWidth, setStartWidth] = useState(0)
@@ -13,7 +13,7 @@ export function useSidebarResize(initialWidth = 260) {
     setStartX(e.clientX)
     setStartWidth(sidebarWidth)
     const handleMouseMove = (ev: MouseEvent) => {
-      const newWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, startWidth + ev.clientX - startX))
+      const newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth + ev.clientX - startX))
       setSidebarWidth(newWidth)
     }
     const handleMouseUp = () => {
@@ -30,7 +30,7 @@ export function useSidebarResize(initialWidth = 260) {
 /**
  * Right-side panel resize: drag left edge → moving right shrinks the panel.
  */
-export function useRightResize(initialWidth = 260) {
+export function useRightResize(initialWidth = 260, minWidth = 120, maxWidth = 500) {
   const [width, setWidth] = useState(initialWidth)
   const [startX, setStartX] = useState(0)
   const [startWidth, setStartWidth] = useState(0)
@@ -40,7 +40,7 @@ export function useRightResize(initialWidth = 260) {
     setStartX(e.clientX)
     setStartWidth(width)
     const handleMouseMove = (ev: MouseEvent) => {
-      const newWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, startWidth - (ev.clientX - startX)))
+      const newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth - (ev.clientX - startX)))
       setWidth(newWidth)
     }
     const handleMouseUp = () => {

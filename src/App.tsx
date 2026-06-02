@@ -7,6 +7,7 @@ import CsvEditor from "./pages/CsvEditor"
 import CsvProperties from "./components/CsvProperties"
 import ComponentShowcase from "./pages/ComponentShowcase"
 import IconShowcase from "./pages/IconShowcase"
+import MonacoShowcase from "./pages/MonacoShowcase"
 import { sidePanels } from "./config/sidePanels"
 import "./App.css"
 
@@ -22,6 +23,7 @@ const tabs = [
   { id: "csv", label: "data.csv", render: () => <CsvEditor /> },
   { id: "showcase", label: "Blueprint Showcase", render: () => <ComponentShowcase /> },
   { id: "icons", label: "Icons", render: () => <IconShowcase /> },
+  { id: "monaco", label: "Monaco Showcase", render: () => <MonacoShowcase /> },
 ]
 
 function App() {

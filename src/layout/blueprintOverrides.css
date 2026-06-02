@@ -3,10 +3,14 @@
    ═══════════════════════════════════════════════ */
 
 /* Remove blue focus outline */
-button:focus,
-button:focus-visible,
-.bp6-button:focus,
-.bp6-button:focus-visible {
+.bp6-dark button:focus,
+.bp6-dark button:focus-visible,
+.bp6-dark .bp6-button:focus,
+.bp6-dark .bp6-button:focus-visible,
+.bp6-light button:focus,
+.bp6-light button:focus-visible,
+.bp6-light .bp6-button:focus,
+.bp6-light .bp6-button:focus-visible {
   outline: none !important;
 }
 
@@ -16,7 +20,7 @@ button:focus-visible,
 }
 
 .csv-editor-toolbar .bp6-button:hover {
-  background: var(--bg-light);
+  background: var(--bg-3);
 }
 
 .csv-editor-toolbar .bp6-switch {
@@ -25,21 +29,21 @@ button:focus-visible,
 
 /* Blueprint Table — dark */
 .bp6-table-container {
-  background: var(--bg-darkest);
+  background: var(--bg-0);
 }
 
 .bp6-table-quadrant-stack {
-  background: var(--bg-darkest);
+  background: var(--bg-0);
 }
 
 .bp6-table-header-cell {
-  background: var(--bg-medium);
+  background: var(--bg-2);
   color: var(--text-dim);
   border-color: var(--border);
 }
 
 .bp6-table-cell {
-  background: var(--bg-darkest);
+  background: var(--bg-0);
   color: var(--text);
   border-color: var(--border);
 }
@@ -53,12 +57,12 @@ button:focus-visible,
 }
 
 .bp6-editable-text:hover {
-  background: var(--bg-light);
+  background: var(--bg-3);
 }
 
 .bp6-editable-text-input {
   color: var(--text-bright);
-  background: var(--bg-medium);
+  background: var(--bg-2);
 }
 
 .bp6-table-column-name-text,
@@ -67,7 +71,7 @@ button:focus-visible,
 }
 
 .bp6-table-row-header-cell {
-  background: var(--bg-medium);
+  background: var(--bg-2);
   border-color: var(--border);
   color: var(--text-dim);
 }
@@ -93,25 +97,25 @@ button:focus-visible,
 
 /* Dialog / Drawer — portals (bp6-dark added via PortalProvider) */
 .bp6-dark .bp6-dialog {
-  background: var(--bg-darkest);
+  background: var(--bg-0);
 }
 
 .bp6-dark .bp6-dialog-header {
-  background: var(--bg-dark);
+  background: var(--bg-1);
   box-shadow: none;
 }
 
 .bp6-dark .bp6-dialog-body {
-  background: var(--bg-darkest);
+  background: var(--bg-0);
 }
 
 .bp6-dark .bp6-dialog-footer {
-  background: var(--bg-dark);
+  background: var(--bg-1);
   box-shadow: none;
 }
 
 .bp6-dark .bp6-drawer {
-  background: var(--bg-darkest);
+  background: var(--bg-0);
 }
 
 /* Dialog / Drawer — light */
@@ -120,7 +124,7 @@ button:focus-visible,
 }
 
 .light .bp6-dialog-header {
-  background: var(--bg-dark);
+  background: var(--bg-1);
   box-shadow: 0 1px 0 var(--border);
 }
 
@@ -129,7 +133,7 @@ button:focus-visible,
 }
 
 .light .bp6-dialog-footer {
-  background: var(--bg-dark);
+  background: var(--bg-1);
   box-shadow: none;
 }
 

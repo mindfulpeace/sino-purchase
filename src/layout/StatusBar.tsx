@@ -20,10 +20,9 @@ export function StatusBar({
         </span>
       </div>
       <div className="status-right">
-        <span className="status-item">UTF-8</span>
-        <span className="status-item">TypeScript</span>
-        <span className="status-item">Ln 1, Col 1</span>
-        <span className="status-item">Spaces: 2</span>
+        <span className="status-item" onClick={onPanelToggle}>
+          {showPanel ? "关闭面板" : "打开面板"}
+        </span>
       </div>
     </div>
   )

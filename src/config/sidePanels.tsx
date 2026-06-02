@@ -38,6 +38,7 @@ export const sidePanels: Record<string, SidePanelConfig> = {
           { id: "csv", label: "CSV 测试", icon: IconNames.GRID_VIEW },
           { id: "showcase", label: "组件展示", icon: IconNames.WIDGET },
           { id: "icons", label: "Icons", icon: IconNames.APPLICATION },
+          { id: "monaco", label: "Monaco 展示", icon: IconNames.CODE },
         ].map((item) => (
           <div
             key={item.id}
