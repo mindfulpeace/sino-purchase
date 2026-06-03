@@ -5,6 +5,5 @@ export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
     exclude: ["@sino-purchase/ui"],
-    include: ["papaparse"],
   },
 })

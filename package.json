@@ -13,6 +13,9 @@
     "build:ui": "npm run build -w packages/ui",
     "build:demo": "npm run build -w apps/demo",
     "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -b",
     "preview": "npm run preview -w apps/demo"
   },
   "devDependencies": {

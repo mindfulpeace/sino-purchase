@@ -39,6 +39,7 @@ export function FileTree({ nodes, depth = 0 }: { nodes: TreeNode[]; depth?: numb
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const projectTreeData: TreeNode[] = [
   {
     name: "sino-purchase-v2",

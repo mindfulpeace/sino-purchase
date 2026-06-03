@@ -66,7 +66,7 @@ count.set(1)`,
   },
   "dependencies": {
     "@blueprintjs/core": "^6.15.0",
-    "@blueprintjs/icons": "^6.0.0",
+    "@blueprintjs/icons": "^6.10.0",
     "@blueprintjs/table": "^6.1.1"
   }
 }`,
