@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-export function useSidebarResize(initialWidth = 300, minWidth = 120, maxWidth = 600) {
+export function useSidebarResize(initialWidth = 200, minWidth = 120, maxWidth = 600) {
   const [sidebarWidth, setSidebarWidth] = useState(initialWidth)
   const [startX, setStartX] = useState(0)
   const [startWidth, setStartWidth] = useState(0)

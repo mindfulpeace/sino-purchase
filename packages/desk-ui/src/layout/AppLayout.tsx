@@ -20,12 +20,34 @@ interface AppLayoutProps {
   tabs: EditorTab[]
 
   propertiesPanel?: (activeTabId: string | null) => PropertiesPanel | undefined
+
+  propertiesVisible?: boolean
+  onPropertiesVisibleChange?: (visible: boolean) => void
 }
 
-export default function AppLayout({ title, activities, sidePanels, tabs, propertiesPanel }: AppLayoutProps) {
+export default function AppLayout({ title, activities, sidePanels, tabs, propertiesPanel, propertiesVisible, onPropertiesVisibleChange }: AppLayoutProps) {
   const { theme } = useTheme()
   const [showPanel, setShowPanel] = useState(false)
-  const [showProperties, setShowProperties] = useState(false)
+  const [showPropertiesInternal, setShowPropertiesInternal] = useState(false)
+
+  const isControlled = propertiesVisible !== undefined
+  const showProperties = isControlled ? propertiesVisible : showPropertiesInternal
+
+  const handlePropertiesToggle = () => {
+    if (isControlled) {
+      onPropertiesVisibleChange?.(!propertiesVisible)
+    } else {
+      setShowPropertiesInternal(p => !p)
+    }
+  }
+
+  const handlePropertiesClose = () => {
+    if (isControlled) {
+      onPropertiesVisibleChange?.(false)
+    } else {
+      setShowPropertiesInternal(false)
+    }
+  }
 
   const tabIds = tabs.map((t) => t.id)
   const { openIds, activeId, dispatch, sync, initialNavId } = useTabs(tabIds)
@@ -49,14 +71,21 @@ export default function AppLayout({ title, activities, sidePanels, tabs, propert
   const openTab = (id: string) => {
     const next = openIds.includes(id) ? openIds : [...openIds, id]
     dispatch({ type: "open", id })
-    setShowProperties(true)
-    sync(next, activeActivity)
+    if (isControlled) {
+      onPropertiesVisibleChange?.(true)
+    } else {
+      setShowPropertiesInternal(true)
+    }
+    sync(next, activeActivity, id)
   }
 
   const closeTab = (id: string) => {
     const next = openIds.filter((t) => t !== id)
     dispatch({ type: "close", id })
-    sync(next, activeActivity)
+    const newActiveId = activeId === id
+      ? (next.length > 0 ? next[Math.min(openIds.indexOf(id), next.length - 1)] : null)
+      : activeId
+    sync(next, activeActivity, newActiveId)
   }
 
   const sidebarPanel = sidePanels[activeActivity]
@@ -79,11 +108,14 @@ export default function AppLayout({ title, activities, sidePanels, tabs, propert
             openIds={openIds}
             activeId={activeId}
             tabs={tabs}
-            onTabChange={(id) => dispatch({ type: "activate", id })}
+            onTabChange={(id) => {
+              dispatch({ type: "activate", id })
+              sync(openIds, activeActivity, id)
+            }}
             onTabClose={closeTab}
           />
           {showProperties && currentProperties && (
-            <PropertiesBar panel={currentProperties} onClose={() => setShowProperties(false)} />
+            <PropertiesBar panel={currentProperties} onClose={handlePropertiesClose} />
           )}
         </div>
         <Panel show={showPanel} height={200} onClose={() => setShowPanel(false)} />
@@ -91,7 +123,7 @@ export default function AppLayout({ title, activities, sidePanels, tabs, propert
           showPanel={showPanel}
           onPanelToggle={() => setShowPanel((p) => !p)}
           showProperties={showProperties}
-          onPropertiesToggle={() => setShowProperties((p) => !p)}
+          onPropertiesToggle={handlePropertiesToggle}
         />
       </div>
       </HotkeysProvider>

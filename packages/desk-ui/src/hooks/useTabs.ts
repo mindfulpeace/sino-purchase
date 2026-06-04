@@ -48,14 +48,17 @@ export function useTabs(validIds: string[]) {
     () => {
       const raw = searchParams.get("tabs") ?? ""
       const tabIds = raw.split(",").filter(Boolean).filter((id) => validIds.includes(id))
-      return { openIds: tabIds, activeId: null }
+      const activeFromUrl = searchParams.get("tab") ?? ""
+      const activeId = tabIds.includes(activeFromUrl) ? activeFromUrl : null
+      return { openIds: tabIds, activeId }
     },
   )
 
-  const sync = (ids: string[], nav: string) => {
+  const sync = (ids: string[], nav: string, activeId?: string | null) => {
     const params = new URLSearchParams()
     if (ids.length > 0) params.set("tabs", ids.join(","))
     if (nav) params.set("nav", nav)
+    if (activeId) params.set("tab", activeId)
     setSearchParams(params, { replace: true })
   }
 

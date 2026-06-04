@@ -29,7 +29,11 @@ export function useSheetData<T extends Record<string, unknown>>(config: UseSheet
   }, [])
 
   useEffect(() => {
-    if (!isLoggedIn()) return
+    if (!isLoggedIn()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLoading(false)
+      return
+    }
     let cancelled = false
     loadTable<T>(sheetName, headers as string[], numericFields, dateFields).then(r => {
       if (cancelled) return

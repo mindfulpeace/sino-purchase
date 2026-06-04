@@ -1,9 +1,13 @@
-import { lazy, Suspense } from "react"
+import { lazy, Suspense, useState, useCallback, useEffect } from "react"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { ThemeProvider, AppLayout } from "@sino-purchase/desk-ui"
 import { SheetsProvider } from "@sino-purchase/sheets-api"
 import { CLIENT_ID, SPREADSHEET_ID } from "./config/sheets"
+import { PlanProvider, usePlan } from "./pages/plan/PlanContext"
+import { TaskDetail } from "./pages/plan/components/TaskDetail"
+import type { PurchaseTask } from "./pages/plan/types"
+import { todayISO } from "./pages/plan/helpers"
 
 const PlanManagement = lazy(() => import("./pages/PlanManagement"))
 const MaterialInfo = lazy(() => import("./pages/MaterialInfo"))
@@ -33,9 +37,17 @@ const sidePanels: Record<string, { id: string; label: string; render: (callbacks
   plan: {
     id: "plan",
     label: "计划管理",
-    render: () => (
-      <div style={{ padding: 16, color: "var(--text-dim)", fontSize: 13 }}>
-        导航目录（设计开发中）
+    render: ({ openTab }) => (
+      <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: 8 }}>
+        <div
+          style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13 }}
+          onClick={() => openTab("plan")}
+          onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+        >
+          <Icon icon={IconNames.SHOPPING_CART} size={16} />
+          <span>采购清单</span>
+        </div>
       </div>
     ),
   },
@@ -85,16 +97,103 @@ const sidePanels: Record<string, { id: string; label: string; render: (callbacks
   },
 }
 
+function PlanAwareApp() {
+  const [propertiesVisible, setPropertiesVisible] = useState(false)
+  const { editingTaskId, isAdding, batchEdit, selectedIds, allTasks, addTask, updateTask, deleteTask, setEditingTaskId, setIsAdding, setBatchEdit, setPendingBatchChanges } = usePlan()
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (editingTaskId || isAdding) setPropertiesVisible(true)
+  }, [editingTaskId, isAdding])
+
+  const handlePropertiesClose = useCallback(() => {
+    setPropertiesVisible(false)
+    setEditingTaskId(null)
+    setIsAdding(false)
+    setBatchEdit(false)
+  }, [setEditingTaskId, setIsAdding, setBatchEdit])
+
+  const propertiesPanel = useCallback((activeId: string | null) => {
+    const defaultInitial: Partial<PurchaseTask> = {
+      name: "", quantity: 1, unit: "个", urgency: 2, status: 1,
+      currency: "ZMW", exchangeRate: 1, taxStatus: "可抵扣",
+      plannedDate: todayISO(),
+    }
+
+    if (activeId !== "plan") return undefined
+
+    if (editingTaskId) {
+      const task = allTasks.find(t => t.id === editingTaskId)
+      if (!task) return undefined
+      return {
+        id: "plan-detail",
+        label: "任务详情",
+        render: () => (
+          <TaskDetail
+            initial={task}
+            mode="edit"
+            onSave={data => updateTask(editingTaskId, data)}
+            onCancel={handlePropertiesClose}
+            onDelete={() => deleteTask(editingTaskId)}
+          />
+        ),
+      }
+    }
+
+    if (isAdding) {
+      return {
+        id: "plan-detail",
+        label: "新任务",
+        render: () => (
+          <TaskDetail
+            initial={defaultInitial}
+            mode="add"
+            onSave={data => addTask(data)}
+            onCancel={handlePropertiesClose}
+          />
+        ),
+      }
+    }
+
+    if (batchEdit && selectedIds.size > 0) {
+      return {
+        id: "plan-batch",
+        label: "批量编辑",
+        render: () => (
+          <TaskDetail
+            initial={defaultInitial}
+            mode="batch"
+            selectedCount={selectedIds.size}
+            onSave={data => setPendingBatchChanges(data)}
+            onCancel={handlePropertiesClose}
+          />
+        ),
+      }
+    }
+
+    return undefined
+  }, [editingTaskId, isAdding, batchEdit, selectedIds, allTasks, addTask, updateTask, deleteTask, handlePropertiesClose, setPendingBatchChanges])
+
+  return (
+    <AppLayout
+      title="sino-purchase-v2"
+      activities={activities}
+      sidePanels={sidePanels}
+      tabs={tabs}
+      propertiesPanel={propertiesPanel}
+      propertiesVisible={propertiesVisible}
+      onPropertiesVisibleChange={setPropertiesVisible}
+    />
+  )
+}
+
 function App() {
   return (
     <SheetsProvider clientId={CLIENT_ID} spreadsheetId={SPREADSHEET_ID}>
       <ThemeProvider>
-        <AppLayout
-          title="sino-purchase-v2"
-          activities={activities}
-          sidePanels={sidePanels}
-          tabs={tabs}
-        />
+        <PlanProvider>
+          <PlanAwareApp />
+        </PlanProvider>
       </ThemeProvider>
     </SheetsProvider>
   )

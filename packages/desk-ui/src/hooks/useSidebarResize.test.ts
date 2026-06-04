@@ -5,7 +5,7 @@ import { useSidebarResize, useRightResize } from "./useSidebarResize"
 describe("useSidebarResize", () => {
   it("starts with default width", () => {
     const { result } = renderHook(() => useSidebarResize())
-    expect(result.current.sidebarWidth).toBe(300)
+    expect(result.current.sidebarWidth).toBe(200)
   })
 
   it("starts with given initialWidth", () => {
