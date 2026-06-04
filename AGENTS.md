@@ -5,6 +5,7 @@
 - Blueprint 6 (`@blueprintjs/core`, `@blueprintjs/icons`, `@blueprintjs/table`)
 - Monaco Editor (`@monaco-editor/react`)
 - CSV 解析: `papaparse`
+- Google Sheets API v4 (OAuth via GSI, 无官方 SDK, 直接 fetch)
 
 ## 布局命名 (沟通名称 / 组件名 / CSS 类名)
 
@@ -24,30 +25,57 @@
 sino-purchase-v2/
 ├── package.json               # npm workspaces root (private)
 ├── packages/
-│   └── ui/                    # @sino-purchase/ui (库)
-│       ├── package.json       # 发布到 npm, peer deps: React/BP6
-│       ├── vite.config.ts     # lib 模式构建
+│   ├── ui/                    # @sino-purchase/ui (布局库)
+│   │   ├── package.json       # 发布到 npm, peer deps: React/BP6
+│   │   ├── vite.config.ts     # lib 模式构建
+│   │   ├── tsconfig.json
+│   │   └── src/
+│   │       ├── index.ts       # barrel 导出 + CSS 自动注入
+│   │       ├── types.ts       # Activity, EditorTab, SidePanel, PropertiesPanel
+│   │       ├── layout/        # 8 个布局组件 + AppLayout.css + blueprintOverrides.css
+│   │       ├── theme/         # ThemeContext + themes.css
+│   │       └── hooks/         # useSidebarResize, useTabs
+│   └── sheets-api/            # @sino-purchase/sheets-api (Google Sheets 数据层)
+│       ├── package.json       # peer deps: React
+│       ├── vite.config.ts     # lib 模式构建 (dts)
 │       ├── tsconfig.json
 │       └── src/
-│           ├── index.ts       # barrel 导出 + CSS 自动注入
-│           ├── types.ts       # Activity, EditorTab, SidePanel, PropertiesPanel
-│           ├── layout/        # 8 个布局组件 + AppLayout.css + blueprintOverrides.css
-│           ├── theme/         # ThemeContext + themes.css
-│           └── hooks/         # useSidebarResize, useTabs
+│           ├── index.ts       # barrel 导出
+│           ├── types.ts       # SheetsConfig, SyncOp, SyncStatus
+│           ├── config.ts      # 运行时配置 (clientId, spreadsheetId)
+│           ├── auth.ts        # GSI OAuth 封装
+│           ├── db.ts          # Sheets REST API CRUD (泛型)
+│           ├── sync-queue.ts  # 离线队列 (localStorage)
+│           ├── SheetsProvider.tsx  # React Context 提供 config + sync
+│           ├── useAuth.ts     # 认证 hook
+│           ├── useSheetData.ts # 泛型数据 hook (add/update/remove/reload)
+│           ├── useSync.tsx    # 同步状态 hook + SyncProvider
+│           └── global.d.ts    # google.accounts.oauth2 类型声明
 ├── apps/
-│   └── demo/                  # 演示应用 (消费者)
-│       ├── package.json       # 依赖 @sino-purchase/ui (workspace:*)
+│   ├── demo/                  # 演示应用 (消费者)
+│   │   ├── package.json       # 依赖 @sino-purchase/ui (workspace:*)
+│   │   ├── vite.config.ts
+│   │   ├── tsconfig.json
+│   │   ├── index.html
+│   │   └── src/
+│   │       ├── App.tsx        # 从 @sino-purchase/ui 导入布局
+│   │       ├── main.tsx
+│   │       ├── index.css
+│   │       ├── components/    # FileTree, CsvProperties
+│   │       ├── config/        # sidePanels
+│   │       ├── context/       # CsvContext
+│   │       └── pages/         # CsvEditor, ComponentShowcase, IconShowcase, MonacoShowcase
+│   └── sino-purchase-v2/      # 主应用 (sino-purchase-v2-main)
+│       ├── package.json       # 依赖 @sino-purchase/ui, @sino-purchase/sheets-api
 │       ├── vite.config.ts
 │       ├── tsconfig.json
 │       ├── index.html
 │       └── src/
-│           ├── App.tsx        # 从 @sino-purchase/ui 导入布局
+│           ├── App.tsx        # 4 个导航项 (计划管理/物料信息/记账报销/往来付款)
 │           ├── main.tsx
 │           ├── index.css
-│           ├── components/    # FileTree, CsvProperties
-│           ├── config/        # sidePanels
-│           ├── context/       # CsvContext
-│           └── pages/         # CsvEditor, ComponentShowcase, IconShowcase, MonacoShowcase
+│           ├── vite-env.d.ts
+│           └── pages/         # 4 个占位页面 (设计开发中)
 ```
 
 ## 设计决策
@@ -93,4 +121,15 @@ sino-purchase-v2/
 - 菜单栏内容 (`menu-content div, span`) 全局设为 `white-space: nowrap; overflow: hidden; text-overflow: ellipsis;`
 - `@sino-purchase/ui` 是 monorepo 中的库包 (`packages/ui`)，布局组件 + 主题 + hooks 全部抽取至此。CSS 提取到 `dist/index.css`，使用者需 `import "@sino-purchase/ui/style.css"`
 - Demo app (`apps/demo`) 通过 npm workspace 引用本地库：`"@sino-purchase/ui": "*"`
-- 构建时先 `npm run build -w packages/ui` 构建库，再 `npm run build -w apps/demo` 构建 demo
+- 主应用 (`apps/sino-purchase-v2`) 引用 `@sino-purchase/ui` + `@sino-purchase/sheets-api`
+- 构建顺序: `packages/ui` → `packages/sheets-api` → `apps/demo`
+- `npm run dev:app` 启动主应用 dev server
+- `npm run build:sheets` 单独构建 sheets-api
+- `npm run test` 运行 vitest (25 tests: ThemeContext 6, useTabs 11, useSidebarResize 8)
+- `npm run typecheck` 运行 tsc -b 全项目类型检查
+- `.github/workflows/ci.yml`: lint → typecheck → test → build
+- `vitest.config.ts` 通过 `test.projects` 指向 `packages/ui`
+- Google Sheets API 数据流: `useSheetData<T>` → `db.ts` (loadTable/insertRow/updateRow/deleteRow) → `auth.ts` (requestToken) → Google Sheets REST API v4
+- Sheets 离线队列: `sync-queue.ts` (localStorage) + `SyncProvider` → `processQueue()`
+- Sheets 认证: GSI OAuth 2.0 (https://accounts.google.com/gsi/client), token 存 localStorage, 5 分钟前静默刷新
+- `sheets-api` 无 runtime 依赖, 纯 fetch, peer deps 仅 React

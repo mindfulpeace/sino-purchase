@@ -9,8 +9,10 @@
   ],
   "scripts": {
     "dev": "npm run dev -w apps/demo",
-    "build": "npm run build -w packages/ui && npm run build -w apps/demo",
+    "dev:app": "npm run dev -w apps/sino-purchase-v2",
+    "build": "npm run build -w packages/ui && npm run build -w packages/sheets-api && npm run build -w apps/demo",
     "build:ui": "npm run build -w packages/ui",
+    "build:sheets": "npm run build -w packages/sheets-api",
     "build:demo": "npm run build -w apps/demo",
     "lint": "eslint .",
     "test": "vitest run",
