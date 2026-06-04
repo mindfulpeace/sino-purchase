@@ -2,6 +2,6 @@
   "files": [],
   "references": [
     { "path": "./packages/desk-ui/tsconfig.json" },
-    { "path": "./apps/demo/tsconfig.json" }
+    { "path": "./apps/desk-ui-demo/tsconfig.json" }
   ]
 }

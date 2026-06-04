@@ -120,9 +120,9 @@ sino-purchase-v2/
 - MonacoShowcase 已去掉 `readOnly: true`，可编辑
 - 菜单栏内容 (`menu-content div, span`) 全局设为 `white-space: nowrap; overflow: hidden; text-overflow: ellipsis;`
 - `@sino-purchase/desk-ui` 是 monorepo 中的库包 (`packages/desk-ui`)，布局组件 + 主题 + hooks 全部抽取至此。CSS 提取到 `dist/index.css`，使用者需 `import "@sino-purchase/desk-ui/style.css"`
-- Demo app (`apps/demo`) 通过 npm workspace 引用本地库：`"@sino-purchase/desk-ui": "*"`
+- Demo app (`apps/desk-ui-demo`) 通过 npm workspace 引用本地库：`"@sino-purchase/desk-ui": "*"`
 - 主应用 (`apps/sino-purchase-v2`) 引用 `@sino-purchase/desk-ui` + `@sino-purchase/sheets-api`
-- 构建顺序: `packages/desk-ui` → `packages/sheets-api` → `apps/demo`
+- 构建顺序: `packages/desk-ui` → `packages/sheets-api` → `apps/desk-ui-demo`
 - `npm run dev` 启动主应用 dev server
 - `npm run dev:demo` 启动 demo 应用
 - `npm run build:sheets` 单独构建 sheets-api
