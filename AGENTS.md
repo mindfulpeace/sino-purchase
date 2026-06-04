@@ -25,7 +25,7 @@
 sino-purchase-v2/
 ├── package.json               # npm workspaces root (private)
 ├── packages/
-│   ├── ui/                    # @sino-purchase/desk-ui (布局库)
+│   ├── desk-ui/               # @sino-purchase/desk-ui (布局库)
 │   │   ├── package.json       # 发布到 npm, peer deps: React/BP6
 │   │   ├── vite.config.ts     # lib 模式构建
 │   │   ├── tsconfig.json
@@ -52,7 +52,7 @@ sino-purchase-v2/
 │           ├── useSync.tsx    # 同步状态 hook + SyncProvider
 │           └── global.d.ts    # google.accounts.oauth2 类型声明
 ├── apps/
-│   ├── demo/                  # 演示应用 (消费者)
+│   ├── desk-ui-demo/          # 演示应用 (消费者)
 │   │   ├── package.json       # 依赖 @sino-purchase/desk-ui (workspace:*)
 │   │   ├── vite.config.ts
 │   │   ├── tsconfig.json
@@ -124,7 +124,7 @@ sino-purchase-v2/
 - 主应用 (`apps/sino-purchase-v2`) 引用 `@sino-purchase/desk-ui` + `@sino-purchase/sheets-api`
 - 构建顺序: `packages/desk-ui` → `packages/sheets-api` → `apps/desk-ui-demo`
 - `npm run dev` 启动主应用 dev server
-- `npm run dev:demo` 启动 demo 应用
+- `npm run dev:desk` 启动 desk-ui demo 应用
 - `npm run build:sheets` 单独构建 sheets-api
 - `npm run test` 运行 vitest (25 tests: ThemeContext 6, useTabs 11, useSidebarResize 8)
 - `npm run typecheck` 运行 tsc -b 全项目类型检查
