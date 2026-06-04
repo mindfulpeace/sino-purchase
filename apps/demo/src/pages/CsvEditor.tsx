@@ -3,7 +3,7 @@ import { Button, ButtonGroup, Switch } from "@blueprintjs/core"
 import { Table2, Column, ColumnHeaderCell, EditableCell2 } from "@blueprintjs/table"
 import MonacoEditor from "@monaco-editor/react"
 import Papa from "papaparse"
-import { useTheme } from "@sino-purchase/ui"
+import { useTheme } from "@sino-purchase/desk-ui"
 import { useCsv } from "../context/CsvContext"
 
 interface CsvData {

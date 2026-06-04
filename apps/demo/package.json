@@ -13,7 +13,7 @@
     "@blueprintjs/icons": "^6.10.0",
     "@blueprintjs/table": "^6.1.1",
     "@monaco-editor/react": "^4.7.0",
-    "@sino-purchase/ui": "*",
+    "@sino-purchase/desk-ui": "*",
     "monaco-editor": "^0.55.1",
     "papaparse": "^5.5.3",
     "react": "^19.2.6",

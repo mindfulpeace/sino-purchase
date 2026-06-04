@@ -1,6 +1,6 @@
 import { useState } from "react"
 import MonacoEditor from "@monaco-editor/react"
-import { useTheme } from "@sino-purchase/ui"
+import { useTheme } from "@sino-purchase/desk-ui"
 
 const samples: Record<string, string> = {
   TypeScript: `interface User {

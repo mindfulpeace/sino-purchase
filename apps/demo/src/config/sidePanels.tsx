@@ -1,6 +1,6 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import type { SidePanel } from "@sino-purchase/ui"
+import type { SidePanel } from "@sino-purchase/desk-ui"
 import { FileTree, projectTreeData } from "../components/FileTree"
 
 export const sidePanels: Record<string, SidePanel> = {

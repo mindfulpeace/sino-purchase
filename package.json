@@ -8,8 +8,8 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "npm run dev -w apps/demo",
-    "dev:app": "npm run dev -w apps/sino-purchase-v2",
+    "dev": "npm run dev -w apps/sino-purchase-v2",
+    "dev:demo": "npm run dev -w apps/demo",
     "dev:sheets": "npm run dev -w apps/sheets-api-demo",
     "build": "npm run build -w packages/ui && npm run build -w packages/sheets-api && npm run build -w apps/demo",
     "build:ui": "npm run build -w packages/ui",

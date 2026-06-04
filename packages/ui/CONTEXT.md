@@ -1,18 +1,18 @@
-# @sino-purchase/ui — AI Context
+# @sino-purchase/desk-ui — AI Context
 
 ## 概要
 VS Code 风格 IDE 布局系统的 React 库（React 19 + Blueprint 6）。
 
 ## 安装
 ```bash
-npm install @sino-purchase/ui
+npm install @sino-purchase/desk-ui
 ```
 Peer deps: `react`, `react-dom`, `@blueprintjs/core`, `@blueprintjs/icons`, `@blueprintjs/table`, `react-router-dom`.
 
 ## 导入
 ```tsx
-import { AppLayout, ThemeProvider } from "@sino-purchase/ui"
-import "@sino-purchase/ui/style.css"
+import { AppLayout, ThemeProvider } from "@sino-purchase/desk-ui"
+import "@sino-purchase/desk-ui/style.css"
 
 // 消费者还需导入 BP6 CSS：
 import "@blueprintjs/core/lib/css/blueprint.css"
@@ -83,9 +83,9 @@ function App() {
 
 ## 要点 / 陷阱
 - 蓝图画标用 `<Icon icon={IconNames.XXX} />`，从 `@blueprintjs/icons` 导入
-- 构建顺序：先 build `@sino-purchase/ui`，再 build 消费者
-- CSS 不内联注入，需手动 `import "@sino-purchase/ui/style.css"`
-- 开发者模式下需 `optimizeDeps: { exclude: ["@sino-purchase/ui"] }`（npm link/workspace 场景）
+- 构建顺序：先 build `@sino-purchase/desk-ui`，再 build 消费者
+- CSS 不内联注入，需手动 `import "@sino-purchase/desk-ui/style.css"`
+- 开发者模式下需 `optimizeDeps: { exclude: ["@sino-purchase/desk-ui"] }`（npm link/workspace 场景）
 - `useTabs` hook 从库导出，用 `useSearchParams` 做 URL 持久化
 - `useSidebarResize` / `useRightResize` hook 分别处理左右侧栏拖拽缩放
 - 所有颜色覆盖集中在 `blueprintOverrides.css`，BP6 Portal 组件用 `.bp6-dark .bp6-dialog` 选择器覆盖

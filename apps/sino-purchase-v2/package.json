@@ -12,7 +12,7 @@
     "@blueprintjs/core": "^6.15.0",
     "@blueprintjs/icons": "^6.10.0",
     "@blueprintjs/table": "^6.1.1",
-    "@sino-purchase/ui": "*",
+    "@sino-purchase/desk-ui": "*",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.16.0"

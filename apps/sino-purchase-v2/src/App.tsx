@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { ThemeProvider, AppLayout } from "@sino-purchase/ui"
+import { ThemeProvider, AppLayout } from "@sino-purchase/desk-ui"
 
 const PlanManagement = lazy(() => import("./pages/PlanManagement"))
 const MaterialInfo = lazy(() => import("./pages/MaterialInfo"))

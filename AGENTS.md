@@ -25,7 +25,7 @@
 sino-purchase-v2/
 ├── package.json               # npm workspaces root (private)
 ├── packages/
-│   ├── ui/                    # @sino-purchase/ui (布局库)
+│   ├── ui/                    # @sino-purchase/desk-ui (布局库)
 │   │   ├── package.json       # 发布到 npm, peer deps: React/BP6
 │   │   ├── vite.config.ts     # lib 模式构建
 │   │   ├── tsconfig.json
@@ -53,12 +53,12 @@ sino-purchase-v2/
 │           └── global.d.ts    # google.accounts.oauth2 类型声明
 ├── apps/
 │   ├── demo/                  # 演示应用 (消费者)
-│   │   ├── package.json       # 依赖 @sino-purchase/ui (workspace:*)
+│   │   ├── package.json       # 依赖 @sino-purchase/desk-ui (workspace:*)
 │   │   ├── vite.config.ts
 │   │   ├── tsconfig.json
 │   │   ├── index.html
 │   │   └── src/
-│   │       ├── App.tsx        # 从 @sino-purchase/ui 导入布局
+│   │       ├── App.tsx        # 从 @sino-purchase/desk-ui 导入布局
 │   │       ├── main.tsx
 │   │       ├── index.css
 │   │       ├── components/    # FileTree, CsvProperties
@@ -66,7 +66,7 @@ sino-purchase-v2/
 │   │       ├── context/       # CsvContext
 │   │       └── pages/         # CsvEditor, ComponentShowcase, IconShowcase, MonacoShowcase
 │   └── sino-purchase-v2/      # 主应用 (sino-purchase-v2-main)
-│       ├── package.json       # 依赖 @sino-purchase/ui, @sino-purchase/sheets-api
+│       ├── package.json       # 依赖 @sino-purchase/desk-ui, @sino-purchase/sheets-api
 │       ├── vite.config.ts
 │       ├── tsconfig.json
 │       ├── index.html
@@ -119,11 +119,12 @@ sino-purchase-v2/
 - 属性栏 (`PropertiesBar`) 通过 `AppLayout` 的 `propertiesPanel` prop 传入，可选中不传则不显示
 - MonacoShowcase 已去掉 `readOnly: true`，可编辑
 - 菜单栏内容 (`menu-content div, span`) 全局设为 `white-space: nowrap; overflow: hidden; text-overflow: ellipsis;`
-- `@sino-purchase/ui` 是 monorepo 中的库包 (`packages/ui`)，布局组件 + 主题 + hooks 全部抽取至此。CSS 提取到 `dist/index.css`，使用者需 `import "@sino-purchase/ui/style.css"`
-- Demo app (`apps/demo`) 通过 npm workspace 引用本地库：`"@sino-purchase/ui": "*"`
-- 主应用 (`apps/sino-purchase-v2`) 引用 `@sino-purchase/ui` + `@sino-purchase/sheets-api`
+- `@sino-purchase/desk-ui` 是 monorepo 中的库包 (`packages/ui`)，布局组件 + 主题 + hooks 全部抽取至此。CSS 提取到 `dist/index.css`，使用者需 `import "@sino-purchase/desk-ui/style.css"`
+- Demo app (`apps/demo`) 通过 npm workspace 引用本地库：`"@sino-purchase/desk-ui": "*"`
+- 主应用 (`apps/sino-purchase-v2`) 引用 `@sino-purchase/desk-ui` + `@sino-purchase/sheets-api`
 - 构建顺序: `packages/ui` → `packages/sheets-api` → `apps/demo`
-- `npm run dev:app` 启动主应用 dev server
+- `npm run dev` 启动主应用 dev server
+- `npm run dev:demo` 启动 demo 应用
 - `npm run build:sheets` 单独构建 sheets-api
 - `npm run test` 运行 vitest (25 tests: ThemeContext 6, useTabs 11, useSidebarResize 8)
 - `npm run typecheck` 运行 tsc -b 全项目类型检查
