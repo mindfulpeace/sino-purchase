@@ -3,10 +3,12 @@ import { Button } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { Icon } from "@blueprintjs/core"
 import { useAuth } from "@sino-purchase/sheets-api"
+import { useTheme } from "@sino-purchase/desk-ui"
 import { SPREADSHEET_ID } from "../config/sheets"
 
 export default function SheetsEditor() {
   const { ready, loggedIn, login } = useAuth()
+  const { theme } = useTheme()
   const [sheetsKey, setSheetsKey] = useState(0)
 
   if (!ready) {
@@ -46,7 +48,7 @@ export default function SheetsEditor() {
         <iframe
           key={sheetsKey}
           src={`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit?embedded=true&single=true&rm=minimal`}
-          style={{ width: "100%", height: "100%", border: "none" }}
+          style={{ width: "100%", height: "100%", border: "none", filter: theme === "dark" ? "invert(1) hue-rotate(180deg)" : undefined }}
           title="Google Sheets"
         />
       </div>
