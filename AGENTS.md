@@ -119,17 +119,17 @@ sino-purchase-v2/
 - 属性栏 (`PropertiesBar`) 通过 `AppLayout` 的 `propertiesPanel` prop 传入，可选中不传则不显示
 - MonacoShowcase 已去掉 `readOnly: true`，可编辑
 - 菜单栏内容 (`menu-content div, span`) 全局设为 `white-space: nowrap; overflow: hidden; text-overflow: ellipsis;`
-- `@sino-purchase/desk-ui` 是 monorepo 中的库包 (`packages/ui`)，布局组件 + 主题 + hooks 全部抽取至此。CSS 提取到 `dist/index.css`，使用者需 `import "@sino-purchase/desk-ui/style.css"`
+- `@sino-purchase/desk-ui` 是 monorepo 中的库包 (`packages/desk-ui`)，布局组件 + 主题 + hooks 全部抽取至此。CSS 提取到 `dist/index.css`，使用者需 `import "@sino-purchase/desk-ui/style.css"`
 - Demo app (`apps/demo`) 通过 npm workspace 引用本地库：`"@sino-purchase/desk-ui": "*"`
 - 主应用 (`apps/sino-purchase-v2`) 引用 `@sino-purchase/desk-ui` + `@sino-purchase/sheets-api`
-- 构建顺序: `packages/ui` → `packages/sheets-api` → `apps/demo`
+- 构建顺序: `packages/desk-ui` → `packages/sheets-api` → `apps/demo`
 - `npm run dev` 启动主应用 dev server
 - `npm run dev:demo` 启动 demo 应用
 - `npm run build:sheets` 单独构建 sheets-api
 - `npm run test` 运行 vitest (25 tests: ThemeContext 6, useTabs 11, useSidebarResize 8)
 - `npm run typecheck` 运行 tsc -b 全项目类型检查
 - `.github/workflows/ci.yml`: lint → typecheck → test → build
-- `vitest.config.ts` 通过 `test.projects` 指向 `packages/ui`
+- `vitest.config.ts` 通过 `test.projects` 指向 `packages/desk-ui`
 - Google Sheets API 数据流: `useSheetData<T>` → `db.ts` (loadTable/insertRow/updateRow/deleteRow) → `auth.ts` (requestToken) → Google Sheets REST API v4
 - Sheets 离线队列: `sync-queue.ts` (localStorage) + `SyncProvider` → `processQueue()`
 - Sheets 认证: GSI OAuth 2.0 (https://accounts.google.com/gsi/client), token 存 localStorage, 5 分钟前静默刷新
