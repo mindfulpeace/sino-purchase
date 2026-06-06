@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { Dialog, Button, Classes } from "@blueprintjs/core"
+import { Dialog, Button, Classes, RadioGroup, Radio } from "@blueprintjs/core"
 import type { CashRecord } from "./types"
 import { formatAmount } from "./helpers"
+
+type ImportMode = "append" | "replace"
 
 interface ImportDialogProps {
   open: boolean
   records: CashRecord[]
-  onConfirm: (records: CashRecord[]) => void
+  onConfirm: (records: CashRecord[], mode: ImportMode) => void
   onCancel: () => void
 }
 
@@ -21,9 +23,13 @@ const FIELDS: { key: keyof CashRecord; label: string; width?: number }[] = [
 
 export default function ImportDialog({ open, records, onConfirm, onCancel }: ImportDialogProps) {
   const [edited, setEdited] = useState<CashRecord[]>([])
+  const [mode, setMode] = useState<ImportMode>("append")
 
   useEffect(() => {
-    if (open) setEdited(records.map(r => ({ ...r })))
+    if (open) {
+      setEdited(records.map(r => ({ ...r })))
+      setMode("append")
+    }
   }, [open, records])
 
   const updateField = useCallback((idx: number, key: keyof CashRecord, value: string) => {
@@ -84,10 +90,19 @@ export default function ImportDialog({ open, records, onConfirm, onCancel }: Imp
           </tbody>
         </table>
       </div>
-      <div className={Classes.DIALOG_FOOTER}>
+      <div className={Classes.DIALOG_FOOTER} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <RadioGroup
+          inline
+          selectedValue={mode}
+          onChange={e => setMode(e.currentTarget.value as ImportMode)}
+          style={{ margin: 0 }}
+        >
+          <Radio label="追加" value="append" />
+          <Radio label="替换" value="replace" />
+        </RadioGroup>
         <div className={Classes.DIALOG_FOOTER_ACTIONS}>
           <Button onClick={onCancel}>取消</Button>
-          <Button onClick={() => onConfirm(edited)} intent="primary">确认导入</Button>
+          <Button onClick={() => onConfirm(edited, mode)} intent="primary">确认导入</Button>
         </div>
       </div>
     </Dialog>

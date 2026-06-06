@@ -47,10 +47,10 @@ const DocReimburse = ({ date, items, applicant = "任金涛", companyName = "中
         <tbody>
           <tr>
             <td width="20%">部门 Department:</td>
-            <td width="20%" style={{ borderRight: 0 }}>采购部</td>
+            <td width="24%" style={{ borderRight: 0 }}>采购部</td>
             <td style={{ borderLeft: 0 }}></td>
-            <td width="18%">日期 Date:</td>
-            <td width="18%">{date}</td>
+            <td width="17%">日期 Date:</td>
+            <td width="17%">{date}</td>
           </tr>
           <tr>
             <td rowSpan={3} style={{ textAlign: "center" }}>
@@ -94,14 +94,14 @@ const DocReimburse = ({ date, items, applicant = "任金涛", companyName = "中
             <td width="5%" style={{ padding: 4 }}>
               序号<br />S/N
             </td>
-            <td width="38%">
+            <td width="41%">
               费用报销明细<br />
               Expense Reimbursement Details
             </td>
-            <td>型号<br />Specifications</td>
-            <td>数量<br />Quantity</td>
+            <td width="14%">型号<br />Specifications</td>
+            <td width="14%">数量<br />Quantity</td>
             <td>单价<br />Price</td>
-            <td width="20%">
+            <td width="17%">
               金额<br />Amount
             </td>
           </tr>
@@ -120,7 +120,7 @@ const DocReimburse = ({ date, items, applicant = "任金涛", companyName = "中
             </td>
             <td id="total">{total.toFixed(2)}</td>
             <td width="9%">汇率：</td>
-            <td width="17%"></td>
+            <td width="20%"></td>
           </tr>
           <tr style={{ textAlign: "center" }}>
             <td>

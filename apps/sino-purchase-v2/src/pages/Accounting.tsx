@@ -12,7 +12,7 @@ import { formatDataSummary } from "./accounting/helpers"
 import type { CashRecord } from "./accounting/types"
 
 function AccountingContent() {
-  const { state, addRecords, hideImportDialog, switchTab } = useAccounting()
+  const { state, setRecords, addRecords, hideImportDialog, switchTab } = useAccounting()
   const { propertiesVisible, setPropertiesVisible, setReimburseRecords } = useDocSettings()
   const { importFromClipboard } = useImportClipboard()
   const { triggerImport, inputRef, handleFileChange } = useImportExcel()
@@ -49,13 +49,14 @@ function AccountingContent() {
     }
   }, [state.records])
 
-  const handleConfirmImport = useCallback((records: CashRecord[]) => {
+  const handleConfirmImport = useCallback((records: CashRecord[], mode: "append" | "replace") => {
     if (records.length > 0) {
-      addRecords(records)
+      if (mode === "replace") setRecords(records)
+      else addRecords(records)
     }
     hideImportDialog()
     switchTab("preview")
-  }, [addRecords, hideImportDialog, switchTab])
+  }, [setRecords, addRecords, hideImportDialog, switchTab])
 
   const summary = formatDataSummary(state.records)
 

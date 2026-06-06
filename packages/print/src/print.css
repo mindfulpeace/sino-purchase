@@ -45,6 +45,12 @@
 
   .print-view .doc-reimburse {
     font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .print-view .doc-reimburse td,
+  .print-view .doc-reimburse th {
+    padding: 0.45em;
   }
 
   .print-view h1,
