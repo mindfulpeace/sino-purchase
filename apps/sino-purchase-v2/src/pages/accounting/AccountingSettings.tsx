@@ -57,12 +57,18 @@ export default function AccountingSettings() {
           value={settings.companyNameEn}
           onChange={(e) => setCompanyNameEn(e.target.value)}
         />
-        <InputGroup
-          placeholder="申请人"
-          value={settings.applicant}
-          onChange={(e) => setApplicant(e.target.value)}
-        />
-        <Button icon={IconNames.PRINT} text="打印" intent="primary" onClick={handlePrint} fill style={{ marginTop: 4 }} />
+        <div style={{ display: "flex", gap: 8, width: "100%" }}>
+          <div style={{ flex: 0.7 }}>
+            <InputGroup
+              placeholder="申请人"
+              value={settings.applicant}
+              onChange={(e) => setApplicant(e.target.value)}
+            />
+          </div>
+          <div style={{ flex: 0.3 }}>
+            <Button icon={IconNames.PRINT} text="打印" intent="primary" onClick={handlePrint} fill />
+          </div>
+        </div>
       </div>
       {reimburseRecords.length > 0 && (
         <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", minHeight: 0 }}>

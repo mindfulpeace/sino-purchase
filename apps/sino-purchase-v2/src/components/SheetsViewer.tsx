@@ -21,8 +21,8 @@ export default function SheetsViewer({ spreadsheetId }: SheetsViewerProps) {
 
   if (!loggedIn) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", flexDirection: "column", gap: 12 }}>
-        <div style={{ fontSize: 14, color: "var(--text-dim)" }}>需要登录 Google 账号才能编辑数据表</div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", flexDirection: "column", gap: 12, width: "100%" }}>
+        <div style={{ fontSize: 14, color: "var(--text-dim)", textAlign: "center" }}>需要登录 Google 账号才能编辑数据表</div>
         <Button intent="primary" icon={<Icon icon={IconNames.LOG_IN} />} onClick={login}>
           登录 Google
         </Button>

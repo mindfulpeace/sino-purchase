@@ -76,7 +76,6 @@ export default function Toolbar({ records, showSheets, onSheetsToggle }: Toolbar
       <Tooltip content={propertiesVisible ? "关闭打印设置" : "打开打印设置"}>
         <Button
           icon="print"
-          text="打印设置"
           intent={propertiesVisible ? "primary" : "none"}
           onClick={handlePrintSettings}
         />

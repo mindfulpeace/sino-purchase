@@ -11,7 +11,9 @@
     "dev": "npm run dev -w apps/sino-purchase-v2",
     "dev:desk": "npm run dev -w apps/desk-ui-demo",
     "dev:sheets": "npm run dev -w apps/sheets-api-demo",
-    "build": "npm run build -w packages/desk-ui && npm run build -w packages/sheets-api && npm run build -w apps/desk-ui-demo",
+    "build": "npm run build:packages && npm run build:main",
+    "build:packages": "npm run build:ui && npm run build:utils && npm run build:doc && npm run build:print && npm run build:sheets",
+    "build:main": "npm run build -w apps/sino-purchase-v2",
     "build:ui": "npm run build -w packages/desk-ui",
     "build:utils": "npm run build -w packages/utils",
     "build:doc": "npm run build -w packages/doc",
@@ -22,7 +24,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -b",
-    "preview": "npm run preview -w apps/desk-ui-demo"
+    "preview": "npm run preview -w apps/sino-purchase-v2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
