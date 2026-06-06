@@ -97,6 +97,11 @@ async function ensureSheet(sheetName: string, headers: string[]): Promise<void> 
   }
 }
 
+export async function listSheets(): Promise<string[]> {
+  await refreshSheetCache()
+  return Array.from(sheetIdCache.keys())
+}
+
 export async function findRow(sheetName: string, uuid: string): Promise<number | null> {
   const { spreadsheetId } = getConfig()
   const res = await fetchWithAuth<{ values?: string[][] }>(

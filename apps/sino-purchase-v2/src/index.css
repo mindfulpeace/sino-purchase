@@ -22,10 +22,34 @@ body {
 }
 
 @media print {
-  /* Hide all app chrome except .right (it holds the print preview) */
+  /* Allow body to flow naturally (remove overflow:hidden) */
+  body {
+    overflow: visible !important;
+  }
+
+  /* Remove single-page height constraint */
+  #root {
+    height: auto !important;
+  }
+
+  /* Remove flex layout constraints — everything becomes normal block flow */
+  .app-root.bp6-dark,
+  .app-root.bp6-light {
+    display: block !important;
+    height: auto !important;
+  }
+
+  .app-body {
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Hide all app chrome */
   .hdr,
   .nav,
   .menu,
+  .editor,
   .panel,
   .status,
   .editor-tabs,
@@ -48,9 +72,13 @@ body {
   }
 
   .right {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    position: static !important;
+    overflow: visible !important;
     border: none !important;
     background: transparent !important;
-    overflow: visible !important;
   }
 
   .right-header,
@@ -59,6 +87,7 @@ body {
   }
 
   .right-content {
+    display: block !important;
     overflow: visible !important;
     padding: 0 !important;
     background: transparent !important;

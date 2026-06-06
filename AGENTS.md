@@ -147,6 +147,7 @@ sino-purchase-v2/
 10. `ref` 赋值不能在 render 阶段做 → 移到 `useEffect`
 11. `useMemo` 依赖数组缺 `searchParams`/`validIds` → 改用 `useState`/`useReducer` lazy init
 12. Dialog/Drawer 打开后布局崩溃: `AppLayout.css` 的 `.bp6-dark` 选择器无作用域限制，portal div 误获 `height:100vh;background:var(--bg-surface)` → 根 div 加 `app-root` 类名，CSS 改为 `.app-root.bp6-dark`
+13. 打印字体缩小 + 分页失效：根因是 `.print-view` 用了 `position: fixed`，导致 `page-break-*` 被忽略（CSS 规范：分页只对根元素正常流中的块级元素生效），且 `#root { height: 100vh }` 和 `.editor { flex: 1 }` 在打印时未覆盖，限制了打印内容宽度。修复：`@media print` 中移除 `position: fixed`，改用正常流；`body/ #root/ .app-root/ .app-body/ .right/ .right-content` 全部 `display: block; height: auto; overflow: visible`；`.editor` 加入 `display: none`；打印字体改为 `14px`
 
 ## 备忘录
 - 所有 Blueprint 图标用 `<Icon icon={IconNames.XXX} />` (从 `@blueprintjs/icons` 导入)

@@ -20,15 +20,10 @@
 
 @media print {
   .print-view {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100vw;
+    width: 100%;
     padding: 0;
     background: none;
     overflow: visible;
-    min-height: 100vh;
-    z-index: 1000000;
   }
 
   .print-view * {
@@ -42,6 +37,7 @@
     break-after: page;
     margin-bottom: 0;
     padding: 0.5em 15mm 20mm 15mm;
+    font-size: 14px;
   }
 
   .print-view .print-paper:first-of-type {
@@ -54,9 +50,8 @@
     break-after: auto;
   }
 
-  .print-view table {
-    page-break-inside: avoid;
-    break-inside: avoid;
+  .print-view .doc-reimburse {
+    font-size: 14px;
   }
 
   .print-view h1,
@@ -76,6 +71,6 @@
 
   @page {
     size: A4;
-    margin: 20mm 15mm 20mm 15mm;
+    margin: 20mm 15mm;
   }
 }

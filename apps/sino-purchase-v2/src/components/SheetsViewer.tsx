@@ -1,7 +1,5 @@
-import { useState } from "react"
-import { Button } from "@blueprintjs/core"
+import { Button, Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { Icon } from "@blueprintjs/core"
 import { useAuth } from "@sino-purchase/sheets-api"
 import { useTheme } from "@sino-purchase/desk-ui"
 
@@ -12,7 +10,6 @@ interface SheetsViewerProps {
 export default function SheetsViewer({ spreadsheetId }: SheetsViewerProps) {
   const { ready, loggedIn, login } = useAuth()
   const { theme } = useTheme()
-  const [sheetsKey, setSheetsKey] = useState(0)
 
   if (!ready) {
     return (
@@ -34,20 +31,12 @@ export default function SheetsViewer({ spreadsheetId }: SheetsViewerProps) {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 8px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
-        <Button small icon={<Icon icon={IconNames.REFRESH} />} onClick={() => setSheetsKey(k => k + 1)}>
-          刷新
-        </Button>
-      </div>
-      <div style={{ flex: 1, minHeight: 0 }}>
-        <iframe
-          key={sheetsKey}
-          src={`https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit?embedded=true&single=true&rm=minimal`}
-          style={{ width: "100%", height: "100%", border: "none", filter: theme === "dark" ? "invert(1) hue-rotate(180deg)" : undefined }}
-          title="Google Sheets"
-        />
-      </div>
+    <div style={{ height: "100%" }}>
+      <iframe
+        src={`https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit?embedded=true&single=true&rm=minimal`}
+        style={{ width: "100%", height: "100%", border: "none", filter: theme === "dark" ? "invert(1) hue-rotate(180deg)" : undefined }}
+        title="Google Sheets"
+      />
     </div>
   )
 }

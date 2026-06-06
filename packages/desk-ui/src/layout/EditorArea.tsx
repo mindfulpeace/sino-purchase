@@ -28,8 +28,6 @@ export function EditorArea({
     )
   }
 
-  const activeTab = tabs.find((t) => t.id === activeId)
-
   return (
     <div className="editor">
       <div className="editor-tabs">
@@ -53,8 +51,16 @@ export function EditorArea({
           )
         })}
       </div>
-      <div className="editor-content">
-        {activeTab?.render()}
+      <div className="editor-content" style={{ display: "flex", flexDirection: "column" }}>
+        {openIds.map((id) => {
+          const tab = tabs.find((t) => t.id === id)
+          if (!tab) return null
+          return (
+            <div key={id} style={{ display: id === activeId ? "flex" : "none", flex: 1, width: "100%", minHeight: 0, flexDirection: "column" }}>
+              {tab.render()}
+            </div>
+          )
+        })}
       </div>
     </div>
   )

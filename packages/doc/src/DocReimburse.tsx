@@ -107,7 +107,8 @@ const DocReimburse = ({ date, items, applicant = "任金涛", companyName = "中
           </tr>
         </thead>
         <tbody>
-          {[0, 1, 2, 3, 4, 5, 6, 7].map((id) => trItem(id + 1, items?.[id]?.detail, items?.[id]?.amount))}
+          {(items || []).map((item, id) => trItem(id + 1, item.detail, item.amount))}
+          {items && Array.from({ length: Math.max(0, 8 - items.length) }, (_, i) => trItem((items?.length || 0) + i + 1))}
         </tbody>
       </table>
 
