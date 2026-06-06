@@ -29,7 +29,7 @@ export default function PrintScaler({ children }: PrintScalerProps) {
   }, [scale])
 
   return (
-    <div ref={outerRef} style={{ overflow: "hidden", width: "100%" }}>
+    <div ref={outerRef} className="print-scaler-outer" style={{ overflow: "hidden", width: "100%" }}>
       <div
         ref={innerRef}
         className="print-preview-scaler"

@@ -87,6 +87,11 @@ body {
     background: transparent !important;
   }
 
+  .print-scaler-outer {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
   .print-preview-scaler {
     transform: none !important;
     width: auto !important;
