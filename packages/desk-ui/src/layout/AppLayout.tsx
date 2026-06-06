@@ -20,12 +20,13 @@ interface AppLayoutProps {
   tabs: EditorTab[]
 
   propertiesPanel?: (activeTabId: string | null) => PropertiesPanel | undefined
+  propertiesMinWidth?: number
 
   propertiesVisible?: boolean
   onPropertiesVisibleChange?: (visible: boolean) => void
 }
 
-export default function AppLayout({ title, activities, sidePanels, tabs, propertiesPanel, propertiesVisible, onPropertiesVisibleChange }: AppLayoutProps) {
+export default function AppLayout({ title, activities, sidePanels, tabs, propertiesPanel, propertiesMinWidth, propertiesVisible, onPropertiesVisibleChange }: AppLayoutProps) {
   const { theme } = useTheme()
   const [showPanel, setShowPanel] = useState(false)
   const [showPropertiesInternal, setShowPropertiesInternal] = useState(false)
@@ -115,7 +116,7 @@ export default function AppLayout({ title, activities, sidePanels, tabs, propert
             onTabClose={closeTab}
           />
           {showProperties && currentProperties && (
-            <PropertiesBar key={currentProperties.id} panel={currentProperties} onClose={handlePropertiesClose} />
+            <PropertiesBar key={currentProperties.id} panel={currentProperties} onClose={handlePropertiesClose} minWidth={propertiesMinWidth} />
           )}
         </div>
         <Panel show={showPanel} height={200} onClose={() => setShowPanel(false)} />

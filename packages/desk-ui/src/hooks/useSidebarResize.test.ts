@@ -45,7 +45,7 @@ describe("useSidebarResize", () => {
 describe("useRightResize", () => {
   it("starts with default width", () => {
     const { result } = renderHook(() => useRightResize())
-    expect(result.current.width).toBe(260)
+    expect(result.current.width).toBe(435)
   })
 
   it("starts with given initialWidth", () => {

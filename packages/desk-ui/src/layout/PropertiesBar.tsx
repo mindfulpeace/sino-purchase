@@ -4,11 +4,13 @@ import type { PropertiesPanel } from "../types"
 export function PropertiesBar({
   panel,
   onClose,
+  minWidth,
 }: {
   panel: PropertiesPanel | undefined
   onClose: () => void
+  minWidth?: number
 }) {
-  const { width, handleResizeStart } = useRightResize()
+  const { width, handleResizeStart } = useRightResize(435, minWidth)
 
   if (!panel) return null
 

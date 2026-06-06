@@ -2,6 +2,7 @@ import { useCallback } from "react"
 import { Button, InputGroup, HTMLSelect } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { useDocSettings } from "../../context/DocSettingsContext"
+import PrintScaler from "../../components/PrintScaler"
 import PrintableReimburse from "./PrintableReimburse"
 
 interface CompanyPreset {
@@ -65,14 +66,14 @@ export default function AccountingSettings() {
       </div>
       {reimburseRecords.length > 0 && (
         <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", minHeight: 0 }}>
-          <div className="print-preview-scaler">
+          <PrintScaler>
             <PrintableReimburse
               records={reimburseRecords}
               applicant={settings.applicant}
               companyName={settings.companyName}
               companyNameEn={settings.companyNameEn}
             />
-          </div>
+          </PrintScaler>
         </div>
       )}
     </div>

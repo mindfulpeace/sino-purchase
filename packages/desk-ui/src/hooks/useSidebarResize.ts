@@ -2,15 +2,13 @@ import { useState } from "react"
 
 export function useSidebarResize(initialWidth = 200, minWidth = 120, maxWidth = 600) {
   const [sidebarWidth, setSidebarWidth] = useState(initialWidth)
-  const [startX, setStartX] = useState(0)
-  const [startWidth, setStartWidth] = useState(0)
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault()
-    setStartX(e.clientX)
-    setStartWidth(sidebarWidth)
+    const initialX = e.clientX
+    const startWidth = sidebarWidth
     const handleMouseMove = (ev: MouseEvent) => {
-      const newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth + ev.clientX - startX))
+      const newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth + ev.clientX - initialX))
       setSidebarWidth(newWidth)
     }
     const handleMouseUp = () => {
@@ -26,15 +24,13 @@ export function useSidebarResize(initialWidth = 200, minWidth = 120, maxWidth = 
 
 export function useRightResize(initialWidth = 435, minWidth = 435, maxWidth = 800) {
   const [width, setWidth] = useState(initialWidth)
-  const [startX, setStartX] = useState(0)
-  const [startWidth, setStartWidth] = useState(0)
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault()
-    setStartX(e.clientX)
-    setStartWidth(width)
+    const initialX = e.clientX
+    const startWidth = width
     const handleMouseMove = (ev: MouseEvent) => {
-      const newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth - (ev.clientX - startX)))
+      const newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth - (ev.clientX - initialX)))
       setWidth(newWidth)
     }
     const handleMouseUp = () => {

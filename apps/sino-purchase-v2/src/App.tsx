@@ -198,6 +198,7 @@ function PlanAwareApp() {
       sidePanels={sidePanels}
       tabs={tabs}
       propertiesPanel={propertiesPanel}
+      propertiesMinWidth={200}
       propertiesVisible={propertiesVisible}
       onPropertiesVisibleChange={setPropertiesVisible}
     />
