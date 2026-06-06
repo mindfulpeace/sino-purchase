@@ -4,17 +4,18 @@ import CashGrid from "./accounting/CashGrid"
 import ImportDialog from "./accounting/ImportDialog"
 import PrintableReimburse from "./accounting/PrintableReimburse"
 import Toolbar from "./accounting/Toolbar"
+import type { CashRecord } from "./accounting/types"
 
 function AccountingContent() {
   const { state, addRecords, hideImportDialog } = useAccounting()
   const [showPrint, setShowPrint] = useState(false)
 
-  const handleConfirmImport = useCallback(() => {
-    if (state.importDialog.importRecord) {
-      addRecords(state.importDialog.importRecord.records)
+  const handleConfirmImport = useCallback((records: CashRecord[]) => {
+    if (records.length > 0) {
+      addRecords(records)
     }
     hideImportDialog()
-  }, [state.importDialog.importRecord, addRecords, hideImportDialog])
+  }, [addRecords, hideImportDialog])
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
