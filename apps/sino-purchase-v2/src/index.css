@@ -18,7 +18,7 @@ body {
 .print-preview-scaler {
   transform: scale(0.5);
   transform-origin: top left;
-  width: 200%;
+  width: 800px; /* locked: A4 paper width at 50% scale, derived from 425px PropertiesBar */
 }
 
 @media print {
