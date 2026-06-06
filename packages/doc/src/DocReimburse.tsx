@@ -3,12 +3,12 @@ import type { DocReimburseProps } from "./types"
 
 const trItem = (id: number, detail?: string, amount?: number) => (
   <tr key={id}>
-    <td style={{ textAlign: "center" }}>{id}</td>
-    <td>{detail}</td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td style={{ textAlign: "right" }}>{!amount ? "" : (amount || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</td>
+    <td style={{ textAlign: "center", height: 28 }}>{id}</td>
+    <td style={{ height: 28 }}>{detail || ""}</td>
+    <td style={{ height: 28 }}></td>
+    <td style={{ height: 28 }}></td>
+    <td style={{ height: 28 }}></td>
+    <td style={{ textAlign: "right", height: 28 }}>{!amount ? "" : (amount || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</td>
   </tr>
 )
 
