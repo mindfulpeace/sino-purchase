@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { calculateDiff, type DiffResult } from "../diff"
+import { calculateDiff } from "../diff"
 
 describe("calculateDiff", () => {
   test("应该计算空数据的差异", () => {

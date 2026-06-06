@@ -4,12 +4,12 @@ import { IconNames } from "@blueprintjs/icons"
 import { ThemeProvider, AppLayout } from "@sino-purchase/desk-ui"
 import { SheetsProvider } from "@sino-purchase/sheets-api"
 import { CLIENT_ID, SPREADSHEET_ID } from "./config/sheets"
-import { PlanProvider, usePlan } from "./pages/plan/PlanContext"
-import { TaskDetail } from "./pages/plan/components/TaskDetail"
-import type { PurchaseTask } from "./pages/plan/types"
-import { todayISO } from "./pages/plan/helpers"
-import { DocSettingsProvider, useDocSettings } from "./context/DocSettingsContext"
-import AccountingSettings from "./pages/accounting/AccountingSettings"
+import { usePlanStore } from "./app/stores/planStore"
+import { useDocSettingsStore } from "./app/stores/docSettingsStore"
+import { TaskDetail } from "./modules/plan/components/TaskDetail"
+import type { PurchaseTask } from "./modules/plan/types"
+import { todayISO } from "./modules/plan/helpers"
+import AccountingSettings from "./modules/accounting/AccountingSettings"
 
 const PlanManagement = lazy(() => import("./pages/PlanManagement"))
 const MaterialInfo = lazy(() => import("./pages/MaterialInfo"))
@@ -108,8 +108,8 @@ const sidePanels: Record<string, { id: string; label: string; render: (callbacks
 }
 
 function PlanAwareApp() {
-  const { propertiesVisible, setPropertiesVisible } = useDocSettings()
-  const { editingTaskId, isAdding, batchEdit, selectedIds, allTasks, addTask, updateTask, deleteTask, setEditingTaskId, setIsAdding, setBatchEdit, setPendingBatchChanges } = usePlan()
+  const { propertiesVisible, setPropertiesVisible } = useDocSettingsStore()
+  const { editingTaskId, isAdding, batchEdit, selectedIds, allTasks, addTask, updateTask, deleteTask, setEditingTaskId, setIsAdding, setBatchEdit, setPendingBatchChanges } = usePlanStore()
 
   useEffect(() => {
     if (editingTaskId || isAdding) setPropertiesVisible(true)
@@ -209,11 +209,7 @@ function App() {
   return (
     <SheetsProvider clientId={CLIENT_ID} spreadsheetId={SPREADSHEET_ID}>
       <ThemeProvider>
-        <PlanProvider>
-          <DocSettingsProvider>
-            <PlanAwareApp />
-          </DocSettingsProvider>
-        </PlanProvider>
+        <PlanAwareApp />
       </ThemeProvider>
     </SheetsProvider>
   )

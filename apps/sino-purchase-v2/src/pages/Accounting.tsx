@@ -1,26 +1,26 @@
 import { useEffect, useCallback, useState } from "react"
 import { Button, Tooltip } from "@blueprintjs/core"
-import { AccountingProvider, useAccounting } from "./accounting/AccountingContext"
-import { useDocSettings } from "../context/DocSettingsContext"
-import CashGrid from "./accounting/CashGrid"
-import ImportDialog from "./accounting/ImportDialog"
-import SheetsDataTab from "./accounting/SheetsDataTab"
-import { useImportClipboard } from "./accounting/useImportClipboard"
-import { useImportExcel } from "./accounting/useImportExcel"
-import { exportExcel } from "./accounting/sheetjs"
-import { formatDataSummary } from "./accounting/helpers"
-import type { CashRecord } from "./accounting/types"
+import { useAccountingStore } from "../app/stores/accountingStore"
+import { useDocSettingsStore } from "../app/stores/docSettingsStore"
+import CashGrid from "../modules/accounting/CashGrid"
+import ImportDialog from "../modules/accounting/ImportDialog"
+import SheetsDataTab from "../modules/accounting/SheetsDataTab"
+import { useImportClipboard } from "../modules/accounting/useImportClipboard"
+import { useImportExcel } from "../modules/accounting/useImportExcel"
+import { exportExcel } from "../modules/accounting/sheetjs"
+import { formatDataSummary } from "../modules/accounting/helpers"
+import type { CashRecord } from "../modules/accounting/types"
 
-function AccountingContent() {
-  const { state, setRecords, addRecords, hideImportDialog, switchTab } = useAccounting()
-  const { propertiesVisible, setPropertiesVisible, setReimburseRecords } = useDocSettings()
+export default function Accounting() {
+  const { records, activeTab, importDialog, setRecords, addRecords, hideImportDialog, switchTab } = useAccountingStore()
+  const { propertiesVisible, setPropertiesVisible, setReimburseRecords } = useDocSettingsStore()
   const { importFromClipboard } = useImportClipboard()
   const { triggerImport, inputRef, handleFileChange } = useImportExcel()
   const [sheetsBatch, setSheetsBatch] = useState<string[]>([])
 
   useEffect(() => {
-    setReimburseRecords(state.records)
-  }, [state.records])
+    setReimburseRecords(records)
+  }, [records])
 
   const handleClipboard = useCallback(async () => {
     try {
@@ -43,11 +43,11 @@ function AccountingContent() {
 
   const handleExport = useCallback(async () => {
     try {
-      await exportExcel(state.records)
+      await exportExcel(records)
     } catch {
       alert("导出失败")
     }
-  }, [state.records])
+  }, [records])
 
   const handleConfirmImport = useCallback((records: CashRecord[], mode: "append" | "replace") => {
     if (records.length > 0) {
@@ -58,7 +58,7 @@ function AccountingContent() {
     switchTab("preview")
   }, [setRecords, addRecords, hideImportDialog, switchTab])
 
-  const summary = formatDataSummary(state.records)
+  const summary = formatDataSummary(records)
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
@@ -66,17 +66,17 @@ function AccountingContent() {
         <div style={{ display: "flex" }}>
           <button
             onClick={() => switchTab("sheets")}
-            style={{
-              padding: "6px 16px",
-              fontSize: 12,
-              border: "none",
-              background: state.activeTab === "sheets" ? "var(--bg-active)" : "transparent",
-              color: state.activeTab === "sheets" ? "var(--text)" : "var(--text-dim)",
-              cursor: "pointer",
-              borderBottom: state.activeTab === "sheets" ? "2px solid var(--accent)" : "2px solid transparent",
-              fontWeight: state.activeTab === "sheets" ? 600 : 400,
-            }}
-          >
+              style={{
+                padding: "6px 16px",
+                fontSize: 12,
+                border: "none",
+                background: activeTab === "sheets" ? "var(--bg-active)" : "transparent",
+                color: activeTab === "sheets" ? "var(--text)" : "var(--text-dim)",
+                cursor: "pointer",
+                borderBottom: activeTab === "sheets" ? "2px solid var(--accent)" : "2px solid transparent",
+                fontWeight: activeTab === "sheets" ? 600 : 400,
+              }}
+            >
             数据源
           </button>
           <button
@@ -85,11 +85,11 @@ function AccountingContent() {
               padding: "6px 16px",
               fontSize: 12,
               border: "none",
-              background: state.activeTab === "preview" ? "var(--bg-active)" : "transparent",
-              color: state.activeTab === "preview" ? "var(--text)" : "var(--text-dim)",
+              background: activeTab === "preview" ? "var(--bg-active)" : "transparent",
+              color: activeTab === "preview" ? "var(--text)" : "var(--text-dim)",
               cursor: "pointer",
-              borderBottom: state.activeTab === "preview" ? "2px solid var(--accent)" : "2px solid transparent",
-              fontWeight: state.activeTab === "preview" ? 600 : 400,
+              borderBottom: activeTab === "preview" ? "2px solid var(--accent)" : "2px solid transparent",
+              fontWeight: activeTab === "preview" ? 600 : 400,
             }}
           >
             数据预览
@@ -124,28 +124,20 @@ function AccountingContent() {
       </div>
 
       <div style={{ flex: 1, overflow: "auto" }}>
-        <div style={{ display: state.activeTab === "sheets" ? "flex" : "none", height: "100%" }}>
+        <div style={{ display: activeTab === "sheets" ? "flex" : "none", height: "100%" }}>
           <SheetsDataTab batch={sheetsBatch} onBatchChange={setSheetsBatch} />
         </div>
-        <div style={{ display: state.activeTab === "preview" ? "flex" : "none", height: "100%" }}>
-          <CashGrid records={state.records} />
+        <div style={{ display: activeTab === "preview" ? "flex" : "none", height: "100%" }}>
+          <CashGrid records={records} />
         </div>
       </div>
 
       <ImportDialog
-        open={state.importDialog.open}
-        records={state.importDialog.importRecord?.records || []}
+        open={importDialog.open}
+        records={importDialog.importRecord?.records || []}
         onConfirm={handleConfirmImport}
         onCancel={hideImportDialog}
       />
     </div>
-  )
-}
-
-export default function Accounting() {
-  return (
-    <AccountingProvider>
-      <AccountingContent />
-    </AccountingProvider>
   )
 }

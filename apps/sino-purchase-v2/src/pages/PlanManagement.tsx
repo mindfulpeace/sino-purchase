@@ -1,20 +1,30 @@
 import { useState, useCallback, useEffect } from "react"
 import { Button, InputGroup, Icon, Tag } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { useAuth } from "@sino-purchase/sheets-api"
-import { usePlan } from "./plan/PlanContext"
-import { TaskList } from "./plan/components/TaskList"
-import { AddNewTaskBar } from "./plan/components/AddNewTaskBar"
-import { FilterPopover } from "./plan/components/FilterModals"
-import { BatchImportDialog } from "./plan/components/BatchImportDialog"
-import { BatchConfirmDialog } from "./plan/components/BatchConfirmDialog"
-import { SettingsDialog } from "./plan/components/SettingsDialog"
-import type { PurchaseTask } from "./plan/types"
-import "./plan/PlanManagement.css"
+import { useAuth, useSheetData } from "@sino-purchase/sheets-api"
+import { usePlanStore } from "../app/stores/planStore"
+import { TaskList } from "../modules/plan/components/TaskList"
+import { AddNewTaskBar } from "../modules/plan/components/AddNewTaskBar"
+import { FilterPopover } from "../modules/plan/components/FilterModals"
+import { BatchImportDialog } from "../modules/plan/components/BatchImportDialog"
+import { BatchConfirmDialog } from "../modules/plan/components/BatchConfirmDialog"
+import { SettingsDialog } from "../modules/plan/components/SettingsDialog"
+import type { PurchaseTask } from "../modules/plan/types"
+import { TASK_HEADERS, NUMERIC_FIELDS, DATE_FIELDS } from "../modules/plan/types"
+import "../modules/plan/PlanManagement.css"
+
+const SHEET = "tasks"
 
 export default function PlanManagement() {
+  const { data: sheetData, reload: sheetReload, add, update, remove } = useSheetData<PurchaseTask>({
+    sheetName: SHEET,
+    headers: TASK_HEADERS,
+    numericFields: NUMERIC_FIELDS,
+    dateFields: DATE_FIELDS,
+  })
+
   const {
-    tasks, allTasks, loading, reload, addTask,
+    allTasks, loading, filteredTasks: tasks, setAllTasks, setCrudActions,
     searchQuery, setSearchQuery,
     statusFilter,
     urgencyFilter,
@@ -23,8 +33,16 @@ export default function PlanManagement() {
     setEditingTaskId, setIsAdding, setBatchEdit,
     selectedIds, onToggleSelect, clearSelection, selectAll,
     pendingBatchChanges, setPendingBatchChanges,
-    confirmBatchApply,
-  } = usePlan()
+    addTask, confirmBatchApply, reload,
+  } = usePlanStore()
+
+  // Sync sheet data to store
+  useEffect(() => { setAllTasks(sheetData) }, [sheetData])
+
+  // Set CRUD actions
+  useEffect(() => {
+    setCrudActions({ add, update, remove, reload: sheetReload })
+  }, [])
 
   const auth = useAuth()
   const [showSettings, setShowSettings] = useState(false)

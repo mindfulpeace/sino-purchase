@@ -1,27 +1,15 @@
 import { useState } from "react"
-import { Button, Card, H3, InputGroup, HTMLTable } from "@blueprintjs/core"
-
-interface Material {
-  id: string
-  name: string
-  code: string
-  unit: string
-  price: number
-  category: string
-}
-
-const sampleMaterials: Material[] = [
-  { id: "1", name: "钢材", code: "MAT-001", unit: "吨", price: 5500, category: "原材料" },
-  { id: "2", name: "铝材", code: "MAT-002", unit: "吨", price: 18000, category: "原材料" },
-  { id: "3", name: "螺丝 M8", code: "MAT-003", unit: "个", price: 0.15, category: "标准件" },
-]
+import { Button, Card, H3, InputGroup, HTMLTable, Tag } from "@blueprintjs/core"
+import { useMaterialStore } from "../app/stores/materialStore"
 
 export default function MaterialInfo() {
-  const [materials, setMaterials] = useState<Material[]>(sampleMaterials)
+  const { materials, deleteMaterial } = useMaterialStore()
   const [search, setSearch] = useState("")
 
   const filtered = materials.filter(m => 
-    m.name.includes(search) || m.code.includes(search)
+    m.name.toLowerCase().includes(search.toLowerCase()) || 
+    m.code.toLowerCase().includes(search.toLowerCase()) ||
+    m.category.toLowerCase().includes(search.toLowerCase())
   )
 
   return (
@@ -62,8 +50,8 @@ export default function MaterialInfo() {
                 <td>{m.unit}</td>
                 <td>{m.price.toLocaleString()}</td>
                 <td>
-                  <Button small minimal icon="edit">编辑</Button>
-                  <Button small minimal icon="trash" style={{ marginLeft: 8 }}>删除</Button>
+                  <Button small minimal icon="edit" />
+                  <Button small minimal icon="trash" intent="danger" style={{ marginLeft: 8 }} onClick={() => deleteMaterial(m.id)} />
                 </td>
               </tr>
             ))}
@@ -72,7 +60,7 @@ export default function MaterialInfo() {
       </Card>
 
       <div style={{ marginTop: 24, color: "var(--text-dim)", fontSize: 14 }}>
-        <p>💡 提示：此页面当前为演示数据，未来将接入 Google Sheets 同步。</p>
+        <p>💡 数据已持久化到 localStorage</p>
       </div>
     </div>
   )
