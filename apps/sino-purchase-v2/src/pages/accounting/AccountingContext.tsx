@@ -11,6 +11,7 @@ type AccountingAction =
   | { type: "SET_RECORDS"; records: CashRecord[] }
   | { type: "ADD_RECORDS"; records: CashRecord[] }
   | { type: "UPDATE_RECORD"; id: string; field: keyof CashRecord; value: string | number }
+  | { type: "DELETE_RECORDS"; ids: string[] }
   | { type: "SHOW_IMPORT_DIALOG"; importRecord: ImportRecord }
   | { type: "HIDE_IMPORT_DIALOG" }
   | { type: "SWITCH_TAB"; tab: "sheets" | "preview" }
@@ -28,6 +29,8 @@ function reducer(state: AccountingState, action: AccountingAction): AccountingSt
           r.id === action.id ? { ...r, [action.field]: action.value } : r,
         ),
       }
+    case "DELETE_RECORDS":
+      return { ...state, records: state.records.filter(r => !action.ids.includes(r.id)) }
     case "SHOW_IMPORT_DIALOG":
       return { ...state, importDialog: { open: true, importRecord: action.importRecord } }
     case "HIDE_IMPORT_DIALOG":
@@ -50,6 +53,7 @@ interface AccountingContextValue {
   setRecords: (records: CashRecord[]) => void
   addRecords: (records: CashRecord[]) => void
   updateRecord: (id: string, field: keyof CashRecord, value: string | number) => void
+  deleteRecords: (ids: string[]) => void
   showImportDialog: (importRecord: ImportRecord) => void
   hideImportDialog: () => void
   switchTab: (tab: "sheets" | "preview") => void
@@ -67,6 +71,10 @@ export function AccountingProvider({ children }: { children: ReactNode }) {
       dispatch({ type: "UPDATE_RECORD", id, field, value }),
     [],
   )
+  const deleteRecords = useCallback(
+    (ids: string[]) => dispatch({ type: "DELETE_RECORDS", ids }),
+    [],
+  )
   const showImportDialog = useCallback(
     (importRecord: ImportRecord) => dispatch({ type: "SHOW_IMPORT_DIALOG", importRecord }),
     [],
@@ -75,7 +83,7 @@ export function AccountingProvider({ children }: { children: ReactNode }) {
   const switchTab = useCallback((tab: "sheets" | "preview") => dispatch({ type: "SWITCH_TAB", tab }), [])
 
   return (
-    <AccountingContext.Provider value={{ state, setRecords, addRecords, updateRecord, showImportDialog, hideImportDialog, switchTab }}>
+    <AccountingContext.Provider value={{ state, setRecords, addRecords, updateRecord, deleteRecords, showImportDialog, hideImportDialog, switchTab }}>
       {children}
     </AccountingContext.Provider>
   )

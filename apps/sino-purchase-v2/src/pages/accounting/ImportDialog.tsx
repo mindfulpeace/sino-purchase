@@ -23,12 +23,12 @@ const FIELDS: { key: keyof CashRecord; label: string; width?: number }[] = [
 
 export default function ImportDialog({ open, records, onConfirm, onCancel }: ImportDialogProps) {
   const [edited, setEdited] = useState<CashRecord[]>([])
-  const [mode, setMode] = useState<ImportMode>("append")
+  const [mode, setMode] = useState<ImportMode>("replace")
 
   useEffect(() => {
     if (open) {
       setEdited(records.map(r => ({ ...r })))
-      setMode("append")
+      setMode("replace")
     }
   }, [open, records])
 
@@ -97,8 +97,8 @@ export default function ImportDialog({ open, records, onConfirm, onCancel }: Imp
           onChange={e => setMode(e.currentTarget.value as ImportMode)}
           style={{ margin: 0 }}
         >
-          <Radio label="追加" value="append" />
           <Radio label="替换" value="replace" />
+          <Radio label="追加" value="append" />
         </RadioGroup>
         <div className={Classes.DIALOG_FOOTER_ACTIONS}>
           <Button onClick={onCancel}>取消</Button>

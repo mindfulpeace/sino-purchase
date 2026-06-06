@@ -16,7 +16,7 @@ function AccountingContent() {
   const { propertiesVisible, setPropertiesVisible, setReimburseRecords } = useDocSettings()
   const { importFromClipboard } = useImportClipboard()
   const { triggerImport, inputRef, handleFileChange } = useImportExcel()
-  const [sheetsBatch, setSheetsBatch] = useState("")
+  const [sheetsBatch, setSheetsBatch] = useState<string[]>([])
 
   useEffect(() => {
     setReimburseRecords(state.records)
