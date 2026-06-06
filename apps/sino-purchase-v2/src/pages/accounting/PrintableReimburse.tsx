@@ -6,9 +6,11 @@ import type { CashRecord } from "./types"
 interface PrintableReimburseProps {
   records: CashRecord[]
   applicant: string
+  companyName?: string
+  companyNameEn?: string
 }
 
-export default function PrintableReimburse({ records, applicant }: PrintableReimburseProps) {
+export default function PrintableReimburse({ records, applicant, companyName, companyNameEn }: PrintableReimburseProps) {
   const { reimburseData } = useReimburseData(records)
 
   if (reimburseData.length === 0) {
@@ -26,7 +28,7 @@ export default function PrintableReimburse({ records, applicant }: PrintableReim
           <div style={{ color: "#999", marginBottom: 8, fontSize: 12 }}>
             {d.tax}{d.batch ? ` - ${d.batch}` : ""}
           </div>
-          <DocReimburse date={d.date} items={d.items} applicant={applicant} />
+          <DocReimburse date={d.date} items={d.items} applicant={applicant} companyName={companyName} companyNameEn={companyNameEn} />
         </PrintPaper>
       ))}
     </PrintView>

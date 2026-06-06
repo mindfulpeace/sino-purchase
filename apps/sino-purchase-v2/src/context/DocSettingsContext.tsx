@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
+import type { CashRecord } from "../pages/accounting/types"
 
 interface DocSettings {
   companyName: string
@@ -11,6 +12,11 @@ interface DocSettingsContextValue {
   setCompanyName: (name: string) => void
   setCompanyNameEn: (name: string) => void
   setApplicant: (name: string) => void
+  showPrint: boolean
+  toggleShowPrint: () => void
+  setShowPrint: (v: boolean) => void
+  reimburseRecords: CashRecord[]
+  setReimburseRecords: (records: CashRecord[]) => void
 }
 
 const DocSettingsContext = createContext<DocSettingsContextValue | null>(null)
@@ -21,13 +27,16 @@ export function DocSettingsProvider({ children }: { children: ReactNode }) {
     companyNameEn: "Sino Xinyuan Mining company Limited",
     applicant: "任金涛",
   })
+  const [showPrint, setShowPrint] = useState(false)
+  const [reimburseRecords, setReimburseRecords] = useState<CashRecord[]>([])
 
   const setCompanyName = useCallback((companyName: string) => setSettings((s) => ({ ...s, companyName })), [])
   const setCompanyNameEn = useCallback((companyNameEn: string) => setSettings((s) => ({ ...s, companyNameEn })), [])
   const setApplicant = useCallback((applicant: string) => setSettings((s) => ({ ...s, applicant })), [])
+  const toggleShowPrint = useCallback(() => setShowPrint((v) => !v), [])
 
   return (
-    <DocSettingsContext.Provider value={{ settings, setCompanyName, setCompanyNameEn, setApplicant }}>
+    <DocSettingsContext.Provider value={{ settings, setCompanyName, setCompanyNameEn, setApplicant, showPrint, toggleShowPrint, setShowPrint, reimburseRecords, setReimburseRecords }}>
       {children}
     </DocSettingsContext.Provider>
   )

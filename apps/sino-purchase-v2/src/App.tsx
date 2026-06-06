@@ -8,7 +8,7 @@ import { PlanProvider, usePlan } from "./pages/plan/PlanContext"
 import { TaskDetail } from "./pages/plan/components/TaskDetail"
 import type { PurchaseTask } from "./pages/plan/types"
 import { todayISO } from "./pages/plan/helpers"
-import { DocSettingsProvider } from "./context/DocSettingsContext"
+import { DocSettingsProvider, useDocSettings } from "./context/DocSettingsContext"
 import AccountingSettings from "./pages/accounting/AccountingSettings"
 
 const PlanManagement = lazy(() => import("./pages/PlanManagement"))
@@ -65,28 +65,7 @@ const sidePanels: Record<string, { id: string; label: string; render: (callbacks
   accounting: {
     id: "accounting",
     label: "记账报销",
-    render: ({ openTab }) => (
-      <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: 8 }}>
-        <div
-          style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13 }}
-          onClick={() => openTab("accounting")}
-          onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
-          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-        >
-          <Icon icon={IconNames.DOLLAR} size={16} />
-          <span>现金日记账</span>
-        </div>
-        <div
-          style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13 }}
-          onClick={() => openTab("accounting")}
-          onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
-          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-        >
-          <Icon icon={IconNames.PRINT} size={16} />
-          <span>费用报销单</span>
-        </div>
-      </div>
-    ),
+    render: ({ openTab }) => <AccountingSidePanel openTab={openTab} />,
   },
   payments: {
     id: "payments",
@@ -116,8 +95,37 @@ const sidePanels: Record<string, { id: string; label: string; render: (callbacks
   },
 }
 
+function AccountingSidePanel({ openTab }: { openTab: (id: string) => void }) {
+  const { toggleShowPrint } = useDocSettings()
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: 8 }}>
+      <div
+        style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13 }}
+        onClick={() => openTab("accounting")}
+        onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
+        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+      >
+        <Icon icon={IconNames.DOLLAR} size={16} />
+        <span>现金日记账</span>
+      </div>
+      <div
+        style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13 }}
+        onClick={() => {
+          openTab("accounting")
+          toggleShowPrint()
+        }}
+        onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
+        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+      >
+        <Icon icon={IconNames.PRINT} size={16} />
+        <span>费用报销单</span>
+      </div>
+    </div>
+  )
+}
+
 function PlanAwareApp() {
-  const [propertiesVisible, setPropertiesVisible] = useState(false)
+  const [propertiesVisible, setPropertiesVisible] = useState(true)
   const { editingTaskId, isAdding, batchEdit, selectedIds, allTasks, addTask, updateTask, deleteTask, setEditingTaskId, setIsAdding, setBatchEdit, setPendingBatchChanges } = usePlan()
 
   useEffect(() => {

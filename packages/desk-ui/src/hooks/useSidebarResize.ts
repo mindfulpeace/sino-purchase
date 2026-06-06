@@ -24,7 +24,7 @@ export function useSidebarResize(initialWidth = 200, minWidth = 120, maxWidth = 
   return { sidebarWidth, handleSidebarResizeStart: handleMouseDown }
 }
 
-export function useRightResize(initialWidth = 260, minWidth = 120, maxWidth = 500) {
+export function useRightResize(initialWidth = 450, minWidth = 200, maxWidth = 800) {
   const [width, setWidth] = useState(initialWidth)
   const [startX, setStartX] = useState(0)
   const [startWidth, setStartWidth] = useState(0)

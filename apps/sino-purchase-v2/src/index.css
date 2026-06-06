@@ -22,11 +22,10 @@ body {
 }
 
 @media print {
-  /* Hide all app chrome */
+  /* Hide all app chrome except .right (it holds the print preview) */
   .hdr,
   .nav,
   .menu,
-  .right,
   .panel,
   .status,
   .editor-tabs,
@@ -46,6 +45,23 @@ body {
   .bp6-toast-container,
   .bp6-portal {
     display: none !important;
+  }
+
+  .right {
+    border: none !important;
+    background: transparent !important;
+    overflow: visible !important;
+  }
+
+  .right-header,
+  .right-resize {
+    display: none !important;
+  }
+
+  .right-content {
+    overflow: visible !important;
+    padding: 0 !important;
+    background: transparent !important;
   }
 
   .print-preview-scaler {

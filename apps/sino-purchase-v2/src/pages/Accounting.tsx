@@ -1,16 +1,18 @@
-import { useState, useCallback } from "react"
+import { useEffect, useCallback } from "react"
 import { AccountingProvider, useAccounting } from "./accounting/AccountingContext"
 import { useDocSettings } from "../context/DocSettingsContext"
 import CashGrid from "./accounting/CashGrid"
 import ImportDialog from "./accounting/ImportDialog"
-import PrintableReimburse from "./accounting/PrintableReimburse"
 import Toolbar from "./accounting/Toolbar"
 import type { CashRecord } from "./accounting/types"
 
 function AccountingContent() {
   const { state, addRecords, hideImportDialog } = useAccounting()
-  const { settings } = useDocSettings()
-  const [showPrint, setShowPrint] = useState(true)
+  const { settings, showPrint, toggleShowPrint, setReimburseRecords } = useDocSettings()
+
+  useEffect(() => {
+    setReimburseRecords(state.records)
+  }, [state.records, setReimburseRecords])
 
   const handleConfirmImport = useCallback((records: CashRecord[]) => {
     if (records.length > 0) {
@@ -23,27 +25,12 @@ function AccountingContent() {
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
       <Toolbar
         records={state.records}
-        onPrintToggle={() => setShowPrint((v) => !v)}
+        onPrintToggle={toggleShowPrint}
         showPrint={showPrint}
       />
 
-      <div style={{ flex: 1, overflow: "auto", display: "flex" }}>
-        <div style={{ flex: 1, overflow: "auto" }}>
-          <CashGrid records={state.records} />
-        </div>
-
-        {showPrint && (
-          <div style={{ width: "50%", overflow: "auto", borderLeft: "1px solid var(--border)" }}>
-            <div className="print-preview-scaler">
-              <PrintableReimburse
-                records={state.records}
-                applicant={settings.applicant}
-                companyName={settings.companyName}
-                companyNameEn={settings.companyNameEn}
-              />
-            </div>
-          </div>
-        )}
+      <div style={{ flex: 1, overflow: "auto" }}>
+        <CashGrid records={state.records} />
       </div>
 
       <ImportDialog
