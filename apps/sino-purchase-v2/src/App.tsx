@@ -63,13 +63,23 @@ const sidePanels: Record<string, { id: string; label: string; render: (callbacks
   accounting: {
     id: "accounting",
     label: "记账报销",
-    render: () => (
+    render: ({ openTab }) => (
       <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: 8 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 4, fontSize: 13, color: "var(--text-dim)" }}>
+        <div
+          style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13 }}
+          onClick={() => openTab("accounting")}
+          onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+        >
           <Icon icon={IconNames.DOLLAR} size={16} />
           <span>现金日记账</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 4, fontSize: 13, color: "var(--text-dim)" }}>
+        <div
+          style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13 }}
+          onClick={() => openTab("accounting")}
+          onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+        >
           <Icon icon={IconNames.PRINT} size={16} />
           <span>费用报销单</span>
         </div>
