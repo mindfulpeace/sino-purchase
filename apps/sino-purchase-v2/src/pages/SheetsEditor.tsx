@@ -38,7 +38,7 @@ export default function SheetsEditor() {
         </Button>
         <Button
           small
-          icon={<Icon icon={IconNames.SHARE_OPEN} />}
+          icon={<Icon icon={IconNames.SHARE} />}
           onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit`, "_blank")}
         >
           浏览器打开

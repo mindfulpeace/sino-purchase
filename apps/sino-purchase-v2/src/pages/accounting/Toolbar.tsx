@@ -1,4 +1,4 @@
-import { useRef, useCallback } from "react"
+import { useCallback } from "react"
 import { Button, ButtonGroup, Tooltip } from "@blueprintjs/core"
 import { useImportClipboard } from "./useImportClipboard"
 import { useImportExcel } from "./useImportExcel"

@@ -129,7 +129,7 @@ export function FilterPopover({ type, label, active }: { type: "status" | "urgen
         return (
           <Button
             {...targetProps}
-            elementRef={ref}
+            ref={ref}
             small
             minimal
             className={active ? "plan-filter-btn on" : "plan-filter-btn"}

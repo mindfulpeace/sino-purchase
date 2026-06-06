@@ -7,23 +7,31 @@ interface PrintScalerProps {
 }
 
 export default function PrintScaler({ children }: PrintScalerProps) {
-  const ref = useRef<HTMLDivElement>(null)
+  const outerRef = useRef<HTMLDivElement>(null)
+  const innerRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
 
   useLayoutEffect(() => {
-    const el = ref.current
+    const el = outerRef.current
     if (!el) return
     const ro = new ResizeObserver(([entry]) => {
-      const w = entry.contentRect.width
-      setScale(Math.min(w / A4_BASE, 1))
+      setScale(Math.min(entry.contentRect.width / A4_BASE, 1))
     })
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
 
+  useLayoutEffect(() => {
+    const outer = outerRef.current
+    const inner = innerRef.current
+    if (!outer || !inner) return
+    outer.style.height = inner.getBoundingClientRect().height + "px"
+  }, [scale])
+
   return (
-    <div ref={ref} style={{ overflow: "hidden", width: "100%" }}>
+    <div ref={outerRef} style={{ overflow: "hidden", width: "100%" }}>
       <div
+        ref={innerRef}
         className="print-preview-scaler"
         style={{ transform: `scale(${scale})`, transformOrigin: "top left", width: A4_BASE }}
       >

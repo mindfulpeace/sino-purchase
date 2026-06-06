@@ -12,7 +12,7 @@ export const TAX_STATUS_OPTIONS: { value: TaxStatus; label: string }[] = [
 
 export type Urgency = 1 | 2 | 3 | 4 | 5
 
-export interface PurchaseTask {
+export interface PurchaseTask extends Record<string, unknown> {
   id: string
   name: string
   brand: string
@@ -34,7 +34,7 @@ export interface PurchaseTask {
   updatedAt: number
 }
 
-export const TASK_HEADERS: (keyof PurchaseTask)[] = [
+export const TASK_HEADERS: string[] = [
   "id", "name", "brand", "spec", "quantity", "unit", "unitPrice",
   "taxStatus", "currency", "exchangeRate", "supplierId", "bookerId",
   "status", "urgency", "createdAt", "plannedDate", "receivedDate",

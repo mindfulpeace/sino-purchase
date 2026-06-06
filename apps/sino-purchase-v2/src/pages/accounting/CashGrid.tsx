@@ -87,7 +87,7 @@ export default function CashGrid({ records }: CashGridProps) {
   const cellRenderer = useCallback(
     (rowIndex: number, colIndex: number) => {
       const row = sortedData[rowIndex]
-      if (!row) return null
+      if (!row) return <div />
       const col = COLUMNS[colIndex]
       const style = getCellStyle(row, colIndex)
 
