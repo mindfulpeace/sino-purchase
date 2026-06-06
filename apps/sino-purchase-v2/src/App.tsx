@@ -64,8 +64,15 @@ const sidePanels: Record<string, { id: string; label: string; render: (callbacks
     id: "accounting",
     label: "记账报销",
     render: () => (
-      <div style={{ padding: 16, color: "var(--text-dim)", fontSize: 13 }}>
-        导航目录（设计开发中）
+      <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 4, fontSize: 13, color: "var(--text-dim)" }}>
+          <Icon icon={IconNames.DOLLAR} size={16} />
+          <span>现金日记账</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 4, fontSize: 13, color: "var(--text-dim)" }}>
+          <Icon icon={IconNames.PRINT} size={16} />
+          <span>费用报销单</span>
+        </div>
       </div>
     ),
   },

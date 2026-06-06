@@ -1,0 +1,87 @@
+.print-view {
+  background-color: #f5f5f5;
+  padding: 2.5mm;
+  color: black;
+  width: 215mm;
+  min-height: 100%;
+  overflow: auto;
+}
+
+.print-view .print-paper {
+  width: 100% !important;
+  padding: 20mm 15mm 20mm 15mm !important;
+  background-color: white !important;
+  margin-bottom: 2.5mm;
+}
+
+.print-view .print-paper:last-child {
+  margin-bottom: 0;
+}
+
+@media print {
+  .print-view {
+    position: absolute;
+    left: 0;
+    top: 0;
+    zoom: 1 !important;
+  }
+
+  .print-view * {
+    box-sizing: border-box;
+  }
+
+  body *,
+  .print-view .no-print {
+    visibility: hidden;
+  }
+
+  .print-view,
+  .print-view * {
+    visibility: visible;
+  }
+
+  .print-view .print-paper {
+    page-break-before: always;
+    page-break-after: always;
+    break-before: page;
+    break-after: page;
+    margin-bottom: 0 !important;
+    padding-top: 15mm !important;
+    padding-bottom: 15mm !important;
+  }
+
+  .print-view .print-paper:first-of-type {
+    page-break-before: auto;
+    break-before: auto;
+  }
+
+  .print-view .print-paper:last-of-type {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  .print-view table {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .print-view h1,
+  .print-view h2,
+  .print-view h3,
+  .print-view h4,
+  .print-view h5,
+  .print-view h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  .print-view p {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  @page {
+    size: A4;
+    margin: 20mm 15mm 20mm 15mm;
+  }
+}

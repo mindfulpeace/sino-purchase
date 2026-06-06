@@ -35,6 +35,28 @@ sino-purchase-v2/
 │   │       ├── layout/        # 8 个布局组件 + AppLayout.css + blueprintOverrides.css
 │   │       ├── theme/         # ThemeContext + themes.css
 │   │       └── hooks/         # useSidebarResize, useTabs
+│   ├── utils/                 # @sino-purchase/utils (工具函数)
+│   │   ├── package.json       # 零依赖纯 TS, peer deps: 无
+│   │   └── src/
+│   │       ├── clone.ts       # deepClone
+│   │       ├── diff.ts        # calculateDiff, DiffResult
+│   │       ├── diffSql.ts     # 差异→SQL 生成
+│   │       ├── format.ts      # amountToWord (中文大写金额)
+│   │       └── index.ts       # barrel 导出
+│   ├── doc/                   # @sino-purchase/doc (文档组件)
+│   │   ├── package.json       # 依赖 @sino-purchase/utils
+│   │   └── src/
+│   │       ├── DocReimburse.tsx  # 费用报销单组件 (纯 CSS, 无 Emotion)
+│   │       ├── types.ts         # ReimbursementItem, DocReimburseProps
+│   │       ├── doc.css          # 报销单样式
+│   │       └── index.ts         # barrel + CSS auto-import
+│   ├── print/                 # @sino-purchase/print (打印组件)
+│   │   ├── package.json       # 零 runtime 依赖
+│   │   └── src/
+│   │       ├── PrintView.tsx   # A4 打印容器 (纯 CSS, 无 Emotion)
+│   │       ├── PrintPaper.tsx   # 单页包装
+│   │       ├── print.css        # print/media CSS
+│   │       └── index.ts         # barrel + CSS auto-import
 │   └── sheets-api/            # @sino-purchase/sheets-api (Google Sheets 数据层)
 │       ├── package.json       # peer deps: React
 │       ├── vite.config.ts     # lib 模式构建 (dts)
@@ -66,16 +88,34 @@ sino-purchase-v2/
 │   │       ├── context/       # CsvContext
 │   │       └── pages/         # CsvEditor, ComponentShowcase, IconShowcase, MonacoShowcase
 │   └── sino-purchase-v2/      # 主应用 (sino-purchase-v2-main)
-│       ├── package.json       # 依赖 @sino-purchase/desk-ui, @sino-purchase/sheets-api
+│       ├── package.json       # 依赖所有 @sino-purchase/* 包
 │       ├── vite.config.ts
 │       ├── tsconfig.json
 │       ├── index.html
 │       └── src/
-│           ├── App.tsx        # 4 个导航项 (计划管理/物料信息/记账报销/往来付款)
+│           ├── App.tsx        # 5 个导航项 (计划管理/物料信息/记账报销/往来付款/设置)
 │           ├── main.tsx
 │           ├── index.css
 │           ├── vite-env.d.ts
-│           └── pages/         # 4 个占位页面 (设计开发中)
+│           └── pages/
+│               ├── Accounting.tsx       # 记账报销 (现金日记账, 完整实现)
+│               ├── PlanManagement.tsx   # 计划管理 (完整实现)
+│               ├── MaterialInfo.tsx     # 占位
+│               ├── Payments.tsx         # 占位
+│               ├── SheetsEditor.tsx     # Google Sheets 数据编辑
+│               └── accounting/          # 记账报销子模块
+│                   ├── types.ts         # CashRecord, ImportRecord
+│                   ├── helpers.ts       # formatAmount, formatDataSummary
+│                   ├── dataParser.ts    # CSV/TSV 解析器
+│                   ├── sheetjs.ts       # Excel 导入/导出 (xlsx)
+│                   ├── AccountingContext.tsx  # useReducer 状态管理
+│                   ├── CashGrid.tsx      # Blueprint Table2 数据表格
+│                   ├── ImportDialog.tsx  # 导入预览对话框
+│                   ├── PrintableReimburse.tsx  # 报销单打印
+│                   ├── Toolbar.tsx       # 导入/导出/打印工具栏
+│                   ├── useReimburseData.ts  # 批次/税务分组聚合
+│                   ├── useImportExcel.ts    # Excel 导入 hook
+│                   └── useImportClipboard.ts # 剪贴板导入 hook
 ```
 
 ## 设计决策
@@ -121,11 +161,14 @@ sino-purchase-v2/
 - 菜单栏内容 (`menu-content div, span`) 全局设为 `white-space: nowrap; overflow: hidden; text-overflow: ellipsis;`
 - `@sino-purchase/desk-ui` 是 monorepo 中的库包 (`packages/desk-ui`)，布局组件 + 主题 + hooks 全部抽取至此。CSS 提取到 `dist/index.css`，使用者需 `import "@sino-purchase/desk-ui/style.css"`
 - Demo app (`apps/desk-ui-demo`) 通过 npm workspace 引用本地库：`"@sino-purchase/desk-ui": "*"`
-- 主应用 (`apps/sino-purchase-v2`) 引用 `@sino-purchase/desk-ui` + `@sino-purchase/sheets-api`
+- 主应用 (`apps/sino-purchase-v2`) 引用 `@sino-purchase/desk-ui` + `@sino-purchase/sheets-api` + `@sino-purchase/utils/doc/print`
 - 构建顺序: `packages/desk-ui` → `packages/sheets-api` → `apps/desk-ui-demo`
 - `npm run dev` 启动主应用 dev server
 - `npm run dev:desk` 启动 desk-ui demo 应用
 - `npm run build:sheets` 单独构建 sheets-api
+- `npm run build:utils` 单独构建 utils
+- `npm run build:doc` 单独构建 doc
+- `npm run build:print` 单独构建 print
 - `npm run test` 运行 vitest (25 tests: ThemeContext 6, useTabs 11, useSidebarResize 8)
 - `npm run typecheck` 运行 tsc -b 全项目类型检查
 - `.github/workflows/ci.yml`: lint → typecheck → test → build
@@ -134,3 +177,9 @@ sino-purchase-v2/
 - Sheets 离线队列: `sync-queue.ts` (localStorage) + `SyncProvider` → `processQueue()`
 - Sheets 认证: GSI OAuth 2.0 (https://accounts.google.com/gsi/client), token 存 localStorage, 5 分钟前静默刷新
 - `sheets-api` 无 runtime 依赖, 纯 fetch, peer deps 仅 React
+- `@sino-purchase/utils` 零依赖，提供 `amountToWord`(中文大写金额)/`deepClone`/`calculateDiff`/`diffSql`
+- `@sino-purchase/doc` 提供 `DocReimburse` 费用报销单组件，纯 CSS (无 Emotion)，需导入 `style.css`
+- `@sino-purchase/print` 提供 `PrintView`(A4 打印容器) + `PrintPaper`(单页包装)，纯 CSS (无 Emotion)，需导入 `style.css`
+- 记账报销页面 (`apps/sino-purchase-v2/src/pages/Accounting.tsx`) 使用 `AccountingProvider`(useReducer) 管理状态，数据存放在内存中（未接入 sheets-api），支持 Excel/剪贴板导入和报销单打印预览
+- `CashGrid` 使用 `@blueprintjs/table` 的 `Table2` + `Column`，按税务字段 HSL 着色，支持点击排序
+- 导入流程: Excel 或剪贴板 → 解析为 CashRecord[] → ImportDialog 预览 → 确认 → 加入状态

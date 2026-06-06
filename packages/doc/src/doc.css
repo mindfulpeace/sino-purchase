@@ -1,0 +1,37 @@
+.doc-reimburse {
+  font-family: "SimSun", serif, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.doc-reimburse * {
+  box-sizing: border-box;
+}
+
+.doc-reimburse h1,
+.doc-reimburse h2,
+.doc-reimburse h3 {
+  padding: 0;
+  margin: 0;
+  text-align: center;
+}
+
+.doc-reimburse table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.doc-reimburse td,
+.doc-reimburse th {
+  padding: 0.3em 0.5em;
+  border: #000 solid 1px;
+}
+
+.doc-reimburse table + table {
+  border-top: none !important;
+}
+
+.doc-reimburse table + table tr:first-of-type td,
+.doc-reimburse table + table tr:first-of-type th {
+  border-top: none !important;
+}

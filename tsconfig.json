@@ -2,6 +2,9 @@
   "files": [],
   "references": [
     { "path": "./packages/desk-ui/tsconfig.json" },
+    { "path": "./packages/utils/tsconfig.json" },
+    { "path": "./packages/doc/tsconfig.json" },
+    { "path": "./packages/print/tsconfig.json" },
     { "path": "./apps/desk-ui-demo/tsconfig.json" }
   ]
 }
