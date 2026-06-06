@@ -6,4 +6,9 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ["@sino-purchase/desk-ui", "@sino-purchase/sheets-api"],
   },
+  server: {
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+    },
+  },
 })

@@ -97,6 +97,18 @@ async function ensureSheet(sheetName: string, headers: string[]): Promise<void> 
   }
 }
 
+export async function findRow(sheetName: string, uuid: string): Promise<number | null> {
+  const { spreadsheetId } = getConfig()
+  const res = await fetchWithAuth<{ values?: string[][] }>(
+    `${BASE}/${spreadsheetId}/values/${sheetName}!A:A`
+  )
+  const rows = res.values || []
+  for (let i = 1; i < rows.length; i++) {
+    if (rows[i][0] === uuid) return i + 1
+  }
+  return null
+}
+
 export interface LoadTableResult<T> {
   data: T[]
   rowMap: Map<string, number>

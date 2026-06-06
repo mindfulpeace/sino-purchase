@@ -9,7 +9,7 @@ export {
 } from "./auth"
 
 export {
-  loadTable, insertRow, updateRow, deleteRow, processQueue,
+  loadTable, insertRow, updateRow, deleteRow, processQueue, findRow,
 } from "./db"
 
 export { enqueue, queueLen, loadQueue } from "./sync-queue"

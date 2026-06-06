@@ -82,6 +82,7 @@ interface PlanContextValue {
   selectedIds: Set<string>
   onToggleSelect: (id: string) => void
   clearSelection: () => void
+  selectAll: (ids: string[]) => void
 
   urgentAll: number
   urgentHigh: number
@@ -211,6 +212,10 @@ export function PlanProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const clearSelection = useCallback(() => setSelectedIds(new Set()), [])
+  const selectAll = useCallback((ids: string[]) => {
+    setBatchEdit(false)
+    setSelectedIds(new Set(ids))
+  }, [])
 
   const confirmBatchApply = useCallback(() => {
     const ids = [...selectedIds]
@@ -278,7 +283,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
         isAdding, setIsAdding,
         batchEdit, setBatchEdit,
 
-        selectedIds, onToggleSelect, clearSelection,
+        selectedIds, onToggleSelect, clearSelection, selectAll,
 
         ...stats,
 

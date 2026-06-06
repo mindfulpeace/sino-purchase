@@ -1,7 +1,8 @@
-import { createContext, useContext, useMemo, type ReactNode } from "react"
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react"
 import { configure } from "./config"
 import type { SheetsConfig } from "./types"
 import { SyncProvider } from "./useSync"
+import { initAuth } from "./auth"
 
 const ConfigContext = createContext<SheetsConfig | null>(null)
 
@@ -19,6 +20,10 @@ export interface SheetsProviderProps extends SheetsConfig {
 export function SheetsProvider({ clientId, spreadsheetId, scope, children }: SheetsProviderProps) {
   const config = useMemo(() => ({ clientId, spreadsheetId, scope }), [clientId, spreadsheetId, scope])
   configure(config)
+
+  useEffect(() => {
+    initAuth().catch(() => {})
+  }, [])
 
   return (
     <ConfigContext.Provider value={config}>

@@ -1,15 +1,14 @@
-import { useState, useCallback, useMemo } from "react"
-import { Button, InputGroup, Icon } from "@blueprintjs/core"
+import { useState, useCallback, useEffect } from "react"
+import { Button, InputGroup, Icon, Tag } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
+import { useAuth } from "@sino-purchase/sheets-api"
 import { usePlan } from "./plan/PlanContext"
 import { TaskList } from "./plan/components/TaskList"
-import { SortBar } from "./plan/components/SortBar"
 import { AddNewTaskBar } from "./plan/components/AddNewTaskBar"
-import { FilterModals } from "./plan/components/FilterModals"
+import { FilterPopover } from "./plan/components/FilterModals"
 import { BatchImportDialog } from "./plan/components/BatchImportDialog"
 import { BatchConfirmDialog } from "./plan/components/BatchConfirmDialog"
 import { SettingsDialog } from "./plan/components/SettingsDialog"
-import { STATUS_BADGE } from "./plan/types"
 import type { PurchaseTask } from "./plan/types"
 import "./plan/PlanManagement.css"
 
@@ -22,11 +21,12 @@ export default function PlanManagement() {
     supplierFilter, bookerFilter,
     groupBy,
     setEditingTaskId, setIsAdding, setBatchEdit,
-    selectedIds, onToggleSelect, clearSelection,
+    selectedIds, onToggleSelect, clearSelection, selectAll,
     pendingBatchChanges, setPendingBatchChanges,
     confirmBatchApply,
   } = usePlan()
 
+  const auth = useAuth()
   const [showSettings, setShowSettings] = useState(false)
   const [showBatch, setShowBatch] = useState(false)
 
@@ -46,26 +46,36 @@ export default function PlanManagement() {
     addTask(data)
   }, [addTask])
 
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const tag = (e.target as HTMLElement)?.tagName
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && tag !== "INPUT" && tag !== "TEXTAREA") {
+        const input = document.querySelector<HTMLInputElement>(".add-bar input")
+        input?.focus()
+        e.preventDefault()
+      }
+      if (e.key === "Escape") {
+        clearSelection()
+      }
+    }
+    document.addEventListener("keydown", onKey)
+    return () => document.removeEventListener("keydown", onKey)
+  }, [clearSelection])
+
   const handleBatchImport = useCallback((tasks: Partial<PurchaseTask>[]) => {
     for (const t of tasks) addTask(t)
   }, [addTask])
-
-  const statusLabel = useMemo(
-    () => statusFilter.length > 0 ? statusFilter.map(s => STATUS_BADGE[s]).join("") : "状态",
-    [statusFilter],
-  )
-  const urgencyLabel = useMemo(
-    () => urgencyFilter.length > 0 ? [...urgencyFilter].sort().join("") : "紧急",
-    [urgencyFilter],
-  )
-  const supplierLabel = useMemo(() => supplierFilter ? `@${supplierFilter}` : "商家", [supplierFilter])
-  const bookerLabel = useMemo(() => bookerFilter ? `#${bookerFilter}` : "预定", [bookerFilter])
 
   return (
     <div className="plan-root">
       {/* Header stats */}
       <div className="plan-hdr">
         <div style={{ marginLeft: "auto", display: "flex", gap: 4, alignItems: "center" }}>
+          {!auth.loggedIn ? (
+            <Button small minimal icon={<Icon icon={IconNames.LOG_IN} />} onClick={auth.login}>登录 Google</Button>
+          ) : (
+            <Tag minimal>已登录</Tag>
+          )}
           <Button small minimal icon={<Icon icon={IconNames.REFRESH} />} onClick={reload}>刷新</Button>
           <Button small minimal icon={<Icon icon={IconNames.COG} />} onClick={() => setShowSettings(true)}>设置</Button>
         </div>
@@ -73,38 +83,10 @@ export default function PlanManagement() {
 
       {/* Filter bar */}
       <div className="plan-filter">
-        <Button
-          small
-          minimal
-          className={statusFilter.length > 0 ? "plan-filter-btn on" : "plan-filter-btn"}
-          onClick={() => setShowFilter("status")}
-        >
-          {statusLabel}
-        </Button>
-        <Button
-          small
-          minimal
-          className={urgencyFilter.length > 0 ? "plan-filter-btn on" : "plan-filter-btn"}
-          onClick={() => setShowFilter("urgency")}
-        >
-          {urgencyLabel}
-        </Button>
-        <Button
-          small
-          minimal
-          className={supplierFilter ? "plan-filter-btn on" : "plan-filter-btn"}
-          onClick={() => setShowFilter("supplier")}
-        >
-          {supplierLabel}
-        </Button>
-        <Button
-          small
-          minimal
-          className={bookerFilter ? "plan-filter-btn on" : "plan-filter-btn"}
-          onClick={() => setShowFilter("booker")}
-        >
-          {bookerLabel}
-        </Button>
+        <FilterPopover type="status" label="状态" active={statusFilter.length > 0} />
+        <FilterPopover type="urgency" label="紧急" active={urgencyFilter.length > 0} />
+        <FilterPopover type="supplier" label="商家" active={!!supplierFilter} />
+        <FilterPopover type="booker" label="预定" active={!!bookerFilter} />
         <InputGroup
           className="plan-search"
           placeholder="搜索品名/品牌/规格/商家/预定人"
@@ -114,13 +96,8 @@ export default function PlanManagement() {
         />
       </div>
 
-      {/* Sort bar */}
-      <SortBar />
-
       {/* Scrollable task list */}
       <div className="plan-scroll">
-        <FilterModals />
-
         {loading ? (
           <div className="plan-loading">
             <div className="sk sk-hdr" />
@@ -140,38 +117,44 @@ export default function PlanManagement() {
             onRequestEdit={handleRequestEdit}
             selectedIds={selectedIds}
             onToggleSelect={onToggleSelect}
+            onSelectAll={() => {
+              if (selectedIds.size === tasks.length) clearSelection()
+              else selectAll(tasks.map(t => t.id))
+            }}
           />
         )}
       </div>
+
+      {/* Selection toolbar */}
+      {selectedIds.size > 0 && (
+        <div className="plan-selbar">
+          <span>{selectedIds.size} 项已选</span>
+          <span className="selbar-divider" />
+          <button onClick={() => {
+            const lines = allTasks.filter(t => selectedIds.has(t.id)).map(t => {
+              let s = t.name
+              if (t.brand) s += `(${t.brand})`
+              if (t.spec) s += `-${t.spec}`
+              s += ` x${t.quantity ?? 1}${t.unit || ""}`
+              return s
+            })
+            navigator.clipboard.writeText(lines.join("\n"))
+          }}>复制</button>
+          <button onClick={() => {
+            setPendingBatchChanges({})
+            setBatchEdit(true)
+            setEditingTaskId(null)
+            setIsAdding(false)
+          }}>批量编辑</button>
+          <button onClick={clearSelection} className="selbar-cancel">取消</button>
+        </div>
+      )}
 
       {/* Bottom: quick add + status */}
       <div style={{ flexShrink: 0 }}>
         <AddNewTaskBar onAdd={handleAddFromBar} onOpenAdd={handleOpenAdd} onBatch={() => setShowBatch(true)} />
         <div className="plan-status">
-          {selectedIds.size > 0 ? (
-            <>
-              <span>{selectedIds.size} 项已选</span>
-              <button onClick={() => {
-                const lines = allTasks.filter(t => selectedIds.has(t.id)).map(t => {
-                  let s = t.name
-                  if (t.brand) s += `(${t.brand})`
-                  if (t.spec) s += `-${t.spec}`
-                  s += ` x${t.quantity ?? 1}${t.unit || ""}`
-                  return s
-                })
-                navigator.clipboard.writeText(lines.join("\n"))
-              }}>复制</button>
-              <button onClick={() => {
-                setPendingBatchChanges({})
-                setBatchEdit(true)
-                setEditingTaskId(null)
-                setIsAdding(false)
-              }}>编辑</button>
-              <button onClick={clearSelection}>取消</button>
-            </>
-          ) : (
-            <span>{allTasks.length} 项</span>
-          )}
+          <span>{allTasks.length} 项</span>
         </div>
       </div>
 

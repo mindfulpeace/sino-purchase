@@ -1,8 +1,18 @@
 import { useState, useEffect } from "react"
 import { Dialog, Button, TextArea } from "@blueprintjs/core"
 import type { PurchaseTask, SupportedCurrency, TaskStatus, Urgency } from "../types"
-import { TaskBody } from "./TaskBody"
 import { todayISO } from "../helpers"
+
+function PreviewTask({ task }: { task: Partial<PurchaseTask> }) {
+  return (
+    <div style={{ fontSize: 12, padding: "2px 0", borderBottom: "1px solid var(--border)", display: "flex", gap: 4 }}>
+      <span style={{ fontWeight: 600 }}>{task.name}</span>
+      {task.brand && <span style={{ color: "var(--text-dim)" }}>({task.brand})</span>}
+      {task.spec && <span style={{ color: "var(--text-dim)" }}>-{task.spec}</span>}
+      <span> x{task.quantity ?? 1}{task.unit || ""}</span>
+    </div>
+  )
+}
 
 interface Props {
   isOpen: boolean
@@ -135,7 +145,7 @@ export function BatchImportDialog({ isOpen, onClose, onImport }: Props) {
               已解析 <strong>{parsed.length}</strong> 条任务
             </p>
             <div style={{ maxHeight: 150, overflowY: "auto", border: "1px solid var(--border)", padding: 4 }}>
-              {parsed.map((t, i) => <TaskBody key={i} task={t} />)}
+              {parsed.map((t, i) => <PreviewTask key={i} task={t} />)}
             </div>
           </>
         )}

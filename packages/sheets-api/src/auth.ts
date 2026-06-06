@@ -65,7 +65,7 @@ export async function initAuth(): Promise<void> {
   })
 }
 
-function requestAccessToken(options?: { prompt?: string }): Promise<TokenResponse> {
+export function requestAccessToken(options?: { prompt?: string }): Promise<TokenResponse> {
   return new Promise((resolve, reject) => {
     if (!tokenClient) return reject(new Error("Auth not initialized"))
     tokenClient.callback = (resp: TokenResponse) => {
@@ -79,14 +79,7 @@ function requestAccessToken(options?: { prompt?: string }): Promise<TokenRespons
 export async function requestToken(): Promise<string> {
   if (!accessToken || !expiresAt) return ""
   if (Date.now() < expiresAt - 300000) return accessToken
-  if (!tokenClient) return accessToken
-
-  try {
-    await requestAccessToken({ prompt: "none" })
-    return accessToken
-  } catch {
-    return accessToken
-  }
+  return accessToken
 }
 
 export function login(): Promise<string> {
