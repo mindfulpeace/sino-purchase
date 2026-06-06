@@ -7,7 +7,7 @@ export interface PrintViewProps extends HTMLAttributes<HTMLDivElement> {
 const PrintView = ({ zoom = 1, className, style, children, ...props }: PrintViewProps) => (
   <div
     className={`print-view ${className || ""}`}
-    style={{ zoom, ...style }}
+    style={{ transform: `scale(${zoom})`, transformOrigin: "top left", width: `${100 / zoom}%`, ...style }}
     {...props}
   >
     {children}
