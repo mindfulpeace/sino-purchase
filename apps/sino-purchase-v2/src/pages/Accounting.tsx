@@ -1,14 +1,17 @@
-import { useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { AccountingProvider, useAccounting } from "./accounting/AccountingContext"
 import { useDocSettings } from "../context/DocSettingsContext"
+import { SPREADSHEET_ID } from "../config/sheets"
 import CashGrid from "./accounting/CashGrid"
 import ImportDialog from "./accounting/ImportDialog"
 import Toolbar from "./accounting/Toolbar"
+import SheetsViewer from "../components/SheetsViewer"
 import type { CashRecord } from "./accounting/types"
 
 function AccountingContent() {
   const { state, addRecords, hideImportDialog } = useAccounting()
   const { setReimburseRecords } = useDocSettings()
+  const [showSheets, setShowSheets] = useState(false)
 
   useEffect(() => {
     setReimburseRecords(state.records)
@@ -23,10 +26,22 @@ function AccountingContent() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
-      <Toolbar records={state.records} />
+      <Toolbar
+        records={state.records}
+        showSheets={showSheets}
+        onSheetsToggle={() => setShowSheets((v) => !v)}
+      />
 
-      <div style={{ flex: 1, overflow: "auto" }}>
-        <CashGrid records={state.records} />
+      <div style={{ flex: 1, overflow: "auto", display: "flex" }}>
+        <div style={{ flex: 1, overflow: "auto", minWidth: 0 }}>
+          <CashGrid records={state.records} />
+        </div>
+
+        {showSheets && (
+          <div style={{ width: "50%", overflow: "auto", borderLeft: "1px solid var(--border)" }}>
+            <SheetsViewer spreadsheetId={SPREADSHEET_ID} />
+          </div>
+        )}
       </div>
 
       <ImportDialog

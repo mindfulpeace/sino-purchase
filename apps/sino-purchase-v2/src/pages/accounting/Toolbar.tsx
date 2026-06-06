@@ -5,16 +5,15 @@ import { useImportExcel } from "./useImportExcel"
 import { exportExcel } from "./sheetjs"
 import { formatDataSummary } from "./helpers"
 import { useDocSettings } from "../../context/DocSettingsContext"
-import { SPREADSHEET_ID } from "../../config/sheets"
 import type { CashRecord } from "./types"
-
-const MONTHS = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"]
 
 interface ToolbarProps {
   records: CashRecord[]
+  showSheets: boolean
+  onSheetsToggle: () => void
 }
 
-export default function Toolbar({ records }: ToolbarProps) {
+export default function Toolbar({ records, showSheets, onSheetsToggle }: ToolbarProps) {
   const { propertiesVisible, setPropertiesVisible } = useDocSettings()
   const { importFromClipboard } = useImportClipboard()
   const { triggerImport, inputRef, handleFileChange } = useImportExcel()
@@ -53,16 +52,11 @@ export default function Toolbar({ records }: ToolbarProps) {
     setPropertiesVisible((v) => !v)
   }, [setPropertiesVisible])
 
-  const handleOpenSource = useCallback(() => {
-    const month = MONTHS[new Date().getMonth()]
-    window.open(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit`, "_blank")
-  }, [])
-
   return (
     <div className="no-print" style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderBottom: "1px solid var(--border)" }}>
       <ButtonGroup minimal>
-        <Tooltip content={`打开 Google Sheets 数据源（${MONTHS[new Date().getMonth()]}）`}>
-          <Button icon="database" text="数据源" onClick={handleOpenSource} />
+        <Tooltip content={showSheets ? "关闭数据源" : "打开 Google Sheets 数据源"}>
+          <Button icon="database" text="数据源" intent={showSheets ? "primary" : "none"} onClick={onSheetsToggle} />
         </Tooltip>
         <Tooltip content="从 Excel 导入">
           <Button icon="import" text="Excel" onClick={triggerImport} />
