@@ -27,15 +27,15 @@ const trSign = (zh: string, en: string, name: string, y?: string, m?: string, d?
   </tr>
 )
 
-const DocReimburse = ({ date, items, applicant = "任金涛" }: DocReimburseProps) => {
+const DocReimburse = ({ date, items, applicant = "任金涛", companyName = "中矿新元矿业有限公司", companyNameEn = "Sino Xinyuan Mining company Limited" }: DocReimburseProps) => {
   const total = items?.reduce((sum, item) => sum + (Number(item.amount) || 0), 0) || 0
   const [y, m, d] = date?.split("-") || []
 
   return (
     <div className="doc-reimburse">
       <h1 style={{ fontSize: 20 }}>
-        中矿新元矿业有限公司<br />
-        Sino Xinyuan Mining company Limited
+        {companyName}<br />
+        {companyNameEn}
       </h1>
       <h2 style={{ fontSize: 16 }}>费用报销单 Reimbursement Form</h2>
 
@@ -58,7 +58,7 @@ const DocReimburse = ({ date, items, applicant = "任金涛" }: DocReimburseProp
               Payee Account
             </td>
             <td>账户名称 Name</td>
-            <td colSpan={3}>任金涛</td>
+            <td colSpan={3}>{applicant}</td>
           </tr>
           <tr>
             <td>开户银行 Bank</td>

@@ -3,14 +3,12 @@ import type { CashRecord, ImportRecord, ImportDialogState } from "./types"
 
 interface AccountingState {
   records: CashRecord[]
-  applicant: string
   importDialog: ImportDialogState
 }
 
 type AccountingAction =
   | { type: "SET_RECORDS"; records: CashRecord[] }
   | { type: "ADD_RECORDS"; records: CashRecord[] }
-  | { type: "SET_APPLICANT"; applicant: string }
   | { type: "SHOW_IMPORT_DIALOG"; importRecord: ImportRecord }
   | { type: "HIDE_IMPORT_DIALOG" }
 
@@ -20,8 +18,6 @@ function reducer(state: AccountingState, action: AccountingAction): AccountingSt
       return { ...state, records: action.records }
     case "ADD_RECORDS":
       return { ...state, records: [...action.records, ...state.records] }
-    case "SET_APPLICANT":
-      return { ...state, applicant: action.applicant }
     case "SHOW_IMPORT_DIALOG":
       return { ...state, importDialog: { open: true, importRecord: action.importRecord } }
     case "HIDE_IMPORT_DIALOG":
@@ -33,7 +29,6 @@ function reducer(state: AccountingState, action: AccountingAction): AccountingSt
 
 const initialState: AccountingState = {
   records: [],
-  applicant: "",
   importDialog: { open: false, importRecord: null },
 }
 
@@ -41,7 +36,6 @@ interface AccountingContextValue {
   state: AccountingState
   setRecords: (records: CashRecord[]) => void
   addRecords: (records: CashRecord[]) => void
-  setApplicant: (applicant: string) => void
   showImportDialog: (importRecord: ImportRecord) => void
   hideImportDialog: () => void
 }
@@ -53,7 +47,6 @@ export function AccountingProvider({ children }: { children: ReactNode }) {
 
   const setRecords = useCallback((records: CashRecord[]) => dispatch({ type: "SET_RECORDS", records }), [])
   const addRecords = useCallback((records: CashRecord[]) => dispatch({ type: "ADD_RECORDS", records }), [])
-  const setApplicant = useCallback((applicant: string) => dispatch({ type: "SET_APPLICANT", applicant }), [])
   const showImportDialog = useCallback(
     (importRecord: ImportRecord) => dispatch({ type: "SHOW_IMPORT_DIALOG", importRecord }),
     [],
@@ -61,7 +54,7 @@ export function AccountingProvider({ children }: { children: ReactNode }) {
   const hideImportDialog = useCallback(() => dispatch({ type: "HIDE_IMPORT_DIALOG" }), [])
 
   return (
-    <AccountingContext.Provider value={{ state, setRecords, addRecords, setApplicant, showImportDialog, hideImportDialog }}>
+    <AccountingContext.Provider value={{ state, setRecords, addRecords, showImportDialog, hideImportDialog }}>
       {children}
     </AccountingContext.Provider>
   )

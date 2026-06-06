@@ -8,6 +8,8 @@ import { PlanProvider, usePlan } from "./pages/plan/PlanContext"
 import { TaskDetail } from "./pages/plan/components/TaskDetail"
 import type { PurchaseTask } from "./pages/plan/types"
 import { todayISO } from "./pages/plan/helpers"
+import { DocSettingsProvider } from "./context/DocSettingsContext"
+import AccountingSettings from "./pages/accounting/AccountingSettings"
 
 const PlanManagement = lazy(() => import("./pages/PlanManagement"))
 const MaterialInfo = lazy(() => import("./pages/MaterialInfo"))
@@ -119,7 +121,6 @@ function PlanAwareApp() {
   const { editingTaskId, isAdding, batchEdit, selectedIds, allTasks, addTask, updateTask, deleteTask, setEditingTaskId, setIsAdding, setBatchEdit, setPendingBatchChanges } = usePlan()
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (editingTaskId || isAdding) setPropertiesVisible(true)
   }, [editingTaskId, isAdding])
 
@@ -131,13 +132,21 @@ function PlanAwareApp() {
   }, [setEditingTaskId, setIsAdding, setBatchEdit])
 
   const propertiesPanel = useCallback((activeId: string | null) => {
+    if (activeId === "accounting") {
+      return {
+        id: "accounting-settings",
+        label: "文档设置",
+        render: () => <AccountingSettings />,
+      }
+    }
+
+    if (activeId !== "plan") return undefined
+
     const defaultInitial: Partial<PurchaseTask> = {
       name: "", quantity: 1, unit: "个", urgency: 2, status: 1,
       currency: "ZMW", exchangeRate: 1, taxStatus: "可抵扣",
       plannedDate: todayISO(),
     }
-
-    if (activeId !== "plan") return undefined
 
     if (editingTaskId) {
       const task = allTasks.find(t => t.id === editingTaskId)
@@ -209,7 +218,9 @@ function App() {
     <SheetsProvider clientId={CLIENT_ID} spreadsheetId={SPREADSHEET_ID}>
       <ThemeProvider>
         <PlanProvider>
-          <PlanAwareApp />
+          <DocSettingsProvider>
+            <PlanAwareApp />
+          </DocSettingsProvider>
         </PlanProvider>
       </ThemeProvider>
     </SheetsProvider>

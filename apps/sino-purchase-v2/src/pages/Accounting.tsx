@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react"
 import { AccountingProvider, useAccounting } from "./accounting/AccountingContext"
+import { useDocSettings } from "../context/DocSettingsContext"
 import CashGrid from "./accounting/CashGrid"
 import ImportDialog from "./accounting/ImportDialog"
 import PrintableReimburse from "./accounting/PrintableReimburse"
@@ -8,7 +9,8 @@ import type { CashRecord } from "./accounting/types"
 
 function AccountingContent() {
   const { state, addRecords, hideImportDialog } = useAccounting()
-  const [showPrint, setShowPrint] = useState(false)
+  const { settings } = useDocSettings()
+  const [showPrint, setShowPrint] = useState(true)
 
   const handleConfirmImport = useCallback((records: CashRecord[]) => {
     if (records.length > 0) {
@@ -33,7 +35,12 @@ function AccountingContent() {
         {showPrint && (
           <div style={{ width: "50%", overflow: "auto", borderLeft: "1px solid var(--border)" }}>
             <div className="print-preview-scaler">
-              <PrintableReimburse records={state.records} applicant={state.applicant} />
+              <PrintableReimburse
+                records={state.records}
+                applicant={settings.applicant}
+                companyName={settings.companyName}
+                companyNameEn={settings.companyNameEn}
+              />
             </div>
           </div>
         )}
