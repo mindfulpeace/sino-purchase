@@ -32,7 +32,9 @@ function AccountingContent() {
 
         {showPrint && (
           <div style={{ width: "50%", overflow: "auto", borderLeft: "1px solid var(--border)" }}>
-            <PrintableReimburse records={state.records} applicant={state.applicant} />
+            <div className="print-preview-scaler">
+              <PrintableReimburse records={state.records} applicant={state.applicant} />
+            </div>
           </div>
         )}
       </div>

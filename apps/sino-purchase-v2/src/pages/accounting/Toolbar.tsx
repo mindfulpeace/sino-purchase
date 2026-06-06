@@ -47,7 +47,7 @@ export default function Toolbar({ records, onPrintToggle, showPrint }: ToolbarPr
   const summary = formatDataSummary(records)
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderBottom: "1px solid var(--border)" }}>
+    <div className="no-print" style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderBottom: "1px solid var(--border)" }}>
       <ButtonGroup minimal>
         <Tooltip content="从 Excel 导入">
           <Button icon="import" text="Excel" onClick={triggerImport} />

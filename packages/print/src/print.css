@@ -7,10 +7,11 @@
 }
 
 .print-view .print-paper {
-  width: 100% !important;
-  padding: 20mm 15mm 20mm 15mm !important;
-  background-color: white !important;
+  width: 100%;
+  padding: 0.5em 15mm 20mm 15mm;
+  background-color: white;
   margin-bottom: 2.5mm;
+  font-size: 13px;
 }
 
 .print-view .print-paper:last-child {
@@ -19,27 +20,19 @@
 
 @media print {
   .print-view {
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
-    width: 100% !important;
+    width: 100vw;
     padding: 0;
     background: none;
-    transform: none !important;
+    overflow: visible;
+    min-height: 100vh;
+    z-index: 1000000;
   }
 
   .print-view * {
     box-sizing: border-box;
-  }
-
-  body *,
-  .print-view .no-print {
-    visibility: hidden;
-  }
-
-  .print-view,
-  .print-view * {
-    visibility: visible;
   }
 
   .print-view .print-paper {
@@ -47,8 +40,8 @@
     page-break-after: always;
     break-before: page;
     break-after: page;
-    margin-bottom: 0 !important;
-    padding: 10mm 15mm !important;
+    margin-bottom: 0;
+    padding: 0.5em 15mm 20mm 15mm;
   }
 
   .print-view .print-paper:first-of-type {
@@ -83,6 +76,6 @@
 
   @page {
     size: A4;
-    margin: 10mm 15mm;
+    margin: 20mm 15mm 20mm 15mm;
   }
 }

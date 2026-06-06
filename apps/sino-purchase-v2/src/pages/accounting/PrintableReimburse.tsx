@@ -20,7 +20,7 @@ export default function PrintableReimburse({ records, applicant }: PrintableReim
   }
 
   return (
-    <PrintView zoom={0.5}>
+    <PrintView>
       {reimburseData.map((d, index) => (
         <PrintPaper key={index}>
           <div style={{ color: "#999", marginBottom: 8, fontSize: 12 }}>

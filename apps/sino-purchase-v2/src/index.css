@@ -14,3 +14,43 @@ body {
 #root {
   height: 100vh;
 }
+
+.print-preview-scaler {
+  transform: scale(0.5);
+  transform-origin: top left;
+  width: 200%;
+}
+
+@media print {
+  /* Hide all app chrome */
+  .hdr,
+  .nav,
+  .menu,
+  .right,
+  .panel,
+  .status,
+  .editor-tabs,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Hide the CashGrid */
+  .bp6-table2-container {
+    display: none !important;
+  }
+
+  /* Hide all BP6 popovers, dialogs, toasts, overlays */
+  .bp6-overlay,
+  .bp6-dialog,
+  .bp6-popover,
+  .bp6-toast-container,
+  .bp6-portal {
+    display: none !important;
+  }
+
+  .print-preview-scaler {
+    transform: none !important;
+    width: auto !important;
+    overflow: visible !important;
+  }
+}
