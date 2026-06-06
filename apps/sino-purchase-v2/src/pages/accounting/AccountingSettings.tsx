@@ -2,7 +2,7 @@ import { useCallback } from "react"
 import { Button, InputGroup, HTMLSelect } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { useDocSettings } from "../../context/DocSettingsContext"
-import PrintScaler from "../../components/PrintScaler"
+import PrintScaler from "../../shared/components/PrintScaler"
 import PrintableReimburse from "./PrintableReimburse"
 
 interface CompanyPreset {

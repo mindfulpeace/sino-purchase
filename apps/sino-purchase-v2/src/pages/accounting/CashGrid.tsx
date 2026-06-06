@@ -5,7 +5,7 @@ import { IconNames } from "@blueprintjs/icons"
 import type { CashRecord } from "./types"
 import { formatAmount } from "./helpers"
 import { useAccounting } from "./AccountingContext"
-import EmptyPlaceholder from "../../components/EmptyPlaceholder"
+import EmptyPlaceholder from "../../shared/components/EmptyPlaceholder"
 
 type SortKey = keyof CashRecord
 

@@ -7,7 +7,7 @@ import { useAuth, listSheets, loadTable } from "@sino-purchase/sheets-api"
 import { SPREADSHEET_ID } from "../../config/sheets"
 import { useAccounting } from "./AccountingContext"
 import type { CashRecord } from "./types"
-import EmptyPlaceholder from "../../components/EmptyPlaceholder"
+import EmptyPlaceholder from "../../shared/components/EmptyPlaceholder"
 
 const BATCH_KEYS = new Set(["批次", "batch", "Batch"])
 const HIDDEN_COLS = new Set(["id", "ID", "编号"])
