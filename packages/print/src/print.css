@@ -31,18 +31,11 @@
   }
 
   .print-view .print-paper {
-    page-break-before: always;
     page-break-after: always;
-    break-before: page;
     break-after: page;
     margin-bottom: 0;
     padding: 0.5em 15mm 20mm 15mm;
     font-size: 14px;
-  }
-
-  .print-view .print-paper:first-of-type {
-    page-break-before: auto;
-    break-before: auto;
   }
 
   .print-view .print-paper:last-of-type {
