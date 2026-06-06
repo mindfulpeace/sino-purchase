@@ -81,7 +81,15 @@ export default function Toolbar({ records, showSheets, onSheetsToggle }: Toolbar
         />
       </Tooltip>
 
-      <input ref={inputRef} type="file" accept=".xlsx,.xls" onChange={handleExcel} style={{ display: "none" }} />
+      <input 
+        ref={inputRef} 
+        type="file" 
+        accept=".xlsx,.xls" 
+        onChange={handleExcel} 
+        style={{ display: "none" }}
+        title="导入Excel文件"
+        aria-label="选择Excel文件进行导入"
+      />
     </div>
   )
 }

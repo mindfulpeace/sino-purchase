@@ -24,7 +24,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -b",
-    "preview": "npm run preview -w apps/sino-purchase-v2"
+    "preview": "npm run preview -w apps/sino-purchase-v2",
+    "deploy": "chmod +x ./scripts/deploy.sh && ./scripts/deploy.sh"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -120,7 +120,7 @@ function AccountingContent() {
           </Tooltip>
         </div>
 
-        <input ref={inputRef} type="file" accept=".xlsx,.xls" onChange={handleExcel} style={{ display: "none" }} />
+        <input ref={inputRef} type="file" accept=".xlsx,.xls" onChange={handleExcel} style={{ display: "none" }} title="导入Excel文件" aria-label="导入Excel文件" />
       </div>
 
       <div style={{ flex: 1, overflow: "auto" }}>
