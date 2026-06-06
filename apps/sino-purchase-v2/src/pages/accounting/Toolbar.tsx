@@ -4,15 +4,15 @@ import { useImportClipboard } from "./useImportClipboard"
 import { useImportExcel } from "./useImportExcel"
 import { exportExcel } from "./sheetjs"
 import { formatDataSummary } from "./helpers"
+import { useDocSettings } from "../../context/DocSettingsContext"
 import type { CashRecord } from "./types"
 
 interface ToolbarProps {
   records: CashRecord[]
-  onPrintToggle: () => void
-  showPrint: boolean
 }
 
-export default function Toolbar({ records, onPrintToggle, showPrint }: ToolbarProps) {
+export default function Toolbar({ records }: ToolbarProps) {
+  const { propertiesVisible, setPropertiesVisible } = useDocSettings()
   const { importFromClipboard } = useImportClipboard()
   const { triggerImport, inputRef, handleFileChange } = useImportExcel()
   const handleClipboard = useCallback(async () => {
@@ -46,6 +46,10 @@ export default function Toolbar({ records, onPrintToggle, showPrint }: ToolbarPr
 
   const summary = formatDataSummary(records)
 
+  const handlePrintSettings = useCallback(() => {
+    setPropertiesVisible((v) => !v)
+  }, [setPropertiesVisible])
+
   return (
     <div className="no-print" style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderBottom: "1px solid var(--border)" }}>
       <ButtonGroup minimal>
@@ -64,12 +68,12 @@ export default function Toolbar({ records, onPrintToggle, showPrint }: ToolbarPr
 
       <span style={{ fontSize: 12, color: "var(--text-dim)", marginRight: 8 }}>{summary}</span>
 
-      <Tooltip content={showPrint ? "隐藏打印预览" : "显示打印预览"}>
+      <Tooltip content={propertiesVisible ? "关闭打印设置" : "打开打印设置"}>
         <Button
           icon="print"
-          text="报销单"
-          intent={showPrint ? "primary" : "none"}
-          onClick={onPrintToggle}
+          text="打印设置"
+          intent={propertiesVisible ? "primary" : "none"}
+          onClick={handlePrintSettings}
         />
       </Tooltip>
 

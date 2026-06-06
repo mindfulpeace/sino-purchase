@@ -115,7 +115,7 @@ export default function AppLayout({ title, activities, sidePanels, tabs, propert
             onTabClose={closeTab}
           />
           {showProperties && currentProperties && (
-            <PropertiesBar panel={currentProperties} onClose={handlePropertiesClose} />
+            <PropertiesBar key={currentProperties.id} panel={currentProperties} onClose={handlePropertiesClose} />
           )}
         </div>
         <Panel show={showPanel} height={200} onClose={() => setShowPanel(false)} />

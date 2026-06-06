@@ -65,7 +65,19 @@ const sidePanels: Record<string, { id: string; label: string; render: (callbacks
   accounting: {
     id: "accounting",
     label: "记账报销",
-    render: ({ openTab }) => <AccountingSidePanel openTab={openTab} />,
+    render: ({ openTab }) => (
+      <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: 8 }}>
+        <div
+          style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13 }}
+          onClick={() => openTab("accounting")}
+          onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+        >
+          <Icon icon={IconNames.DOLLAR} size={16} />
+          <span>现金日记账</span>
+        </div>
+      </div>
+    ),
   },
   payments: {
     id: "payments",
@@ -95,55 +107,26 @@ const sidePanels: Record<string, { id: string; label: string; render: (callbacks
   },
 }
 
-function AccountingSidePanel({ openTab }: { openTab: (id: string) => void }) {
-  const { toggleShowPrint } = useDocSettings()
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: 8 }}>
-      <div
-        style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13 }}
-        onClick={() => openTab("accounting")}
-        onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
-        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-      >
-        <Icon icon={IconNames.DOLLAR} size={16} />
-        <span>现金日记账</span>
-      </div>
-      <div
-        style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", cursor: "pointer", borderRadius: 4, fontSize: 13 }}
-        onClick={() => {
-          openTab("accounting")
-          toggleShowPrint()
-        }}
-        onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
-        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-      >
-        <Icon icon={IconNames.PRINT} size={16} />
-        <span>费用报销单</span>
-      </div>
-    </div>
-  )
-}
-
 function PlanAwareApp() {
-  const [propertiesVisible, setPropertiesVisible] = useState(true)
+  const { propertiesVisible, setPropertiesVisible } = useDocSettings()
   const { editingTaskId, isAdding, batchEdit, selectedIds, allTasks, addTask, updateTask, deleteTask, setEditingTaskId, setIsAdding, setBatchEdit, setPendingBatchChanges } = usePlan()
 
   useEffect(() => {
     if (editingTaskId || isAdding) setPropertiesVisible(true)
-  }, [editingTaskId, isAdding])
+  }, [editingTaskId, isAdding, setPropertiesVisible])
 
   const handlePropertiesClose = useCallback(() => {
     setPropertiesVisible(false)
     setEditingTaskId(null)
     setIsAdding(false)
     setBatchEdit(false)
-  }, [setEditingTaskId, setIsAdding, setBatchEdit])
+  }, [setPropertiesVisible, setEditingTaskId, setIsAdding, setBatchEdit])
 
   const propertiesPanel = useCallback((activeId: string | null) => {
     if (activeId === "accounting") {
       return {
         id: "accounting-settings",
-        label: "文档设置",
+        label: "打印设置",
         render: () => <AccountingSettings />,
       }
     }

@@ -8,7 +8,7 @@ import type { CashRecord } from "./accounting/types"
 
 function AccountingContent() {
   const { state, addRecords, hideImportDialog } = useAccounting()
-  const { settings, showPrint, toggleShowPrint, setReimburseRecords } = useDocSettings()
+  const { setReimburseRecords } = useDocSettings()
 
   useEffect(() => {
     setReimburseRecords(state.records)
@@ -23,11 +23,7 @@ function AccountingContent() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
-      <Toolbar
-        records={state.records}
-        onPrintToggle={toggleShowPrint}
-        showPrint={showPrint}
-      />
+      <Toolbar records={state.records} />
 
       <div style={{ flex: 1, overflow: "auto" }}>
         <CashGrid records={state.records} />

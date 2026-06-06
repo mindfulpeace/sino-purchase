@@ -1,18 +1,19 @@
 import { useMemo, useState, useCallback } from "react"
-import { Table2, Column } from "@blueprintjs/table"
+import { Table2, Column, EditableCell } from "@blueprintjs/table"
 import type { CashRecord } from "./types"
 import { formatAmount } from "./helpers"
+import { useAccounting } from "./AccountingContext"
 
 type SortKey = keyof CashRecord
 
 const COLUMNS = [
-  { label: "ID", key: "id" as SortKey },
-  { label: "日期", key: "date" as SortKey },
-  { label: "税务", key: "tax" as SortKey },
-  { label: "描述", key: "description" as SortKey },
-  { label: "金额", key: "amount" as SortKey },
-  { label: "类型", key: "type" as SortKey },
-  { label: "批次", key: "batch" as SortKey },
+  { label: "ID", key: "id" as SortKey, editable: false },
+  { label: "日期", key: "date" as SortKey, editable: true },
+  { label: "税务", key: "tax" as SortKey, editable: true },
+  { label: "描述", key: "description" as SortKey, editable: true },
+  { label: "金额", key: "amount" as SortKey, editable: true },
+  { label: "类型", key: "type" as SortKey, editable: true },
+  { label: "批次", key: "batch" as SortKey, editable: true },
 ]
 
 interface CashGridProps {
@@ -20,6 +21,7 @@ interface CashGridProps {
 }
 
 export default function CashGrid({ records }: CashGridProps) {
+  const { updateRecord } = useAccounting()
   const [sortKey, setSortKey] = useState<SortKey | null>(null)
   const [sortDesc, setSortDesc] = useState(false)
 
@@ -56,33 +58,63 @@ export default function CashGrid({ records }: CashGridProps) {
     })
   }, [])
 
+  const getCellStyle = useCallback(
+    (row: CashRecord, colIndex: number): React.CSSProperties => {
+      const isEmptyBatch = !row.batch
+      const bgColor = taxColors.get(row.tax)
+      return {
+        background: bgColor,
+        color: isEmptyBatch ? "#999" : undefined,
+        textAlign: colIndex === 4 ? "right" : undefined,
+      }
+    },
+    [taxColors],
+  )
+
+  const handleCellConfirm = useCallback(
+    (value: string, rowIndex: number | undefined, colIndex: number | undefined) => {
+      if (rowIndex === undefined || colIndex === undefined) return
+      const row = sortedData[rowIndex]
+      if (!row) return
+      const colKey = COLUMNS[colIndex]?.key
+      if (!colKey || !COLUMNS[colIndex]?.editable) return
+      const parsedValue = colKey === "amount" ? (Number(value) || 0) : value
+      updateRecord(row.id, colKey, parsedValue)
+    },
+    [sortedData, updateRecord],
+  )
+
   const cellRenderer = useCallback(
     (rowIndex: number, colIndex: number) => {
       const row = sortedData[rowIndex]
       if (!row) return null
+      const col = COLUMNS[colIndex]
+      const style = getCellStyle(row, colIndex)
 
-      const isEmptyBatch = !row.batch
-      const bgColor = taxColors.get(row.tax)
-      const style: React.CSSProperties = {
-        background: bgColor,
-        color: isEmptyBatch ? "#999" : undefined,
-        textAlign: colIndex === 4 ? "right" : undefined,
-        padding: "0 8px",
+      let displayValue: string
+      if (col.key === "id") {
+        displayValue = row.id.slice(0, 8)
+      } else if (col.key === "amount") {
+        displayValue = formatAmount(row.amount)
+      } else {
+        displayValue = String(row[col.key] ?? "")
       }
 
-      const values = [
-        row.id.slice(0, 8),
-        row.date,
-        row.tax,
-        row.description,
-        formatAmount(row.amount),
-        row.type,
-        row.batch,
-      ]
+      if (!col.editable) {
+        return <div style={{ ...style, padding: "0 8px", height: "100%", display: "flex", alignItems: "center" }}>{displayValue}</div>
+      }
 
-      return <div style={style}>{values[colIndex]}</div>
+      return (
+        <EditableCell
+          value={displayValue}
+          rowIndex={rowIndex}
+          columnIndex={colIndex}
+          onConfirm={handleCellConfirm}
+          style={style}
+        />
+      )
     },
-    [sortedData, taxColors],
+    [sortedData, getCellStyle, handleCellConfirm],
   )
 
   const columnHeaderRenderer = useCallback(

@@ -12,9 +12,8 @@ interface DocSettingsContextValue {
   setCompanyName: (name: string) => void
   setCompanyNameEn: (name: string) => void
   setApplicant: (name: string) => void
-  showPrint: boolean
-  toggleShowPrint: () => void
-  setShowPrint: (v: boolean) => void
+  propertiesVisible: boolean
+  setPropertiesVisible: (v: boolean | ((prev: boolean) => boolean)) => void
   reimburseRecords: CashRecord[]
   setReimburseRecords: (records: CashRecord[]) => void
 }
@@ -27,16 +26,15 @@ export function DocSettingsProvider({ children }: { children: ReactNode }) {
     companyNameEn: "Sino Xinyuan Mining company Limited",
     applicant: "任金涛",
   })
-  const [showPrint, setShowPrint] = useState(false)
+  const [propertiesVisible, setPropertiesVisible] = useState(true)
   const [reimburseRecords, setReimburseRecords] = useState<CashRecord[]>([])
 
   const setCompanyName = useCallback((companyName: string) => setSettings((s) => ({ ...s, companyName })), [])
   const setCompanyNameEn = useCallback((companyNameEn: string) => setSettings((s) => ({ ...s, companyNameEn })), [])
   const setApplicant = useCallback((applicant: string) => setSettings((s) => ({ ...s, applicant })), [])
-  const toggleShowPrint = useCallback(() => setShowPrint((v) => !v), [])
 
   return (
-    <DocSettingsContext.Provider value={{ settings, setCompanyName, setCompanyNameEn, setApplicant, showPrint, toggleShowPrint, setShowPrint, reimburseRecords, setReimburseRecords }}>
+    <DocSettingsContext.Provider value={{ settings, setCompanyName, setCompanyNameEn, setApplicant, propertiesVisible, setPropertiesVisible, reimburseRecords, setReimburseRecords }}>
       {children}
     </DocSettingsContext.Provider>
   )

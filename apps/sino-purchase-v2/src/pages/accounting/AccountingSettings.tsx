@@ -4,7 +4,11 @@ import { useDocSettings } from "../../context/DocSettingsContext"
 import PrintableReimburse from "./PrintableReimburse"
 
 export default function AccountingSettings() {
-  const { settings, setCompanyName, setCompanyNameEn, setApplicant, showPrint, toggleShowPrint, reimburseRecords } = useDocSettings()
+  const { settings, setCompanyName, setCompanyNameEn, setApplicant, reimburseRecords } = useDocSettings()
+
+  const handlePrint = () => {
+    window.print()
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8, height: "100%", overflow: "hidden", padding: 12 }}>
@@ -24,18 +28,9 @@ export default function AccountingSettings() {
           value={settings.applicant}
           onChange={(e) => setApplicant(e.target.value)}
         />
-        <div style={{ borderTop: "1px solid var(--border)", paddingBlock: 8 }}>
-          <Button
-            icon={IconNames.PRINT}
-            text={showPrint ? "关闭打印预览" : "显示打印预览"}
-            intent={showPrint ? "primary" : "none"}
-            onClick={toggleShowPrint}
-            fill
-            style={{ marginTop: 4 }}
-          />
-        </div>
+        <Button icon={IconNames.PRINT} text="打印" intent="primary" onClick={handlePrint} fill style={{ marginTop: 4 }} />
       </div>
-      {showPrint && reimburseRecords.length > 0 && (
+      {reimburseRecords.length > 0 && (
         <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", minHeight: 0 }}>
           <div className="print-preview-scaler">
             <PrintableReimburse
