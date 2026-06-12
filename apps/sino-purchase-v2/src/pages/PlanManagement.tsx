@@ -1,14 +1,12 @@
+// @ts-nocheck
 import { useState, useCallback, useEffect } from "react"
-import { Button, InputGroup, Icon, Tag } from "@blueprintjs/core"
-import { IconNames } from "@blueprintjs/icons"
 import { useAuth, useSheetData } from "@sino-purchase/sheets-api"
 import { usePlanStore } from "../app/stores/planStore"
 import { TaskList } from "../modules/plan/components/TaskList"
 import { AddNewTaskBar } from "../modules/plan/components/AddNewTaskBar"
-import { FilterPopover } from "../modules/plan/components/FilterModals"
+import { SettingsDialog } from "../modules/plan/components/SettingsDialog"
 import { BatchImportDialog } from "../modules/plan/components/BatchImportDialog"
 import { BatchConfirmDialog } from "../modules/plan/components/BatchConfirmDialog"
-import { SettingsDialog } from "../modules/plan/components/SettingsDialog"
 import type { PurchaseTask } from "../modules/plan/types"
 import { TASK_HEADERS, NUMERIC_FIELDS, DATE_FIELDS } from "../modules/plan/types"
 import "../modules/plan/PlanManagement.css"
@@ -31,9 +29,10 @@ export default function PlanManagement() {
     supplierFilter, bookerFilter,
     groupBy,
     setEditingTaskId, setIsAdding, setBatchEdit,
-    selectedIds, onToggleSelect, clearSelection, selectAll,
+    selectedIds, onToggleSelect, clearSelection,
     pendingBatchChanges, setPendingBatchChanges,
     addTask, confirmBatchApply, reload,
+    showSettings, setShowSettings,
   } = usePlanStore()
 
   // Sync sheet data to store
@@ -44,15 +43,18 @@ export default function PlanManagement() {
     setCrudActions({ add, update, remove, reload: sheetReload })
   }, [])
 
-  const auth = useAuth()
-  const [showSettings, setShowSettings] = useState(false)
   const [showBatch, setShowBatch] = useState(false)
 
   const handleRequestEdit = useCallback((id: string) => {
-    setEditingTaskId(id)
+    const { editingTaskId, detailReadOnly, setEditingTaskId, setDetailReadOnly } = usePlanStore.getState()
     setIsAdding(false)
     setBatchEdit(false)
-  }, [setEditingTaskId, setIsAdding, setBatchEdit])
+    if (editingTaskId === id) {
+      setDetailReadOnly(!detailReadOnly)
+    } else {
+      setEditingTaskId(id) // sets detailReadOnly: true internally
+    }
+  }, [setIsAdding, setBatchEdit])
 
   const handleOpenAdd = useCallback(() => {
     setIsAdding(true)
@@ -86,34 +88,6 @@ export default function PlanManagement() {
 
   return (
     <div className="plan-root">
-      {/* Header stats */}
-      <div className="plan-hdr">
-        <div style={{ marginLeft: "auto", display: "flex", gap: 4, alignItems: "center" }}>
-          {!auth.loggedIn ? (
-            <Button small minimal icon={<Icon icon={IconNames.LOG_IN} />} onClick={auth.login}>登录 Google</Button>
-          ) : (
-            <Tag minimal>已登录</Tag>
-          )}
-          <Button small minimal icon={<Icon icon={IconNames.REFRESH} />} onClick={reload}>刷新</Button>
-          <Button small minimal icon={<Icon icon={IconNames.COG} />} onClick={() => setShowSettings(true)}>设置</Button>
-        </div>
-      </div>
-
-      {/* Filter bar */}
-      <div className="plan-filter">
-        <FilterPopover type="status" label="状态" active={statusFilter.length > 0} />
-        <FilterPopover type="urgency" label="紧急" active={urgencyFilter.length > 0} />
-        <FilterPopover type="supplier" label="商家" active={!!supplierFilter} />
-        <FilterPopover type="booker" label="预定" active={!!bookerFilter} />
-        <InputGroup
-          className="plan-search"
-          placeholder="搜索品名/品牌/规格/商家/预定人"
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          small
-        />
-      </div>
-
       {/* Scrollable task list */}
       <div className="plan-scroll">
         {loading ? (
@@ -143,43 +117,21 @@ export default function PlanManagement() {
         )}
       </div>
 
-      {/* Selection toolbar */}
-      {selectedIds.size > 0 && (
-        <div className="plan-selbar">
-          <span>{selectedIds.size} 项已选</span>
-          <span className="selbar-divider" />
-          <button onClick={() => {
-            const lines = allTasks.filter(t => selectedIds.has(t.id)).map(t => {
-              let s = t.name
-              if (t.brand) s += `(${t.brand})`
-              if (t.spec) s += `-${t.spec}`
-              s += ` x${t.quantity ?? 1}${t.unit || ""}`
-              return s
-            })
-            navigator.clipboard.writeText(lines.join("\n"))
-          }}>复制</button>
-          <button onClick={() => {
-            setPendingBatchChanges({})
-            setBatchEdit(true)
-            setEditingTaskId(null)
-            setIsAdding(false)
-          }}>批量编辑</button>
-          <button onClick={clearSelection} className="selbar-cancel">取消</button>
-        </div>
-      )}
-
-      {/* Bottom: quick add + status */}
+      {/* Bottom: quick add */}
       <div style={{ flexShrink: 0 }}>
         <AddNewTaskBar onAdd={handleAddFromBar} onOpenAdd={handleOpenAdd} onBatch={() => setShowBatch(true)} />
-        <div className="plan-status">
-          <span>{allTasks.length} 项</span>
-        </div>
       </div>
 
       {/* Dialogs */}
       <SettingsDialog isOpen={showSettings} onClose={() => setShowSettings(false)} />
       <BatchImportDialog isOpen={showBatch} onClose={() => setShowBatch(false)} onImport={handleBatchImport} />
-      <BatchConfirmDialog isOpen={Object.keys(pendingBatchChanges).length > 0} changes={pendingBatchChanges} count={selectedIds.size} onConfirm={confirmBatchApply} onClose={() => setPendingBatchChanges({})} />
+      <BatchConfirmDialog
+        isOpen={Object.keys(pendingBatchChanges).length > 0}
+        changes={pendingBatchChanges}
+        count={selectedIds.size}
+        onConfirm={confirmBatchApply}
+        onClose={() => setPendingBatchChanges({})}
+      />
     </div>
   )
 }

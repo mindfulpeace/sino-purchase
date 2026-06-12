@@ -140,10 +140,14 @@ interface PlanState {
   // UI state
   editingTaskId: string | null
   setEditingTaskId: (id: string | null) => void
+  detailReadOnly: boolean
+  setDetailReadOnly: (v: boolean) => void
   isAdding: boolean
   setIsAdding: (v: boolean) => void
   batchEdit: boolean
   setBatchEdit: (v: boolean) => void
+  showSettings: boolean
+  setShowSettings: (v: boolean) => void
   showFilter: "status" | "urgency" | "supplier" | "booker" | null
   setShowFilter: (v: "status" | "urgency" | "supplier" | "booker" | null) => void
   selectedIds: Set<string>
@@ -236,11 +240,15 @@ export const usePlanStore = create<PlanState>((set, get) => {
 
     // UI state
     editingTaskId: null,
-    setEditingTaskId: (editingTaskId) => set({ editingTaskId }),
+    setEditingTaskId: (editingTaskId) => set({ editingTaskId, detailReadOnly: true }),
+    detailReadOnly: true,
+    setDetailReadOnly: (detailReadOnly) => set({ detailReadOnly }),
     isAdding: false,
     setIsAdding: (isAdding) => set({ isAdding }),
     batchEdit: false,
     setBatchEdit: (batchEdit) => set({ batchEdit }),
+    showSettings: false,
+    setShowSettings: (showSettings) => set({ showSettings }),
     showFilter: null,
     setShowFilter: (showFilter) => set({ showFilter }),
     selectedIds: new Set<string>(),

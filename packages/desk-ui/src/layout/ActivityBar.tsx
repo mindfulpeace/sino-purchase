@@ -7,10 +7,12 @@ export function ActivityBar({
   activities,
   activeActivity,
   onActivityChange,
+  footer,
 }: {
   activities: Activity[]
   activeActivity: string
   onActivityChange: (id: string) => void
+  footer?: React.ReactNode
 }) {
   const { theme, toggle: toggleTheme } = useTheme()
 
@@ -27,6 +29,7 @@ export function ActivityBar({
         </button>
       ))}
       <div style={{ flex: 1 }} />
+      {footer}
       <button
         className="nav-item"
         onClick={toggleTheme}

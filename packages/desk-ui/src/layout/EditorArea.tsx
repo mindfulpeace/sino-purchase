@@ -58,6 +58,10 @@ export function EditorArea({
           return (
             <div key={id} style={{ display: id === activeId ? "flex" : "none", flex: 1, width: "100%", minHeight: 0, flexDirection: "column" }}>
               {tab.render()}
+              {tab.bottomToolbar && id === activeId && (() => {
+                const tb = tab.bottomToolbar()
+                return tb ? <div className="editor-bottom-toolbar" style={{ flexShrink: 0 }}>{tb}</div> : null
+              })()}
             </div>
           )
         })}

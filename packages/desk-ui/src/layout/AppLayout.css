@@ -29,6 +29,46 @@
 
 .hdr-text { opacity: 0.7; }
 
+.hdr-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.hdr-toggles {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.hdr-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+.hdr-toggle:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.bp6-theme-light .hdr-toggle:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.hdr-toggle.active {
+  opacity: 1;
+  color: var(--text-bright);
+}
+
 /* ── 主体 ─────────────────────────────────── */
 
 .app-body {
@@ -202,6 +242,51 @@
   cursor: col-resize;
   z-index: 10;
 }
+
+.right-feedback {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  max-height: 80px;
+  overflow: hidden;
+}
+
+.right-feedback-msgs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  gap: 1px;
+}
+
+.right-feedback-msg {
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-dim);
+}
+
+.right-feedback-info { color: var(--text-dim); }
+.right-feedback-warn { color: #f5a623; }
+.right-feedback-error { color: #e54d42; }
+
+.right-feedback-clear {
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 4px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.right-feedback-clear:hover { color: var(--text-bright); }
 
 /* ── 编辑区 (.editor) ─────────────────────── */
 

@@ -1,7 +1,9 @@
 import { useMemo, useState, type ReactNode } from "react"
-import { HotkeysProvider, OverlaysProvider, PortalProvider } from "@blueprintjs/core"
+import { Icon, HotkeysProvider, OverlaysProvider, PortalProvider } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import { useTheme } from "../theme/ThemeContext"
 import { useTabs } from "../hooks/useTabs"
+import { PropertiesFeedbackProvider } from "../hooks/usePropertiesFeedback"
 import type { Activity, EditorTab, SidePanel, PropertiesPanel } from "../types"
 import { TitleBar } from "./TitleBar"
 import { ActivityBar } from "./ActivityBar"
@@ -14,6 +16,8 @@ import { StatusBar } from "./StatusBar"
 interface AppLayoutProps {
   title?: ReactNode
   activities: Activity[]
+  /** 导航栏底部区域（可放置登录按钮等） */
+  activityBarFooter?: ReactNode
 
   sidePanels: Record<string, SidePanel>
 
@@ -24,11 +28,15 @@ interface AppLayoutProps {
 
   propertiesVisible?: boolean
   onPropertiesVisibleChange?: (visible: boolean) => void
+
+  /** 隐藏底部状态栏 */
+  hideStatusBar?: boolean
 }
 
-export default function AppLayout({ title, activities, sidePanels, tabs, propertiesPanel, propertiesMinWidth, propertiesVisible, onPropertiesVisibleChange }: AppLayoutProps) {
+export default function AppLayout({ title, activities, activityBarFooter, sidePanels, tabs, propertiesPanel, propertiesMinWidth, propertiesVisible, onPropertiesVisibleChange, hideStatusBar }: AppLayoutProps) {
   const { theme } = useTheme()
   const [showPanel, setShowPanel] = useState(false)
+  const [showMenu, setShowMenu] = useState(true)
   const [showPropertiesInternal, setShowPropertiesInternal] = useState(false)
 
   const isControlled = propertiesVisible !== undefined
@@ -66,7 +74,19 @@ export default function AppLayout({ title, activities, sidePanels, tabs, propert
 
   const handleActivityChange = (id: string) => {
     setActiveActivity(id)
-    sync(openIds, id)
+    if (tabIds.includes(id)) {
+      // Auto-open tab matching the activity
+      const next = openIds.includes(id) ? openIds : [...openIds, id]
+      dispatch({ type: "open", id })
+      if (isControlled) {
+        onPropertiesVisibleChange?.(true)
+      } else {
+        setShowPropertiesInternal(true)
+      }
+      sync(next, id, id)
+    } else {
+      sync(openIds, id)
+    }
   }
 
   const openTab = (id: string) => {
@@ -91,20 +111,49 @@ export default function AppLayout({ title, activities, sidePanels, tabs, propert
 
   const sidebarPanel = sidePanels[activeActivity]
   const rootClass = theme === "dark" ? "bp6-dark" : "bp6-light"
+  const activeTab = activeId ? tabs.find(t => t.id === activeId) : undefined
+
+  const titleRight = (
+    <div className="hdr-toggles">
+      <button
+        className={`hdr-toggle${showMenu ? " active" : ""}`}
+        onClick={() => setShowMenu(v => !v)}
+        title="切换菜单栏"
+      >
+        <Icon icon={IconNames.MENU} size={14} />
+      </button>
+      <button
+        className={`hdr-toggle${showProperties ? " active" : ""}`}
+        onClick={handlePropertiesToggle}
+        title="切换属性栏"
+      >
+        <Icon icon={IconNames.SETTINGS} size={14} />
+      </button>
+      <button
+        className={`hdr-toggle${showPanel ? " active" : ""}`}
+        onClick={() => setShowPanel(v => !v)}
+        title="切换面板"
+      >
+        <Icon icon={showPanel ? IconNames.CHEVRON_DOWN : IconNames.CHEVRON_UP} size={14} />
+      </button>
+    </div>
+  )
 
   return (
     <PortalProvider portalClassName={theme === "dark" ? "bp6-dark" : undefined}>
       <OverlaysProvider>
       <HotkeysProvider>
       <div className={"app-root " + rootClass}>
-        <TitleBar>{title}</TitleBar>
+        <PropertiesFeedbackProvider>
+        <TitleBar rightContent={titleRight}>{title}</TitleBar>
         <div className="app-body">
           <ActivityBar
             activities={activities}
             activeActivity={activeActivity}
             onActivityChange={handleActivityChange}
+            footer={activityBarFooter}
           />
-          <SiderBar panel={sidebarPanel} onOpenTab={openTab} />
+          {showMenu && <SiderBar panel={sidebarPanel} onOpenTab={openTab} />}
           <EditorArea
             openIds={openIds}
             activeId={activeId}
@@ -120,12 +169,16 @@ export default function AppLayout({ title, activities, sidePanels, tabs, propert
           )}
         </div>
         <Panel show={showPanel} height={200} onClose={() => setShowPanel(false)} />
-        <StatusBar
-          showPanel={showPanel}
-          onPanelToggle={() => setShowPanel((p) => !p)}
-          showProperties={showProperties}
-          onPropertiesToggle={handlePropertiesToggle}
-        />
+        {!hideStatusBar && (
+          <StatusBar
+            showPanel={showPanel}
+            onPanelToggle={() => setShowPanel((p) => !p)}
+            showProperties={showProperties}
+            onPropertiesToggle={handlePropertiesToggle}
+            statusInfo={activeTab?.statusInfo?.()}
+          />
+        )}
+      </PropertiesFeedbackProvider>
       </div>
       </HotkeysProvider>
       </OverlaysProvider>

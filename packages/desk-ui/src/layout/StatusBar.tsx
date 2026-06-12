@@ -3,11 +3,13 @@ export function StatusBar({
   onPanelToggle,
   showProperties,
   onPropertiesToggle,
+  statusInfo,
 }: {
   showPanel: boolean
   onPanelToggle: () => void
   showProperties: boolean
   onPropertiesToggle: () => void
+  statusInfo?: React.ReactNode
 }) {
   return (
     <div className="status">
@@ -20,6 +22,7 @@ export function StatusBar({
         </span>
       </div>
       <div className="status-right">
+        {statusInfo && <span className="status-item">{statusInfo}</span>}
         <span className="status-item" onClick={onPanelToggle}>
           {showPanel ? "关闭面板" : "打开面板"}
         </span>

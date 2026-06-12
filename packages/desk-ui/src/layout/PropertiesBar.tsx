@@ -1,5 +1,21 @@
 import { useRightResize } from "../hooks/useSidebarResize"
+import { usePropertiesFeedback } from "../hooks/usePropertiesFeedback"
 import type { PropertiesPanel } from "../types"
+
+function FeedbackDisplay() {
+  const { messages, clear } = usePropertiesFeedback()
+  if (messages.length === 0) return null
+  return (
+    <div className="right-feedback">
+      <div className="right-feedback-msgs">
+        {messages.map(m => (
+          <div key={m.id} className={`right-feedback-msg right-feedback-${m.level}`}>{m.text}</div>
+        ))}
+      </div>
+      <button className="right-feedback-clear" onClick={clear} title="清除">&times;</button>
+    </div>
+  )
+}
 
 export function PropertiesBar({
   panel,
@@ -23,6 +39,7 @@ export function PropertiesBar({
         </button>
       </div>
       <div className="right-content">{panel.render()}</div>
+      <FeedbackDisplay />
       <div className="right-resize" onMouseDown={handleResizeStart} />
     </div>
   )
