@@ -1,0 +1,81 @@
+:root {
+  --bg-surface: #1e1e1e;
+  --bg-elevated: #252526;
+  --bg-raised: #2d2d2d;
+  --bg-overlay: #3c3c3c;
+  --bg-hover: #2a2d2e;
+  --border: #3c3c3c;
+  --text: #cccccc;
+  --text-dim: #858585;
+  --text-bright: #e0e0e0;
+  --accent: #007acc;
+  --accent-hover: #1a8ad4;
+  --tab-active-bg: #1e1e1e;
+  --tab-inactive-bg: #2d2d2d;
+  --tab-border: #252526;
+  --sidebar-bg: #252526;
+  --activitybar-bg: #333333;
+  --activitybar-hover: #3c3c3c;
+  --activitybar-active-border: #ffffff;
+  --titlebar-bg: #3c3c3c;
+  --statusbar-bg: #007acc;
+  --panel-bg: #1e1e1e;
+  --panel-header-bg: #252526;
+  --scrollbar-bg: transparent;
+  --scrollbar-thumb: #424242;
+  --scrollbar-thumb-hover: #4f4f4f;
+
+  --bp-intent-default-rest: #5f6b7c;
+  --bp-intent-default-hover: #404854;
+  --bp-intent-default-active: #383e47;
+  --bp-intent-default-foreground: #ffffff;
+  --bp-typography-color-default-rest: #cccccc;
+  --bp-typography-color-default-disabled: #5f6b7c;
+  --bp-typography-color-default-hover: #858585;
+  --bp-typography-color-default-active: #cccccc;
+  --bp-surface-background-color-default-rest: #252526;
+  --bp-surface-background-color-default-hover: #2d2d2d;
+  --bp-surface-background-color-default-active: #3c3c3c;
+  --bp-surface-background-color-default-disabled: #252526;
+}
+
+:root.bp6-theme-light {
+  --bg-surface: #ffffff;
+  --bg-elevated: #f3f3f3;
+  --bg-raised: #ececec;
+  --bg-overlay: #e0e0e0;
+  --bg-hover: #e8e8e8;
+  --border: #d4d4d4;
+  --text: #333333;
+  --text-dim: #888888;
+  --text-bright: #1a1a1a;
+  --accent: #0066b8;
+  --accent-hover: #005a9e;
+  --tab-active-bg: #ffffff;
+  --tab-inactive-bg: #ececec;
+  --tab-border: #e0e0e0;
+  --sidebar-bg: #f3f3f3;
+  --activitybar-bg: #e8e8e8;
+  --activitybar-hover: #dcdcdc;
+  --activitybar-active-border: #0066b8;
+  --titlebar-bg: #dddddd;
+  --statusbar-bg: #0066b8;
+  --panel-bg: #ffffff;
+  --panel-header-bg: #f3f3f3;
+  --scrollbar-bg: transparent;
+  --scrollbar-thumb: #c1c1c1;
+  --scrollbar-thumb-hover: #a0a0a0;
+
+  --bp-intent-default-rest: #5f6b7c;
+  --bp-intent-default-hover: #4a525d;
+  --bp-intent-default-active: #383e47;
+  --bp-intent-default-foreground: #ffffff;
+  --bp-typography-color-default-rest: #333333;
+  --bp-typography-color-default-disabled: #abb3bf;
+  --bp-typography-color-default-hover: #888888;
+  --bp-typography-color-default-active: #333333;
+  --bp-surface-background-color-default-rest: #ffffff;
+  --bp-surface-background-color-default-hover: #f3f3f3;
+  --bp-surface-background-color-default-active: #ececec;
+  --bp-surface-background-color-default-disabled: #ffffff;
+}

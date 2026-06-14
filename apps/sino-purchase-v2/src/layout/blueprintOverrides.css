@@ -1,0 +1,142 @@
+/* ═══════════════════════════════════════════════
+   Blueprint 6 Component Overrides
+   ═══════════════════════════════════════════════ */
+
+/* Remove blue focus outline */
+.bp6-dark button:focus,
+.bp6-dark button:focus-visible,
+.bp6-dark .bp6-button:focus,
+.bp6-dark .bp6-button:focus-visible,
+.bp6-light button:focus,
+.bp6-light button:focus-visible,
+.bp6-light .bp6-button:focus,
+.bp6-light .bp6-button:focus-visible {
+  outline: none !important;
+}
+
+/* CSV editor toolbar buttons */
+.csv-editor-toolbar .bp6-button {
+  color: var(--text-bright);
+}
+
+.csv-editor-toolbar .bp6-button:hover {
+  background: var(--bg-overlay);
+}
+
+.csv-editor-toolbar .bp6-switch {
+  color: var(--text);
+}
+
+/* Blueprint Table — dark */
+.bp6-table-container {
+  background: var(--bg-surface);
+}
+
+.bp6-table-quadrant-stack {
+  background: var(--bg-surface);
+}
+
+.bp6-table-header-cell {
+  background: var(--bg-raised);
+  color: var(--text-dim);
+  border-color: var(--border);
+}
+
+.bp6-table-cell {
+  background: var(--bg-surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.bp6-table-cell:hover {
+  background: var(--bg-hover);
+}
+
+.bp6-editable-text {
+  color: var(--text);
+}
+
+.bp6-editable-text:hover {
+  background: var(--bg-overlay);
+}
+
+.bp6-editable-text-input {
+  color: var(--text-bright);
+  background: var(--bg-raised);
+}
+
+.bp6-table-column-name-text,
+.bp6-table-header-cell-content {
+  color: var(--text-dim);
+}
+
+.bp6-table-row-header-cell {
+  background: var(--bg-raised);
+  border-color: var(--border);
+  color: var(--text-dim);
+}
+
+/* Blueprint Table — light */
+.bp6-theme-light .bp6-table-cell {
+  background: #ffffff;
+}
+
+.bp6-theme-light .bp6-table-container,
+.bp6-theme-light .bp6-table-quadrant-stack {
+  background: #ffffff;
+}
+
+.bp6-theme-light .bp6-editable-text-input {
+  color: #1a1a1a;
+  background: #ffffff;
+}
+
+.bp6-theme-light .bp6-table-header-cell {
+  background: #f6f7f9;
+}
+
+/* Dialog / Drawer — portals */
+.bp6-dark .bp6-dialog {
+  background: var(--bg-surface);
+}
+
+.bp6-dark .bp6-dialog-header {
+  background: var(--bg-elevated);
+  box-shadow: none;
+}
+
+.bp6-dark .bp6-dialog-body {
+  background: var(--bg-surface);
+}
+
+.bp6-dark .bp6-dialog-footer {
+  background: var(--bg-elevated);
+  box-shadow: none;
+}
+
+.bp6-dark .bp6-drawer {
+  background: var(--bg-surface);
+}
+
+/* Dialog / Drawer — light */
+.bp6-theme-light .bp6-dialog {
+  background: #ffffff;
+}
+
+.bp6-theme-light .bp6-dialog-header {
+  background: var(--bg-elevated);
+  box-shadow: 0 1px 0 var(--border);
+}
+
+.bp6-theme-light .bp6-dialog-body {
+  background: #ffffff;
+}
+
+.bp6-theme-light .bp6-dialog-footer {
+  background: var(--bg-elevated);
+  box-shadow: none;
+}
+
+.bp6-theme-light .bp6-drawer {
+  background: #ffffff;
+}

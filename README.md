@@ -41,7 +41,7 @@ sino-purchase-v2/
 │   └── print/         # 打印组件
 ├── apps/              # 应用
 │   ├── sino-purchase-v2/  # 主应用
-│   ├── desk-ui-demo/      # UI 库演示
+│   ├── demo-ui/          # UI 库演示
 │   └── sheets-api-demo/   # API 演示
 └── scripts/           # 部署脚本
 ```

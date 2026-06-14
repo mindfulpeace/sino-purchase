@@ -74,7 +74,7 @@ sino-purchase-v2/
 │           ├── useSync.tsx    # 同步状态 hook + SyncProvider
 │           └── global.d.ts    # google.accounts.oauth2 类型声明
 ├── apps/
-│   ├── desk-ui-demo/          # 演示应用 (消费者)
+│   └── demo-ui/              # 演示应用 (消费者)
 │   │   ├── package.json       # 依赖 @sino-purchase/desk-ui (workspace:*)
 │   │   ├── vite.config.ts
 │   │   ├── tsconfig.json
@@ -161,9 +161,9 @@ sino-purchase-v2/
 - MonacoShowcase 已去掉 `readOnly: true`，可编辑
 - 菜单栏内容 (`menu-content div, span`) 全局设为 `white-space: nowrap; overflow: hidden; text-overflow: ellipsis;`
 - `@sino-purchase/desk-ui` 是 monorepo 中的库包 (`packages/desk-ui`)，布局组件 + 主题 + hooks 全部抽取至此。CSS 提取到 `dist/index.css`，使用者需 `import "@sino-purchase/desk-ui/style.css"`
-- Demo app (`apps/desk-ui-demo`) 通过 npm workspace 引用本地库：`"@sino-purchase/desk-ui": "*"`
+- Demo app (`apps/demo-ui`) 通过 npm workspace 引用本地库：`"@sino-purchase/desk-ui": "*"`
 - 主应用 (`apps/sino-purchase-v2`) 引用 `@sino-purchase/desk-ui` + `@sino-purchase/sheets-api` + `@sino-purchase/utils/doc/print`
-- 构建顺序: `packages/desk-ui` → `packages/sheets-api` → `apps/desk-ui-demo`
+- 构建顺序: `packages/desk-ui` → `packages/sheets-api` → `apps/demo-ui`
 - `npm run dev` 启动主应用 dev server
 - `npm run dev:desk` 启动 desk-ui demo 应用
 - `npm run build:sheets` 单独构建 sheets-api

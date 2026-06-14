@@ -1,5 +1,5 @@
 {
-  "name": "@sino-purchase/desk-ui",
+  "name": "@sino-purchase/ui-dock",
   "version": "0.0.1",
   "private": false,
   "type": "module",
@@ -29,23 +29,14 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "@blueprintjs/core": "^6.15.0",
-    "@blueprintjs/icons": "^6.10.0",
-    "@blueprintjs/table": "^6.1.1",
+    "dockview": "^6.6.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-router-dom": "^7.0.0"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^6.0.1",
-    "jsdom": "^26.1.0",
     "typescript": "~6.0.2",
     "vite": "^8.0.12",
-    "vite-plugin-dts": "^5.0.2",
-    "vitest": "^3.2.6"
+    "vite-plugin-dts": "^5.0.2"
   }
 }

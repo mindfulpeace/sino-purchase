@@ -5,6 +5,7 @@
     { "path": "./packages/utils/tsconfig.json" },
     { "path": "./packages/doc/tsconfig.json" },
     { "path": "./packages/print/tsconfig.json" },
-    { "path": "./apps/desk-ui-demo/tsconfig.json" }
+    { "path": "./packages/ui-dock/tsconfig.json" },
+    { "path": "./apps/demo-ui/tsconfig.json" }
   ]
 }

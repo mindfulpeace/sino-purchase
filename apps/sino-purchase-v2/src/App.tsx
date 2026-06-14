@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useMemo } from "react"
+import { lazy, Suspense, useCallback } from "react"
 import { Icon, Button, InputGroup } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { ThemeProvider, AppLayout, usePropertiesFeedback } from "@sino-purchase/desk-ui"
@@ -117,7 +117,7 @@ function PlanPropertiesContent() {
     editingTaskId, detailReadOnly, isAdding, batchEdit, selectedIds, allTasks,
     addTask, updateTask, deleteTask, setEditingTaskId, setIsAdding,
     setBatchEdit, setPendingBatchChanges,
-    urgentAll, urgentHigh, urgentMid, urgentLow, completed,
+    urgentAll, urgentHigh,  completed,
   } = usePlanStore()
   const { setPropertiesVisible } = useDocSettingsStore()
   const feedback = usePropertiesFeedback()
@@ -252,17 +252,6 @@ function PlanSelectionToolbar() {
         onClick={clearSelection}
       >取消</button>
     </div>
-  )
-}
-
-/* ── 计划管理状态信息（属性栏底部） ─────────── */
-
-function PlanStatusInfo() {
-  const { allTasks, selectedIds } = usePlanStore()
-  return (
-    <span style={{ fontSize: 11, color: "var(--text-dim)", padding: "0 12px" }}>
-      {allTasks.length} 项{selectedIds.size > 0 ? ` | 已选 ${selectedIds.size}` : ""}
-    </span>
   )
 }
 

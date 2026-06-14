@@ -1,0 +1,66 @@
+.dv-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dv-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 26px;
+  padding: 0 12px;
+  background: var(--dv-background-color, #1e1e1e);
+  border-bottom: 1px solid var(--dv-separator-border, #333);
+  font-size: 12px;
+  color: var(--dv-activegroup-visiblepanel-tab-color, #ccc);
+  flex-shrink: 0;
+}
+
+.dv-titlebar-title {
+  font-weight: 600;
+}
+
+.dv-body {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Hide close button/action on all edge group tabs (locked) */
+.dv-edge-group .dv-default-tab-action {
+  display: none !important;
+}
+
+/* Prevent cursor change on locked group tabs */
+.dv-locked-groupview .dv-tab {
+  cursor: pointer;
+}
+
+/* Panel content: default text color dimmer than tab color */
+.dv-content-container {
+  color: var(--dv-activegroup-visiblepanel-tab-color, white);
+  opacity: 0.7;
+}
+
+/* Panel headings remain full brightness */
+.dv-content-container h1,
+.dv-content-container h2,
+.dv-content-container h3,
+.dv-content-container h4,
+.dv-content-container h5,
+.dv-content-container h6 {
+  opacity: 1;
+}
+
+/* Light mode: override opacity for better contrast */
+.dockview-theme-light .dv-content-container {
+  opacity: 0.85;
+}
+
+/* Disable pane focus outline */
+.dockview-theme-dark {
+  --dv-paneview-active-outline-color: transparent;
+}
+.dockview-theme-light {
+  --dv-paneview-active-outline-color: transparent;
+}

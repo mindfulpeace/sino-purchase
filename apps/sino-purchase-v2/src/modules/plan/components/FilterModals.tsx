@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { Popover, Button } from "@blueprintjs/core"
 import { usePlanStore } from "../../../app/stores/planStore"
 import { nameListOptions } from "../helpers"
