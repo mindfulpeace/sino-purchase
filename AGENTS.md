@@ -74,32 +74,37 @@ sino-purchase-v2/
 │           ├── useSync.tsx    # 同步状态 hook + SyncProvider
 │           └── global.d.ts    # google.accounts.oauth2 类型声明
 │   └── ui-dock/               # @sino-purchase/ui-dock (dockview 布局库)
-│       ├── package.json       # peer deps: React, dockview
+│       ├── package.json       # peer deps: React, dockview, @blueprintjs/core, @blueprintjs/icons
 │       ├── vite.config.ts     # lib 模式构建
 │       ├── tsconfig.json
 │       └── src/
 │           ├── index.ts       # barrel 导出 + CSS 自动注入
-│           ├── types.ts       # NavigationItem, EditorTab, DeskDockviewLayoutProps, StatusBarProps
-│           ├── DeskDockviewLayout.tsx  # 主布局组件 (themeAbyss/themeLight, headerRight, statusMessage)
+│           ├── types.ts       # NavigationItem, EditorTab, DockLayoutProps, StatusBarProps, EdgeGroupConfig
+│           ├── DockLayout.tsx  # 主布局组件 (themeAbyss/themeLight, bp6-dark/bp6-light, useDock)
+│           ├── HeaderToggles.tsx  # 边栏切换按钮 (Blueprint Icon)
 │           ├── StatusBar.tsx  # 底部状态栏组件 (left/right slots)
-│           ├── hooks/
-│           │   └── useDockviewApi.ts  # dockview API context
+│           ├── components.tsx  # DockMenuItem, DockInput, DockPlaceholder, DockSection
 │           └── styles/
-│               └── overrides.css  # 主题覆盖、标题栏、状态栏、tab 高度等样式
+│               └── overrides.css  # 主题覆盖、Blueprint CSS 变量桥接、dockview 样式覆盖
 ├── apps/
 │   └── demo-ui/              # 演示应用 (消费者)
-│   │   ├── package.json       # 依赖 @sino-purchase/desk-ui (workspace:*)
+│   │   ├── package.json       # 依赖 @sino-purchase/ui-dock (workspace:*)
 │   │   ├── vite.config.ts
 │   │   ├── tsconfig.json
 │   │   ├── index.html
 │   │   └── src/
-│   │       ├── App.tsx        # 从 @sino-purchase/desk-ui 导入布局
-│   │       ├── main.tsx
+│   │       ├── App.tsx        # DockLayout + useDock, lazy-import 展示页
+│   │       ├── main.tsx       # 导入 Blueprint CSS + dockview CSS + ui-dock CSS
 │   │       ├── index.css
-│   │       ├── components/    # FileTree, CsvProperties
-│   │       ├── config/        # sidePanels
-│   │       ├── context/       # CsvContext
-│   │       └── pages/         # CsvEditor, ComponentShowcase, IconShowcase, MonacoShowcase
+│   │       ├── components/
+│   │       ├── config/
+│   │       ├── context/
+│   │       └── pages/
+│   │           ├── ComponentShowcase.tsx  # Blueprint 组件展示 (11 sections)
+│   │           ├── IconShowcase.tsx       # Blueprint 图标分类网格
+│   │           ├── MonacoShowcase.tsx     # Monaco 编辑器展示
+│   │           ├── CsvEditor.tsx          # CSV 编辑器
+│   │           └── showcase/SectionBox.tsx  # Section/SectionCard 包装组件
 │   └── sino-purchase-v2/      # 主应用 (sino-purchase-v2-main)
 │       ├── package.json       # 依赖所有 @sino-purchase/* 包
 │       ├── vite.config.ts
@@ -148,8 +153,8 @@ sino-purchase-v2/
 - **标题栏高**: 26px
 - **ui-dock 主题**: 使用 `themeAbyss` (深蓝/紫) 作为暗色主题，`themeLight` 作为亮色主题。主题切换通过 `theme`/`setTheme` context 状态实现，`DockviewReact` 接收不同 theme 对象
 - **ui-dock tab 高度**: `--dv-tabs-and-actions-container-height: 24px` (两个主题均设)，从默认 35px 缩减
-- **ui-dock 标题栏**: `dv-titlebar-right` 区域用于消费者自定义按钮 (`headerRight` prop)；内置 edge 切换按钮待实现
-- **ui-dock 状态栏**: 内置 22px 状态栏，通过 `statusMessage`/`setStatusMessage` context 让消费者自由设置状态文本
+- **ui-dock 标题栏**: `dv-titlebar-right` 区域用于消费者自定义按钮 (`headerRight` prop)；内置 `<HeaderToggles />` (Blueprint Icon, 左/下/右 edge 切换)
+- **ui-dock 状态栏**: 内置 22px 状态栏，通过 `useDock()` context 的 `status`(左) + `summary`(右) 让消费者自由设置
 - **ui-dock 面板文字**: `.dv-content-container` 使用 `opacity: 0.7` (暗色) / `0.85` (亮色)，标题 `opacity: 1.0`
 - **ui-dock 焦点轮廓**: `--dv-paneview-active-outline-color: transparent` 禁用面板聚焦蓝色轮廓
 - **ui-dock 编辑器 tab 按钮**: `.dv-tab .dv-default-tab-action { display: none }` 隐藏 float/maximize/minimize 按钮
@@ -168,6 +173,7 @@ sino-purchase-v2/
 11. `useMemo` 依赖数组缺 `searchParams`/`validIds` → 改用 `useState`/`useReducer` lazy init
 12. Dialog/Drawer 打开后布局崩溃: `AppLayout.css` 的 `.bp6-dark` 选择器无作用域限制，portal div 误获 `height:100vh;background:var(--bg-surface)` → 根 div 加 `app-root` 类名，CSS 改为 `.app-root.bp6-dark`
 13. 打印字体缩小 + 分页失效：根因是 `.print-view` 用了 `position: fixed`，导致 `page-break-*` 被忽略（CSS 规范：分页只对根元素正常流中的块级元素生效），且 `#root { height: 100vh }` 和 `.editor { flex: 1 }` 在打印时未覆盖，限制了打印内容宽度。修复：`@media print` 中移除 `position: fixed`，改用正常流；`body/ #root/ .app-root/ .app-body/ .right/ .right-content` 全部 `display: block; height: auto; overflow: visible`；`.editor` 加入 `display: none`；打印字体改为 `14px`
+14. `IconNames.SIDEBAR_LEFT`/`SIDEBAR_RIGHT` 不存在 — TS2339 错误，改用 `ADD_COLUMN_LEFT`/`REMOVE_COLUMN_LEFT` 和 `ADD_COLUMN_RIGHT`/`REMOVE_COLUMN_RIGHT`
 
 ## 备忘录
 - 所有 Blueprint 图标用 `<Icon icon={IconNames.XXX} />` (从 `@blueprintjs/icons` 导入)
@@ -204,10 +210,11 @@ sino-purchase-v2/
 - 记账报销页面 (`apps/sino-purchase-v2/src/pages/Accounting.tsx`) 使用 `AccountingProvider`(useReducer) 管理状态，数据存放在内存中（未接入 sheets-api），支持 Excel/剪贴板导入和报销单打印预览
 - `CashGrid` 使用 `@blueprintjs/table` 的 `Table2` + `Column`，按税务字段 HSL 着色，支持点击排序
 - 导入流程: Excel 或剪贴板 → 解析为 CashRecord[] → ImportDialog 预览 → 确认 → 加入状态
-- `@sino-purchase/ui-dock` 是 dockview 布局库，提供 `DeskDockviewLayout` 组件和 `useDeskDockview` hook。导出 `StatusBar` 组件。使用 `themeAbyss`/`themeLight` 主题
-- ui-dock Context API: `openEditor(id)`, `setRightVisible(v)`, `setBottomVisible(v)`, `rightVisible`, `bottomVisible`, `statusMessage`, `setStatusMessage(msg)`, `theme`, `setTheme(t)`
-- ui-dock Props: `title?`, `headerRight?` (ReactNode), `navigation[]`, `editors?`, `properties?`, `bottom?`
+- `@sino-purchase/ui-dock` 是 dockview 布局库，提供 `DockLayout` 组件和 `useDock` hook。导出 `StatusBar`、`DockMenuItem`、`DockInput`、`DockPlaceholder`、`DockSection` 组件。使用 `themeAbyss`/`themeLight` 主题。peer deps 含 Blueprint
+- ui-dock Context API (`useDock()`): `openEditor(id)`, `closeEditor(id)`, `getApi()`, `setLeftVisible(v)`, `setRightVisible(v)`, `setBottomVisible(v)`, `leftVisible`, `rightVisible`, `bottomVisible`, `status`, `summary`, `setStatus(msg)`, `setSummary(msg)`, `theme`, `setTheme(t)`
+- ui-dock Props: `title?`, `headerRight?` (ReactNode), `navigation[]`, `editors?`, `properties?`, `bottom?`, `left?`, `right?`, `bottomEdge?` (EdgeGroupConfig), `defaultTheme?`, `rightDefault?`, `bottomDefault?`, `statusBar?`, `onReady?`
 - `npm run build:dockview` 单独构建 ui-dock
 - ui-dock edge groups: left (导航面板, 300px), right (属性栏, 350px, 默认隐藏), bottom (底部面板, 200px, 默认隐藏)
 - dockview 主题切换需要传递不同 theme 对象给 `DockviewReact`，不能仅通过 CSS 类切换
 - `--dv-tabs-and-actions-container-height` 必须在每个主题类下单独设置（变量作用域不共享）
+- `IconNames.SIDEBAR_LEFT`/`SIDEBAR_RIGHT` 不存在 — 使用 `ADD_COLUMN_LEFT`/`REMOVE_COLUMN_LEFT` 和 `ADD_COLUMN_RIGHT`/`REMOVE_COLUMN_RIGHT`

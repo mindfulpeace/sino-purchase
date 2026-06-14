@@ -1,10 +1,15 @@
-import { useState } from "react"
+import { lazy, Suspense, useState } from "react"
 import { Icon, Switch } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import {
   DockLayout,
   useDock,
 } from "@sino-purchase/ui-dock"
+
+const ComponentShowcase = lazy(() => import("./pages/ComponentShowcase"))
+const IconShowcase = lazy(() => import("./pages/IconShowcase"))
+
+const fallback = <div className="dv-panel" style={{ color: "var(--text-dim)" }}>Loading…</div>
 
 /* ── Placeholder panel ── */
 
@@ -155,8 +160,8 @@ const editors = [
   { id: "data-csv", label: "data.csv", content: <PlaceholderPanel icon={IconNames.DOCUMENT} title="data.csv" /> },
   { id: "orders-csv", label: "orders.csv", content: <PlaceholderPanel icon={IconNames.DOCUMENT} title="orders.csv" /> },
   { id: "inventory-csv", label: "inventory.csv", content: <PlaceholderPanel icon={IconNames.DOCUMENT} title="inventory.csv" /> },
-  { id: "showcase", label: "Blueprint Showcase", content: <PlaceholderPanel icon={IconNames.CUBE} title="Blueprint Showcase" /> },
-  { id: "icons", label: "图标展示", content: <PlaceholderPanel icon={IconNames.PALETTE} title="图标展示" /> },
+  { id: "showcase", label: "Blueprint Showcase", content: <Suspense fallback={fallback}><ComponentShowcase /></Suspense> },
+  { id: "icons", label: "图标展示", content: <Suspense fallback={fallback}><IconShowcase /></Suspense> },
   { id: "monaco", label: "Monaco Editor", content: <PlaceholderPanel icon={IconNames.EDIT} title="Monaco Editor" /> },
 ]
 

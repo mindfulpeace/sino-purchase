@@ -29,6 +29,8 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
+    "@blueprintjs/core": "^6.15.0",
+    "@blueprintjs/icons": "^6.10.0",
     "dockview": "^6.6.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

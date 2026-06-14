@@ -224,7 +224,7 @@ export function DockLayout({
 
   return (
     <Ctx.Provider value={ctx}>
-      <div className={`dv-layout dockview-theme-${theme === "dark" ? "abyss" : "light"}`}>
+      <div className={`dv-layout dockview-theme-${theme === "dark" ? "abyss" : "light"} ${theme === "dark" ? "bp6-dark" : "bp6-light"}`}>
         <div className="dv-titlebar">
           <span className="dv-titlebar-title">{title}</span>
           <div className="dv-titlebar-right">

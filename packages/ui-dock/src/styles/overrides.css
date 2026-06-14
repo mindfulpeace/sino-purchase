@@ -111,7 +111,6 @@
 
 .dv-content-container {
   color: var(--dv-activegroup-visiblepanel-tab-color, white);
-  opacity: 0.7;
 }
 
 .dv-content-container h1,
@@ -121,6 +120,38 @@
 .dv-content-container h5,
 .dv-content-container h6 {
   opacity: 1;
+}
+
+/* Edge group panels: dimmer text */
+.dv-edge-group .dv-content-container {
+  opacity: 0.7;
+}
+
+.dv-edge-group .dv-content-container h1,
+.dv-edge-group .dv-content-container h2,
+.dv-edge-group .dv-content-container h3,
+.dv-edge-group .dv-content-container h4,
+.dv-edge-group .dv-content-container h5,
+.dv-edge-group .dv-content-container h6 {
+  opacity: 1;
+}
+
+/* ── Showcase section ── */
+
+.dv-section-header {
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 15px;
+  border-bottom: 1px solid var(--dv-separator-border, #2b2b4a);
+  color: var(--dv-activegroup-visiblepanel-tab-color, white);
+}
+
+.dv-section-body {
+  padding: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
 }
 
 /* ── Panel utility classes ── */
@@ -202,26 +233,42 @@
 }
 
 .dockview-theme-light .dv-content-container {
+  opacity: 1;
+}
+
+.dockview-theme-light .dv-edge-group .dv-content-container {
   opacity: 0.85;
 }
 
 /* TitleBar — light */
 .dockview-theme-light .dv-titlebar {
-  background: var(--dv-tabs-and-actions-container-background-color, #f3f3f3);
-  border-bottom-color: var(--dv-separator-border, #d4d4d4);
-  color: var(--dv-activegroup-visiblepanel-tab-color, #333);
+  background: var(--bp-surface-background-color-default-rest, #f3f3f3);
+  border-bottom-color: var(--bp-border, #d4d4d4);
+  color: var(--bp-typography-color-default-rest, #333);
 }
 
 .dockview-theme-light .dv-titlebar-btn {
-  color: #333;
+  color: var(--bp-typography-color-default-rest, #333);
 }
 
 .dockview-theme-light .dv-titlebar-btn:hover {
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--bp-surface-background-color-default-hover, rgba(0, 0, 0, 0.06));
 }
 
 /* StatusBar — light */
 .dockview-theme-light .dv-statusbar {
-  background: #007acc;
-  color: white;
+  background: var(--bp-intent-primary, #007acc);
+  color: var(--bp-intent-primary-text, white);
+}
+
+/* Panel items — light */
+.dockview-theme-light .dv-panel-item:hover {
+  background: var(--bp-surface-background-color-default-hover, #e8e8e8);
+}
+
+/* Panel input — light */
+.dockview-theme-light .dv-panel-input {
+  border-color: var(--bp-html-select-border, #d4d4d4);
+  background: var(--bp-surface-background-color-default-rest, white);
+  color: var(--bp-typography-color-default-rest, #333);
 }
