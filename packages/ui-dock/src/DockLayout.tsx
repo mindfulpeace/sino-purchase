@@ -18,60 +18,70 @@ import type {
   DockviewApi,
   IDockviewPanelProps,
 } from "dockview"
-import type { DeskDockviewLayoutProps } from "./types"
+import type { DockLayoutProps } from "./types"
 import { StatusBar } from "./StatusBar"
 import { HeaderToggles } from "./HeaderToggles"
 
-/* ─── Context for child components ─── */
+/* ─── Context ─── */
 
-interface DeskDockviewCtx {
+interface DockCtx {
   openEditor: (id: string) => void
+  closeEditor: (id: string) => void
+  getApi: () => DockviewApi | null
   setLeftVisible: (v: boolean) => void
   setRightVisible: (v: boolean) => void
   setBottomVisible: (v: boolean) => void
   leftVisible: boolean
   rightVisible: boolean
   bottomVisible: boolean
-  statusMessage: string
-  contentSummary: string
-  setStatusMessage: (msg: string) => void
-  setContentSummary: (msg: string) => void
+  status: string
+  summary: string
+  setStatus: (msg: string) => void
+  setSummary: (msg: string) => void
   theme: "dark" | "light"
   setTheme: (t: "dark" | "light") => void
 }
 
-const Ctx = createContext<DeskDockviewCtx | null>(null)
+const Ctx = createContext<DockCtx | null>(null)
 
-export function useDeskDockview(): DeskDockviewCtx {
+export function useDock(): DockCtx {
   const ctx = useContext(Ctx)
-  if (!ctx) throw new Error("useDeskDockview must be used inside DeskDockviewLayout")
+  if (!ctx) throw new Error("useDock must be used inside DockLayout")
   return ctx
 }
 
-/* ─── Main Layout ─── */
+/* ─── Layout ─── */
 
-export function DeskDockviewLayout({
+export function DockLayout({
   title,
   headerRight,
   navigation,
   editors,
   properties,
   bottom,
-}: DeskDockviewLayoutProps) {
+  left: leftCfg,
+  right: rightCfg,
+  bottomEdge: bottomCfg,
+  defaultTheme = "dark",
+  rightDefault = false,
+  bottomDefault = false,
+  statusBar = true,
+  onReady,
+}: DockLayoutProps) {
   const apiRef = useRef<DockviewApi | null>(null)
   const editorsRef = useRef(editors)
   editorsRef.current = editors
   const centerGroupRef = useRef<string | null>(null)
   const [leftVisible, setLeftVisible] = useState(true)
-  const [rightVisible, setRightVisible] = useState(false)
-  const [bottomVisible, setBottomVisible] = useState(false)
-  const [statusMessage, setStatusMessage] = useState("")
-  const [contentSummary, setContentSummary] = useState("")
-  const [theme, setTheme] = useState<"dark" | "light">("dark")
+  const [rightVisible, setRightVisible] = useState(rightDefault)
+  const [bottomVisible, setBottomVisible] = useState(bottomDefault)
+  const [status, setStatus] = useState("")
+  const [summary, setSummary] = useState("")
+  const [theme, setTheme] = useState<"dark" | "light">(defaultTheme)
 
-  const dockviewTheme: DockviewTheme = theme === "dark" ? themeAbyss : themeLight
+  const dvTheme: DockviewTheme = theme === "dark" ? themeAbyss : themeLight
 
-  /* openEditor — called from nav panel child components */
+  /* openEditor */
   const openEditor = useCallback((id: string) => {
     const api = apiRef.current
     if (!api) return
@@ -82,7 +92,6 @@ export function DeskDockviewLayout({
       return
     }
     const tab = editorsRef.current?.find((e) => e.id === id)
-    // First editor creates a center group; subsequent ones join it
     const panel = api.addPanel({
       id: panelId,
       component: "editorPanel",
@@ -97,7 +106,17 @@ export function DeskDockviewLayout({
     }
   }, [])
 
-  /* dockview component map */
+  /* closeEditor */
+  const closeEditor = useCallback((id: string) => {
+    const api = apiRef.current
+    if (!api) return
+    api.getPanel(`editor-${id}`)?.api.close()
+  }, [])
+
+  /* getApi */
+  const getApi = useCallback(() => apiRef.current, [])
+
+  /* component map */
   const components = useMemo(() => ({
     navPanel: (props: IDockviewPanelProps) => {
       const navId = props.params?.navId as string | undefined
@@ -114,18 +133,18 @@ export function DeskDockviewLayout({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [navigation, properties, bottom])
 
-  /* onReady — set up edge groups */
-  const onReady = useCallback(
+  /* onReady */
+  const handleReady = useCallback(
     (event: DockviewReadyEvent) => {
       const { api } = event
       apiRef.current = api
 
-      /* ── Left edge: navigation tabs (locked) ── */
+      /* Left edge */
       const leftEdge = api.addEdgeGroup("left", {
         id: "left-edge",
-        initialSize: 200,
-        minimumSize: 120,
-        maximumSize: 600,
+        initialSize: leftCfg?.size ?? 200,
+        minimumSize: leftCfg?.minSize ?? 120,
+        maximumSize: leftCfg?.maxSize ?? 600,
       })
 
       navigation.forEach((item, i) => {
@@ -140,7 +159,7 @@ export function DeskDockviewLayout({
         if (i === 0) panel.api.setActive()
       })
 
-      /* ── Lock edge groups: prevent panel drag-out, group drag, and close ── */
+      /* Lock edge groups */
       api.onWillDragPanel((event) => {
         const id = event.panel.id
         if (id.startsWith("nav-") || id === "right-panel" || id === "bottom-panel") {
@@ -148,87 +167,75 @@ export function DeskDockviewLayout({
         }
       })
       api.onWillDragGroup((event) => {
-        if (event.group.locked) {
-          event.nativeEvent.preventDefault()
-        }
+        if (event.group.locked) event.nativeEvent.preventDefault()
       })
 
-      /* ── Right edge: properties ── */
+      /* Right edge */
       if (properties) {
         api.addEdgeGroup("right", {
           id: "right-edge",
-          initialSize: 200,
-          minimumSize: 150,
+          initialSize: rightCfg?.size ?? 200,
+          minimumSize: rightCfg?.minSize ?? 150,
+          maximumSize: rightCfg?.maxSize,
         })
         const rPanel = api.addPanel({
           id: "right-panel",
           component: "rightPanel",
-          title: "属性",
+          title: rightCfg?.title ?? "属性",
           position: { referenceGroup: "right-edge" },
         })
         rPanel.group.locked = true
-        api.setEdgeGroupVisible("right", false)
+        api.setEdgeGroupVisible("right", rightDefault)
       }
 
-      /* ── Bottom edge ── */
+      /* Bottom edge */
       if (bottom) {
         api.addEdgeGroup("bottom", {
           id: "bottom-edge",
-          initialSize: 200,
-          minimumSize: 60,
+          initialSize: bottomCfg?.size ?? 200,
+          minimumSize: bottomCfg?.minSize ?? 60,
+          maximumSize: bottomCfg?.maxSize,
         })
         const bPanel = api.addPanel({
           id: "bottom-panel",
           component: "bottomPanel",
-          title: "面板",
+          title: bottomCfg?.title ?? "面板",
           position: { referenceGroup: "bottom-edge" },
         })
         bPanel.group.locked = true
-        api.setEdgeGroupVisible("bottom", false)
+        api.setEdgeGroupVisible("bottom", bottomDefault)
       }
+
+      onReady?.(api)
     },
-    [navigation, properties, bottom],
+    [navigation, properties, bottom, leftCfg, rightCfg, bottomCfg, rightDefault, bottomDefault, onReady],
   )
 
-  /* sync visibility state */
-  useEffect(() => {
-    apiRef.current?.setEdgeGroupVisible("left", leftVisible)
-  }, [leftVisible])
+  /* sync visibility */
+  useEffect(() => { apiRef.current?.setEdgeGroupVisible("left", leftVisible) }, [leftVisible])
+  useEffect(() => { apiRef.current?.setEdgeGroupVisible("right", rightVisible) }, [rightVisible])
+  useEffect(() => { apiRef.current?.setEdgeGroupVisible("bottom", bottomVisible) }, [bottomVisible])
 
-  useEffect(() => {
-    apiRef.current?.setEdgeGroupVisible("right", rightVisible)
-  }, [rightVisible])
-
-  useEffect(() => {
-    apiRef.current?.setEdgeGroupVisible("bottom", bottomVisible)
-  }, [bottomVisible])
-
-  /* context value */
-  const ctx = useMemo<DeskDockviewCtx>(
-    () => ({ openEditor, setLeftVisible, setRightVisible, setBottomVisible, leftVisible, rightVisible, bottomVisible, statusMessage, contentSummary, setStatusMessage, setContentSummary, theme, setTheme }),
-    [openEditor, leftVisible, rightVisible, bottomVisible, statusMessage, contentSummary, theme],
+  /* context */
+  const ctx = useMemo<DockCtx>(
+    () => ({ openEditor, closeEditor, getApi, setLeftVisible, setRightVisible, setBottomVisible, leftVisible, rightVisible, bottomVisible, status, summary, setStatus, setSummary, theme, setTheme }),
+    [openEditor, closeEditor, getApi, leftVisible, rightVisible, bottomVisible, status, summary, theme],
   )
 
   return (
     <Ctx.Provider value={ctx}>
       <div className={`dv-layout dockview-theme-${theme === "dark" ? "abyss" : "light"}`}>
-        {title && (
-          <div className="dv-titlebar">
-            <span className="dv-titlebar-title">{title}</span>
-            <div className="dv-titlebar-right">
-              <HeaderToggles />
-              {headerRight}
-            </div>
+        <div className="dv-titlebar">
+          <span className="dv-titlebar-title">{title}</span>
+          <div className="dv-titlebar-right">
+            <HeaderToggles />
+            {headerRight}
           </div>
-        )}
-        <div className="dv-body">
-          <DockviewReact
-            components={components}
-            onReady={onReady}
-            theme={dockviewTheme}
-          />
         </div>
-        <StatusBar left={<>{statusMessage}</>} right={<>{contentSummary}</>} />
+        <div className="dv-body">
+          <DockviewReact components={components} onReady={handleReady} theme={dvTheme} />
+        </div>
+        {statusBar && <StatusBar left={<>{status}</>} right={<>{summary}</>} />}
       </div>
     </Ctx.Provider>
   )

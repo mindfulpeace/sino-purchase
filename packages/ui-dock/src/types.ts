@@ -18,11 +18,26 @@ export interface StatusBarProps {
   right?: ReactNode
 }
 
-export interface DeskDockviewLayoutProps {
+export interface EdgeGroupConfig {
+  size?: number
+  minSize?: number
+  maxSize?: number
+  title?: string
+}
+
+export interface DockLayoutProps {
   title?: ReactNode
   headerRight?: ReactNode
   navigation: NavigationItem[]
   editors?: EditorTab[]
   properties?: ReactNode
   bottom?: ReactNode
+  left?: EdgeGroupConfig
+  right?: EdgeGroupConfig
+  bottomEdge?: EdgeGroupConfig
+  defaultTheme?: "dark" | "light"
+  rightDefault?: boolean
+  bottomDefault?: boolean
+  statusBar?: boolean
+  onReady?: (api: import("dockview").DockviewApi) => void
 }

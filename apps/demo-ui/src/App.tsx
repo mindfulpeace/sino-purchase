@@ -2,68 +2,44 @@ import { useState } from "react"
 import { Icon, Switch } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import {
-  DeskDockviewLayout,
-  useDeskDockview,
+  DockLayout,
+  useDock,
 } from "@sino-purchase/ui-dock"
 
-/* ── A centered placeholder panel ── */
+/* ── Placeholder panel ── */
 
 function PlaceholderPanel({ icon, title }: { icon: string; title: string }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100%",
-        fontSize: 16,
-        gap: 12,
-      }}
-    >
+    <div className="dv-placeholder">
       <Icon icon={icon} size={48} />
       <span>{title}</span>
     </div>
   )
 }
 
-/* ── Nav panel content components ── */
+/* ── Nav panels ── */
 
 function ExplorerPanel() {
-  const { openEditor, setStatusMessage, setContentSummary } = useDeskDockview()
+  const { openEditor, setStatus, setSummary } = useDock()
   const items = [
     { id: "data-csv", icon: IconNames.DOCUMENT, label: "data.csv" },
     { id: "orders-csv", icon: IconNames.DOCUMENT, label: "orders.csv" },
     { id: "inventory-csv", icon: IconNames.DOCUMENT, label: "inventory.csv" },
   ]
   return (
-    <div style={{ padding: 8 }}>
-      <h4 style={{ margin: "0 0 8px", fontSize: 13 }}>
-        文件浏览器
-      </h4>
+    <div className="dv-panel">
+      <h4>文件浏览器</h4>
       {items.map((item) => (
         <div
           key={item.id}
+          className="dv-panel-item"
           onClick={() => {
             openEditor(item.id)
-            setStatusMessage(`已打开 ${item.label}`)
-            setContentSummary(`${items.length} 个文件`)
+            setStatus(`已打开 ${item.label}`)
+            setSummary(`${items.length} 个文件`)
           }}
-          style={{
-            padding: "6px 8px",
-            cursor: "pointer",
-            borderRadius: 4,
-            fontSize: 13,
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.background = "color-mix(in srgb, var(--dv-activegroup-visiblepanel-tab-color) 8%, transparent)")
-          }
-          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
         >
-          <span><Icon icon={item.icon} size={14} /></span>
+          <Icon icon={item.icon} size={14} />
           <span>{item.label}</span>
         </div>
       ))}
@@ -73,64 +49,35 @@ function ExplorerPanel() {
 
 function SearchPanel() {
   return (
-    <div style={{ padding: 8 }}>
-      <h4 style={{ margin: "0 0 8px", fontSize: 13 }}>
-        搜索
-      </h4>
-      <input
-        placeholder="搜索文件…"
-        style={{
-          width: "100%",
-          padding: "6px 8px",
-          borderRadius: 4,
-          border: "1px solid var(--dv-separator-border)",
-          background: "var(--dv-tabs-and-actions-container-background-color)",
-          fontSize: 12,
-          outline: "none",
-        }}
-      />
+    <div className="dv-panel">
+      <h4>搜索</h4>
+      <input className="dv-panel-input" placeholder="搜索文件…" />
     </div>
   )
 }
 
 function ExamplesPanel() {
-  const { openEditor, setStatusMessage, setContentSummary } = useDeskDockview()
+  const { openEditor, setStatus, setSummary } = useDock()
   const items = [
     { id: "showcase", icon: IconNames.CUBE, label: "Blueprint Showcase" },
     { id: "icons", icon: IconNames.PALETTE, label: "图标展示" },
     { id: "monaco", icon: IconNames.EDIT, label: "Monaco Editor" },
   ]
   return (
-    <div style={{ padding: 8 }}>
-      <h4 style={{ margin: "0 0 8px", fontSize: 13 }}>
-        组件范例
-      </h4>
+    <div className="dv-panel">
+      <h4>组件范例</h4>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {items.map((item) => (
           <div
             key={item.id}
+            className="dv-panel-item"
             onClick={() => {
               openEditor(item.id)
-              setStatusMessage(`已打开 ${item.label}`)
-              setContentSummary(`${items.length} 个范例`)
+              setStatus(`已打开 ${item.label}`)
+              setSummary(`${items.length} 个范例`)
             }}
-            style={{
-              padding: "6px 8px",
-              cursor: "pointer",
-              borderRadius: 4,
-              fontSize: 13,
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.background = "color-mix(in srgb, var(--dv-activegroup-visiblepanel-tab-color) 8%, transparent)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.background = "transparent")
-            }
           >
-            <span><Icon icon={item.icon} size={14} /></span>
+            <Icon icon={item.icon} size={14} />
             <span>{item.label}</span>
           </div>
         ))}
@@ -140,19 +87,17 @@ function ExamplesPanel() {
 }
 
 function SettingsPanel() {
-  const { theme, setTheme, setStatusMessage } = useDeskDockview()
+  const { theme, setTheme, setStatus } = useDock()
   return (
-    <div style={{ padding: 8 }}>
-      <h4 style={{ margin: "0 0 8px", fontSize: 13 }}>
-        设置
-      </h4>
+    <div className="dv-panel">
+      <h4>设置</h4>
       <Switch
         checked={theme === "dark"}
         label="暗色模式"
         onChange={(e) => {
           const next = (e.target as HTMLInputElement).checked ? "dark" : "light"
           setTheme(next)
-          setStatusMessage(`已切换到${next === "dark" ? "暗色" : "亮色"}主题`)
+          setStatus(`已切换到${next === "dark" ? "暗色" : "亮色"}主题`)
         }}
         style={{ margin: 0, fontSize: 13 }}
       />
@@ -163,12 +108,12 @@ function SettingsPanel() {
 /* ── Header right buttons (consumer) ── */
 
 function HeaderRight() {
-  const { setStatusMessage } = useDeskDockview()
+  const { setStatus } = useDock()
   return (
     <button
       className="dv-titlebar-btn"
       title="登录 Google"
-      onClick={() => setStatusMessage("登录功能由消费者实现")}
+      onClick={() => setStatus("登录功能由消费者实现")}
     >
       <Icon icon={IconNames.LOG_IN} size={14} />
     </button>
@@ -219,25 +164,23 @@ const editors = [
 
 function App() {
   return (
-    <DeskDockviewLayout
+    <DockLayout
       title="ui-dock demo"
       headerRight={<HeaderRight />}
       navigation={navigation}
       editors={editors}
+      right={{ size: 250, minSize: 180, title: "属性" }}
+      bottomEdge={{ size: 150, minSize: 80, title: "终端" }}
       bottom={
-        <div style={{ padding: 8, fontSize: 12 }}>
-          <h4 style={{ margin: "0 0 8px", fontSize: 13 }}>终端</h4>
-          <div style={{ fontFamily: "monospace", opacity: 0.7 }}>~ $</div>
+        <div className="dv-bottom">
+          <h4>终端</h4>
+          <pre>~ $</pre>
         </div>
       }
       properties={
-        <div style={{ padding: 12 }}>
-          <h4 style={{ margin: "0 0 8px", fontSize: 13 }}>
-            属性
-          </h4>
-          <div style={{ fontSize: 12 }}>
-            选中内容后显示属性
-          </div>
+        <div className="dv-panel-wide">
+          <h4>属性</h4>
+          <div>选中内容后显示属性</div>
         </div>
       }
     />

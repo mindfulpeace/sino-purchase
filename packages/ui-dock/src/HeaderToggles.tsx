@@ -1,4 +1,4 @@
-import { useDeskDockview } from "./DeskDockviewLayout"
+import { useDock } from "./DockLayout"
 
 /* ── VS Code style solid/outline SVG icons ── */
 
@@ -36,7 +36,7 @@ function SidebarRightIcon({ solid }: { solid: boolean }) {
 }
 
 export function HeaderToggles() {
-  const { leftVisible, setLeftVisible, rightVisible, setRightVisible, bottomVisible, setBottomVisible } = useDeskDockview()
+  const { leftVisible, setLeftVisible, rightVisible, setRightVisible, bottomVisible, setBottomVisible } = useDock()
 
   return (
     <>
