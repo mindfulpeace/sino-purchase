@@ -9,23 +9,35 @@ import {
 } from "react"
 import {
   DockviewReact,
-  themeDark,
+  themeAbyss,
+  themeLight,
 } from "dockview"
+import type { DockviewTheme } from "dockview"
 import type {
   DockviewReadyEvent,
   DockviewApi,
   IDockviewPanelProps,
 } from "dockview"
 import type { DeskDockviewLayoutProps } from "./types"
+import { StatusBar } from "./StatusBar"
+import { HeaderToggles } from "./HeaderToggles"
 
 /* ─── Context for child components ─── */
 
 interface DeskDockviewCtx {
   openEditor: (id: string) => void
+  setLeftVisible: (v: boolean) => void
   setRightVisible: (v: boolean) => void
   setBottomVisible: (v: boolean) => void
+  leftVisible: boolean
   rightVisible: boolean
   bottomVisible: boolean
+  statusMessage: string
+  contentSummary: string
+  setStatusMessage: (msg: string) => void
+  setContentSummary: (msg: string) => void
+  theme: "dark" | "light"
+  setTheme: (t: "dark" | "light") => void
 }
 
 const Ctx = createContext<DeskDockviewCtx | null>(null)
@@ -40,6 +52,7 @@ export function useDeskDockview(): DeskDockviewCtx {
 
 export function DeskDockviewLayout({
   title,
+  headerRight,
   navigation,
   editors,
   properties,
@@ -49,8 +62,14 @@ export function DeskDockviewLayout({
   const editorsRef = useRef(editors)
   editorsRef.current = editors
   const centerGroupRef = useRef<string | null>(null)
+  const [leftVisible, setLeftVisible] = useState(true)
   const [rightVisible, setRightVisible] = useState(false)
   const [bottomVisible, setBottomVisible] = useState(false)
+  const [statusMessage, setStatusMessage] = useState("")
+  const [contentSummary, setContentSummary] = useState("")
+  const [theme, setTheme] = useState<"dark" | "light">("dark")
+
+  const dockviewTheme: DockviewTheme = theme === "dark" ? themeAbyss : themeLight
 
   /* openEditor — called from nav panel child components */
   const openEditor = useCallback((id: string) => {
@@ -104,7 +123,7 @@ export function DeskDockviewLayout({
       /* ── Left edge: navigation tabs (locked) ── */
       const leftEdge = api.addEdgeGroup("left", {
         id: "left-edge",
-        initialSize: 300,
+        initialSize: 200,
         minimumSize: 120,
         maximumSize: 600,
       })
@@ -138,8 +157,8 @@ export function DeskDockviewLayout({
       if (properties) {
         api.addEdgeGroup("right", {
           id: "right-edge",
-          initialSize: 350,
-          minimumSize: 200,
+          initialSize: 200,
+          minimumSize: 150,
         })
         const rPanel = api.addPanel({
           id: "right-panel",
@@ -173,6 +192,10 @@ export function DeskDockviewLayout({
 
   /* sync visibility state */
   useEffect(() => {
+    apiRef.current?.setEdgeGroupVisible("left", leftVisible)
+  }, [leftVisible])
+
+  useEffect(() => {
     apiRef.current?.setEdgeGroupVisible("right", rightVisible)
   }, [rightVisible])
 
@@ -182,25 +205,30 @@ export function DeskDockviewLayout({
 
   /* context value */
   const ctx = useMemo<DeskDockviewCtx>(
-    () => ({ openEditor, setRightVisible, setBottomVisible, rightVisible, bottomVisible }),
-    [openEditor, rightVisible, bottomVisible],
+    () => ({ openEditor, setLeftVisible, setRightVisible, setBottomVisible, leftVisible, rightVisible, bottomVisible, statusMessage, contentSummary, setStatusMessage, setContentSummary, theme, setTheme }),
+    [openEditor, leftVisible, rightVisible, bottomVisible, statusMessage, contentSummary, theme],
   )
 
   return (
     <Ctx.Provider value={ctx}>
-      <div className="dv-layout">
+      <div className={`dv-layout dockview-theme-${theme === "dark" ? "abyss" : "light"}`}>
         {title && (
           <div className="dv-titlebar">
             <span className="dv-titlebar-title">{title}</span>
+            <div className="dv-titlebar-right">
+              <HeaderToggles />
+              {headerRight}
+            </div>
           </div>
         )}
         <div className="dv-body">
           <DockviewReact
             components={components}
             onReady={onReady}
-            theme={themeDark}
+            theme={dockviewTheme}
           />
         </div>
+        <StatusBar left={<>{statusMessage}</>} right={<>{contentSummary}</>} />
       </div>
     </Ctx.Provider>
   )

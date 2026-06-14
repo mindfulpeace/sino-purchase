@@ -4,45 +4,116 @@
   height: 100%;
 }
 
+/* ── TitleBar ── */
+
 .dv-titlebar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 26px;
   padding: 0 12px;
-  background: var(--dv-background-color, #1e1e1e);
-  border-bottom: 1px solid var(--dv-separator-border, #333);
+  background: var(--dv-tabs-and-actions-container-background-color, #1c1c2a);
+  border-bottom: 1px solid var(--dv-separator-border, #2b2b4a);
   font-size: 12px;
-  color: var(--dv-activegroup-visiblepanel-tab-color, #ccc);
+  color: var(--dv-activegroup-visiblepanel-tab-color, rgba(255, 255, 255, 0.6));
   flex-shrink: 0;
 }
 
 .dv-titlebar-title {
   font-weight: 600;
+  color: var(--dv-activegroup-visiblepanel-tab-color, rgba(255, 255, 255, 0.85));
 }
+
+.dv-titlebar-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dv-titlebar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+}
+
+.dv-titlebar-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dv-titlebar-btn-active svg {
+  opacity: 1;
+}
+
+/* ── Body ── */
 
 .dv-body {
   flex: 1;
   overflow: hidden;
 }
 
-/* Hide close button/action on all edge group tabs (locked) */
+/* ── StatusBar ── */
+
+.dv-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 22px;
+  padding: 0 8px;
+  background: var(--dv-color-abyss-accent, rgb(91, 30, 207));
+  color: var(--dv-color-abyss-primary-text, white);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.dv-statusbar-left,
+.dv-statusbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dv-statusbar-item {
+  padding: 0 6px;
+  line-height: 22px;
+  white-space: nowrap;
+}
+
+/* ── Edge groups ── */
+
+/* Hide close button on locked edge group tabs */
 .dv-edge-group .dv-default-tab-action {
   display: none !important;
 }
 
-/* Prevent cursor change on locked group tabs */
-.dv-locked-groupview .dv-tab {
-  cursor: pointer;
+/* Hide float / maximize / minimize buttons on editor tabs */
+.dv-groupview:not(.dv-edge-group) .dv-tabs-and-actions-container > .dv-tab-group-action {
+  display: none !important;
 }
 
-/* Panel content: default text color dimmer than tab color */
+/* Prevent cursor change on locked group tabs */
+.dv-edge-group .dv-pane-header {
+  cursor: default !important;
+}
+.dv-edge-group .dv-void-container {
+  cursor: default !important;
+}
+
+/* ── Panel content ── */
+
 .dv-content-container {
   color: var(--dv-activegroup-visiblepanel-tab-color, white);
   opacity: 0.7;
 }
 
-/* Panel headings remain full brightness */
 .dv-content-container h1,
 .dv-content-container h2,
 .dv-content-container h3,
@@ -52,15 +123,40 @@
   opacity: 1;
 }
 
-/* Light mode: override opacity for better contrast */
+/* ── Abyss theme: disable focus outline ── */
+
+.dockview-theme-abyss {
+  --dv-paneview-active-outline-color: transparent;
+  --dv-tabs-and-actions-container-height: 24px;
+}
+
+/* ── Light mode ── */
+
+.dockview-theme-light {
+  --dv-tabs-and-actions-container-height: 24px;
+}
+
 .dockview-theme-light .dv-content-container {
   opacity: 0.85;
 }
 
-/* Disable pane focus outline */
-.dockview-theme-dark {
-  --dv-paneview-active-outline-color: transparent;
+/* TitleBar — light */
+.dockview-theme-light .dv-titlebar {
+  background: var(--dv-tabs-and-actions-container-background-color, #f3f3f3);
+  border-bottom-color: var(--dv-separator-border, #d4d4d4);
+  color: var(--dv-activegroup-visiblepanel-tab-color, #333);
 }
-.dockview-theme-light {
-  --dv-paneview-active-outline-color: transparent;
+
+.dockview-theme-light .dv-titlebar-btn {
+  color: #333;
+}
+
+.dockview-theme-light .dv-titlebar-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* StatusBar — light */
+.dockview-theme-light .dv-statusbar {
+  background: #007acc;
+  color: white;
 }

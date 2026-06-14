@@ -13,8 +13,14 @@ export interface EditorTab {
   content: ReactNode
 }
 
+export interface StatusBarProps {
+  left?: ReactNode
+  right?: ReactNode
+}
+
 export interface DeskDockviewLayoutProps {
   title?: ReactNode
+  headerRight?: ReactNode
   navigation: NavigationItem[]
   editors?: EditorTab[]
   properties?: ReactNode

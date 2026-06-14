@@ -73,6 +73,19 @@ sino-purchase-v2/
 │           ├── useSheetData.ts # 泛型数据 hook (add/update/remove/reload)
 │           ├── useSync.tsx    # 同步状态 hook + SyncProvider
 │           └── global.d.ts    # google.accounts.oauth2 类型声明
+│   └── ui-dock/               # @sino-purchase/ui-dock (dockview 布局库)
+│       ├── package.json       # peer deps: React, dockview
+│       ├── vite.config.ts     # lib 模式构建
+│       ├── tsconfig.json
+│       └── src/
+│           ├── index.ts       # barrel 导出 + CSS 自动注入
+│           ├── types.ts       # NavigationItem, EditorTab, DeskDockviewLayoutProps, StatusBarProps
+│           ├── DeskDockviewLayout.tsx  # 主布局组件 (themeAbyss/themeLight, headerRight, statusMessage)
+│           ├── StatusBar.tsx  # 底部状态栏组件 (left/right slots)
+│           ├── hooks/
+│           │   └── useDockviewApi.ts  # dockview API context
+│           └── styles/
+│               └── overrides.css  # 主题覆盖、标题栏、状态栏、tab 高度等样式
 ├── apps/
 │   └── demo-ui/              # 演示应用 (消费者)
 │   │   ├── package.json       # 依赖 @sino-purchase/desk-ui (workspace:*)
@@ -133,6 +146,13 @@ sino-purchase-v2/
 - **Tab 状态管理**: `useTabs` hook (useReducer + useSearchParams)，URL 用 `setSearchParams({replace:true})` 持久化，回到按钮正常
 - **菜单栏默认**: 300px 宽，最小 120px，最大 600px；文件树 `text-overflow: ellipsis` 防换行
 - **标题栏高**: 26px
+- **ui-dock 主题**: 使用 `themeAbyss` (深蓝/紫) 作为暗色主题，`themeLight` 作为亮色主题。主题切换通过 `theme`/`setTheme` context 状态实现，`DockviewReact` 接收不同 theme 对象
+- **ui-dock tab 高度**: `--dv-tabs-and-actions-container-height: 24px` (两个主题均设)，从默认 35px 缩减
+- **ui-dock 标题栏**: `dv-titlebar-right` 区域用于消费者自定义按钮 (`headerRight` prop)；内置 edge 切换按钮待实现
+- **ui-dock 状态栏**: 内置 22px 状态栏，通过 `statusMessage`/`setStatusMessage` context 让消费者自由设置状态文本
+- **ui-dock 面板文字**: `.dv-content-container` 使用 `opacity: 0.7` (暗色) / `0.85` (亮色)，标题 `opacity: 1.0`
+- **ui-dock 焦点轮廓**: `--dv-paneview-active-outline-color: transparent` 禁用面板聚焦蓝色轮廓
+- **ui-dock 编辑器 tab 按钮**: `.dv-tab .dv-default-tab-action { display: none }` 隐藏 float/maximize/minimize 按钮
 
 ## 已修复的问题
 1. `bp5-` → `bp6-` 前缀
@@ -161,9 +181,9 @@ sino-purchase-v2/
 - MonacoShowcase 已去掉 `readOnly: true`，可编辑
 - 菜单栏内容 (`menu-content div, span`) 全局设为 `white-space: nowrap; overflow: hidden; text-overflow: ellipsis;`
 - `@sino-purchase/desk-ui` 是 monorepo 中的库包 (`packages/desk-ui`)，布局组件 + 主题 + hooks 全部抽取至此。CSS 提取到 `dist/index.css`，使用者需 `import "@sino-purchase/desk-ui/style.css"`
-- Demo app (`apps/demo-ui`) 通过 npm workspace 引用本地库：`"@sino-purchase/desk-ui": "*"`
+- Demo app (`apps/demo-ui`) 通过 npm workspace 引用本地库：`"@sino-purchase/ui-dock": "*"`
 - 主应用 (`apps/sino-purchase-v2`) 引用 `@sino-purchase/desk-ui` + `@sino-purchase/sheets-api` + `@sino-purchase/utils/doc/print`
-- 构建顺序: `packages/desk-ui` → `packages/sheets-api` → `apps/demo-ui`
+- 构建顺序: `packages/desk-ui` → `packages/ui-dock` → `packages/sheets-api` → `apps/demo-ui`
 - `npm run dev` 启动主应用 dev server
 - `npm run dev:desk` 启动 desk-ui demo 应用
 - `npm run build:sheets` 单独构建 sheets-api
@@ -184,3 +204,10 @@ sino-purchase-v2/
 - 记账报销页面 (`apps/sino-purchase-v2/src/pages/Accounting.tsx`) 使用 `AccountingProvider`(useReducer) 管理状态，数据存放在内存中（未接入 sheets-api），支持 Excel/剪贴板导入和报销单打印预览
 - `CashGrid` 使用 `@blueprintjs/table` 的 `Table2` + `Column`，按税务字段 HSL 着色，支持点击排序
 - 导入流程: Excel 或剪贴板 → 解析为 CashRecord[] → ImportDialog 预览 → 确认 → 加入状态
+- `@sino-purchase/ui-dock` 是 dockview 布局库，提供 `DeskDockviewLayout` 组件和 `useDeskDockview` hook。导出 `StatusBar` 组件。使用 `themeAbyss`/`themeLight` 主题
+- ui-dock Context API: `openEditor(id)`, `setRightVisible(v)`, `setBottomVisible(v)`, `rightVisible`, `bottomVisible`, `statusMessage`, `setStatusMessage(msg)`, `theme`, `setTheme(t)`
+- ui-dock Props: `title?`, `headerRight?` (ReactNode), `navigation[]`, `editors?`, `properties?`, `bottom?`
+- `npm run build:dockview` 单独构建 ui-dock
+- ui-dock edge groups: left (导航面板, 300px), right (属性栏, 350px, 默认隐藏), bottom (底部面板, 200px, 默认隐藏)
+- dockview 主题切换需要传递不同 theme 对象给 `DockviewReact`，不能仅通过 CSS 类切换
+- `--dv-tabs-and-actions-container-height` 必须在每个主题类下单独设置（变量作用域不共享）

@@ -21,7 +21,7 @@ function PlaceholderPanel({ icon, title }: { icon: string; title: string }) {
         gap: 12,
       }}
     >
-      <span style={{ fontSize: 48 }}>{icon}</span>
+      <Icon icon={icon} size={48} />
       <span>{title}</span>
     </div>
   )
@@ -30,11 +30,11 @@ function PlaceholderPanel({ icon, title }: { icon: string; title: string }) {
 /* ── Nav panel content components ── */
 
 function ExplorerPanel() {
-  const { openEditor } = useDeskDockview()
+  const { openEditor, setStatusMessage, setContentSummary } = useDeskDockview()
   const items = [
-    { id: "data-csv", icon: "📄", label: "data.csv" },
-    { id: "orders-csv", icon: "📄", label: "orders.csv" },
-    { id: "inventory-csv", icon: "📄", label: "inventory.csv" },
+    { id: "data-csv", icon: IconNames.DOCUMENT, label: "data.csv" },
+    { id: "orders-csv", icon: IconNames.DOCUMENT, label: "orders.csv" },
+    { id: "inventory-csv", icon: IconNames.DOCUMENT, label: "inventory.csv" },
   ]
   return (
     <div style={{ padding: 8 }}>
@@ -44,7 +44,11 @@ function ExplorerPanel() {
       {items.map((item) => (
         <div
           key={item.id}
-          onClick={() => openEditor(item.id)}
+          onClick={() => {
+            openEditor(item.id)
+            setStatusMessage(`已打开 ${item.label}`)
+            setContentSummary(`${items.length} 个文件`)
+          }}
           style={{
             padding: "6px 8px",
             cursor: "pointer",
@@ -59,7 +63,7 @@ function ExplorerPanel() {
           }
           onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
         >
-          <span>{item.icon}</span>
+          <span><Icon icon={item.icon} size={14} /></span>
           <span>{item.label}</span>
         </div>
       ))}
@@ -90,11 +94,11 @@ function SearchPanel() {
 }
 
 function ExamplesPanel() {
-  const { openEditor } = useDeskDockview()
+  const { openEditor, setStatusMessage, setContentSummary } = useDeskDockview()
   const items = [
-    { id: "showcase", icon: "🧩", label: "Blueprint Showcase" },
-    { id: "icons", icon: "🎨", label: "图标展示" },
-    { id: "monaco", icon: "📝", label: "Monaco Editor" },
+    { id: "showcase", icon: IconNames.CUBE, label: "Blueprint Showcase" },
+    { id: "icons", icon: IconNames.PALETTE, label: "图标展示" },
+    { id: "monaco", icon: IconNames.EDIT, label: "Monaco Editor" },
   ]
   return (
     <div style={{ padding: 8 }}>
@@ -105,7 +109,11 @@ function ExamplesPanel() {
         {items.map((item) => (
           <div
             key={item.id}
-            onClick={() => openEditor(item.id)}
+            onClick={() => {
+              openEditor(item.id)
+              setStatusMessage(`已打开 ${item.label}`)
+              setContentSummary(`${items.length} 个范例`)
+            }}
             style={{
               padding: "6px 8px",
               cursor: "pointer",
@@ -122,7 +130,7 @@ function ExamplesPanel() {
               (e.currentTarget.style.background = "transparent")
             }
           >
-            <span>{item.icon}</span>
+            <span><Icon icon={item.icon} size={14} /></span>
             <span>{item.label}</span>
           </div>
         ))}
@@ -132,35 +140,38 @@ function ExamplesPanel() {
 }
 
 function SettingsPanel() {
-  const [isDark, setIsDark] = useState(true)
-
-  const handleToggle = (checked: boolean) => {
-    setIsDark(checked)
-    const html = document.documentElement
-    const shell = document.querySelector(".dv-shell")
-    if (checked) {
-      html.classList.remove("bp6-theme-light")
-      shell?.classList.remove("dockview-theme-light")
-      shell?.classList.add("dockview-theme-dark")
-    } else {
-      html.classList.add("bp6-theme-light")
-      shell?.classList.remove("dockview-theme-dark")
-      shell?.classList.add("dockview-theme-light")
-    }
-  }
-
+  const { theme, setTheme, setStatusMessage } = useDeskDockview()
   return (
     <div style={{ padding: 8 }}>
       <h4 style={{ margin: "0 0 8px", fontSize: 13 }}>
         设置
       </h4>
       <Switch
-        checked={isDark}
+        checked={theme === "dark"}
         label="暗色模式"
-        onChange={(e) => handleToggle((e.target as HTMLInputElement).checked)}
+        onChange={(e) => {
+          const next = (e.target as HTMLInputElement).checked ? "dark" : "light"
+          setTheme(next)
+          setStatusMessage(`已切换到${next === "dark" ? "暗色" : "亮色"}主题`)
+        }}
         style={{ margin: 0, fontSize: 13 }}
       />
     </div>
+  )
+}
+
+/* ── Header right buttons (consumer) ── */
+
+function HeaderRight() {
+  const { setStatusMessage } = useDeskDockview()
+  return (
+    <button
+      className="dv-titlebar-btn"
+      title="登录 Google"
+      onClick={() => setStatusMessage("登录功能由消费者实现")}
+    >
+      <Icon icon={IconNames.LOG_IN} size={14} />
+    </button>
   )
 }
 
@@ -196,12 +207,12 @@ const navigation = [
 /* ── Editor definitions ── */
 
 const editors = [
-  { id: "data-csv", label: "data.csv", content: <PlaceholderPanel icon="📄" title="data.csv" /> },
-  { id: "orders-csv", label: "orders.csv", content: <PlaceholderPanel icon="📄" title="orders.csv" /> },
-  { id: "inventory-csv", label: "inventory.csv", content: <PlaceholderPanel icon="📄" title="inventory.csv" /> },
-  { id: "showcase", label: "Blueprint Showcase", content: <PlaceholderPanel icon="🧩" title="Blueprint Showcase" /> },
-  { id: "icons", label: "图标展示", content: <PlaceholderPanel icon="🎨" title="图标展示" /> },
-  { id: "monaco", label: "Monaco Editor", content: <PlaceholderPanel icon="📝" title="Monaco Editor" /> },
+  { id: "data-csv", label: "data.csv", content: <PlaceholderPanel icon={IconNames.DOCUMENT} title="data.csv" /> },
+  { id: "orders-csv", label: "orders.csv", content: <PlaceholderPanel icon={IconNames.DOCUMENT} title="orders.csv" /> },
+  { id: "inventory-csv", label: "inventory.csv", content: <PlaceholderPanel icon={IconNames.DOCUMENT} title="inventory.csv" /> },
+  { id: "showcase", label: "Blueprint Showcase", content: <PlaceholderPanel icon={IconNames.CUBE} title="Blueprint Showcase" /> },
+  { id: "icons", label: "图标展示", content: <PlaceholderPanel icon={IconNames.PALETTE} title="图标展示" /> },
+  { id: "monaco", label: "Monaco Editor", content: <PlaceholderPanel icon={IconNames.EDIT} title="Monaco Editor" /> },
 ]
 
 /* ── App ── */
@@ -209,9 +220,16 @@ const editors = [
 function App() {
   return (
     <DeskDockviewLayout
-      title="CSV Editor — dockview demo"
+      title="ui-dock demo"
+      headerRight={<HeaderRight />}
       navigation={navigation}
       editors={editors}
+      bottom={
+        <div style={{ padding: 8, fontSize: 12 }}>
+          <h4 style={{ margin: "0 0 8px", fontSize: 13 }}>终端</h4>
+          <div style={{ fontFamily: "monospace", opacity: 0.7 }}>~ $</div>
+        </div>
+      }
       properties={
         <div style={{ padding: 12 }}>
           <h4 style={{ margin: "0 0 8px", fontSize: 13 }}>
