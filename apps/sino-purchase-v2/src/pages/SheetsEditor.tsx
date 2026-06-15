@@ -3,12 +3,12 @@ import { Button } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { Icon } from "@blueprintjs/core"
 import { useAuth } from "@sino-purchase/sheets-api"
-import { useTheme } from "@sino-purchase/desk-ui"
+import { useDock } from "@sino-purchase/ui-dock"
 import { SPREADSHEET_ID } from "../config/sheets"
 
 export default function SheetsEditor() {
   const { ready, loggedIn, login } = useAuth()
-  const { theme } = useTheme()
+  const { theme } = useDock()
   const [sheetsKey, setSheetsKey] = useState(0)
 
   if (!ready) {

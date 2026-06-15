@@ -3,7 +3,7 @@ import type { PurchaseTask, TaskStatus } from "../types"
 import { STATUS_BADGE, STATUS_LABEL_CN } from "../types"
 import { urgencyLabel } from "../helpers"
 import { usePlanStore } from "../../../app/stores/planStore"
-import { usePropertiesFeedback } from "@sino-purchase/desk-ui"
+import { useDock } from "@sino-purchase/ui-dock"
 
 interface Props {
   task: PurchaseTask
@@ -16,7 +16,7 @@ interface Props {
 
 function StatusSelector({ task, onClose }: { task: PurchaseTask; onClose: () => void }) {
   const { updateTask } = usePlanStore()
-  const feedback = usePropertiesFeedback()
+  const { setStatus } = useDock()
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -29,9 +29,9 @@ function StatusSelector({ task, onClose }: { task: PurchaseTask; onClose: () => 
 
   const handleSelect = useCallback((s: TaskStatus) => {
     updateTask(task.id, { status: s })
-    feedback.log(`状态: ${STATUS_LABEL_CN[s]}`)
+    setStatus(`状态: ${STATUS_LABEL_CN[s]}`)
     onClose()
-  }, [task.id, updateTask, feedback, onClose])
+  }, [task.id, updateTask, setStatus, onClose])
 
   const statuses: TaskStatus[] = [1, 2, 3, 4, 5]
   return (
@@ -55,7 +55,7 @@ function StatusSelector({ task, onClose }: { task: PurchaseTask; onClose: () => 
 
 function UrgencySelector({ task, onClose }: { task: PurchaseTask; onClose: () => void }) {
   const { updateTask } = usePlanStore()
-  const feedback = usePropertiesFeedback()
+  const { setStatus } = useDock()
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -68,9 +68,9 @@ function UrgencySelector({ task, onClose }: { task: PurchaseTask; onClose: () =>
 
   const handleSelect = useCallback((u: number) => {
     updateTask(task.id, { urgency: u as 1 | 2 | 3 | 4 | 5 })
-    feedback.log(`紧急: ${u}/5`)
+    setStatus(`紧急: ${u}/5`)
     onClose()
-  }, [task.id, updateTask, feedback, onClose])
+  }, [task.id, updateTask, setStatus, onClose])
 
   return (
     <div ref={ref} style={{ position: "absolute", top: "100%", left: 0, zIndex: 50, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", display: "flex", gap: 2, padding: 4 }}>

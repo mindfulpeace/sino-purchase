@@ -1,7 +1,7 @@
 import { Button, Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { useAuth } from "@sino-purchase/sheets-api"
-import { useTheme } from "@sino-purchase/desk-ui"
+import { useDock } from "@sino-purchase/ui-dock"
 
 interface SheetsViewerProps {
   spreadsheetId: string
@@ -9,7 +9,7 @@ interface SheetsViewerProps {
 
 export default function SheetsViewer({ spreadsheetId }: SheetsViewerProps) {
   const { ready, loggedIn, login } = useAuth()
-  const { theme } = useTheme()
+  const { theme } = useDock()
 
   if (!ready) {
     return (

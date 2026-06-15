@@ -13,7 +13,7 @@
     "@blueprintjs/icons": "^6.10.0",
     "@blueprintjs/select": "^6.2.1",
     "@blueprintjs/table": "^6.1.1",
-    "@sino-purchase/desk-ui": "*",
+    "@sino-purchase/ui-dock": "*",
     "@sino-purchase/doc": "*",
     "@sino-purchase/print": "*",
     "@sino-purchase/sheets-api": "*",
