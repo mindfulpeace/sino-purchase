@@ -68,8 +68,9 @@
   justify-content: space-between;
   height: 22px;
   padding: 0 8px;
-  background: var(--dv-color-abyss-accent, rgb(91, 30, 207));
-  color: var(--dv-color-abyss-primary-text, white);
+  background: var(--dv-tabs-and-actions-container-background-color, #1c1c2a);
+  border-top: 1px solid var(--dv-separator-border, #2b2b4a);
+  color: var(--dv-activegroup-visiblepanel-tab-color, rgba(255, 255, 255, 0.6));
   font-size: 12px;
   flex-shrink: 0;
 }
@@ -105,6 +106,20 @@
 }
 .dv-edge-group .dv-void-container {
   cursor: default !important;
+}
+
+/* Disable focus outline on tabs */
+.dv-tab:focus {
+  outline: none;
+}
+.dv-tab:focus-within::after,
+.dv-tab:focus::after {
+  outline: none !important;
+}
+
+/* Fix tab separator line position */
+.dv-tabs-container.dv-vertical .dv-tab:not(:first-child)::before {
+  top: -2px;
 }
 
 /* ── Panel content ── */
@@ -219,9 +234,9 @@
   opacity: 0.7;
 }
 
-/* ── Abyss theme: disable focus outline ── */
+/* ── VS theme: disable focus outline + tab height ── */
 
-.dockview-theme-abyss {
+.dockview-theme-vs {
   --dv-paneview-active-outline-color: transparent;
   --dv-tabs-and-actions-container-height: 24px;
 }
@@ -257,8 +272,9 @@
 
 /* StatusBar — light */
 .dockview-theme-light .dv-statusbar {
-  background: var(--bp-intent-primary, #007acc);
-  color: var(--bp-intent-primary-text, white);
+  background: var(--dv-tabs-and-actions-container-background-color, #f3f3f3);
+  border-top-color: var(--dv-separator-border, #d4d4d4);
+  color: var(--dv-activegroup-visiblepanel-tab-color, #333);
 }
 
 /* Panel items — light */

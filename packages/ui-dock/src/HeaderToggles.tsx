@@ -19,7 +19,7 @@ export function HeaderToggles() {
         title="切换面板"
         onClick={() => setBottomVisible(!bottomVisible)}
       >
-        <Icon icon={bottomVisible ? IconNames.APPLICATION : IconNames.CHEVRON_UP} size={14} />
+        <Icon icon={bottomVisible ? IconNames.REMOVE_ROW_BOTTOM : IconNames.ADD_ROW_BOTTOM} size={14} />
       </button>
       <button
         className="dv-titlebar-btn"

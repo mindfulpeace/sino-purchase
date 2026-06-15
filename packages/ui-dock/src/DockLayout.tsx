@@ -9,7 +9,7 @@ import {
 } from "react"
 import {
   DockviewReact,
-  themeAbyss,
+  themeVisualStudio,
   themeLight,
 } from "dockview"
 import type { DockviewTheme } from "dockview"
@@ -79,7 +79,7 @@ export function DockLayout({
   const [summary, setSummary] = useState("")
   const [theme, setTheme] = useState<"dark" | "light">(defaultTheme)
 
-  const dvTheme: DockviewTheme = theme === "dark" ? themeAbyss : themeLight
+  const dvTheme: DockviewTheme = theme === "dark" ? themeVisualStudio : themeLight
 
   /* openEditor */
   const openEditor = useCallback((id: string) => {
@@ -224,7 +224,7 @@ export function DockLayout({
 
   return (
     <Ctx.Provider value={ctx}>
-      <div className={`dv-layout dockview-theme-${theme === "dark" ? "abyss" : "light"} ${theme === "dark" ? "bp6-dark" : "bp6-light"}`}>
+      <div className={`dv-layout dockview-theme-${theme === "dark" ? "vs" : "light"} ${theme === "dark" ? "bp6-dark" : "bp6-light"}`}>
         <div className="dv-titlebar">
           <span className="dv-titlebar-title">{title}</span>
           <div className="dv-titlebar-right">
