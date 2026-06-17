@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect } from "react"
 import { useAuth, useSheetData } from "@sino-purchase/sheets-api"
 import { usePlanStore } from "../app/stores/planStore"
-import { TaskList } from "../modules/plan/components/TaskList"
+import { PurchaseList } from "./PurchaseList"
 import { AddNewTaskBar } from "../modules/plan/components/AddNewTaskBar"
 import { SettingsDialog } from "../modules/plan/components/SettingsDialog"
 import { BatchImportDialog } from "../modules/plan/components/BatchImportDialog"
@@ -103,16 +103,8 @@ export default function PlanManagement() {
             <div className="sk sk-w82" />
           </div>
         ) : (
-          <TaskList
+          <PurchaseList
             tasks={tasks}
-            groupBy={groupBy}
-            onRequestEdit={handleRequestEdit}
-            selectedIds={selectedIds}
-            onToggleSelect={onToggleSelect}
-            onSelectAll={() => {
-              if (selectedIds.size === tasks.length) clearSelection()
-              else selectAll(tasks.map(t => t.id))
-            }}
           />
         )}
       </div>
