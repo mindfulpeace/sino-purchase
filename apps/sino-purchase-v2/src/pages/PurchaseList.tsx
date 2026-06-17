@@ -52,7 +52,7 @@ export function PurchaseList({ tasks }: PurchaseListProps) {
       numRows={tasks.length}
       enableGhostCells={false}
       enableRowHeader={false}
-      columnWidths={[120, 80, 100, 70, 50, 80, 80, 60, 60, 70, 90]}
+      columnWidths={[120, 80, 100, 70, 50, 80, 80, 60, 90]}
     >
       <Column name="品名" cellRenderer={(rowIndex) => (
         <Cell>
