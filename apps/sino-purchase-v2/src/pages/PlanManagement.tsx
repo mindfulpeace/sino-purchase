@@ -87,9 +87,9 @@ export default function PlanManagement() {
   }, [addTask])
 
   return (
-    <div className="plan-root">
+    <div className="plan-root" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       {/* Scrollable task list */}
-      <div className="plan-scroll">
+      <div className="plan-scroll" style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
         {loading ? (
           <div className="plan-loading">
             <div className="sk sk-hdr" />
