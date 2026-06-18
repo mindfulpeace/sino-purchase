@@ -1,33 +1,109 @@
-// @ts-nocheck
+import { Fragment, useMemo } from "react"
 import { usePlanStore } from "../../../app/stores/planStore"
-import type { PurchaseTask, SortBy } from "../types"
+import type { PurchaseTask, GroupBy } from "../types"
 import { TaskItem } from "./TaskItem"
 
-interface Props { tasks: PurchaseTask[]; onRequestEdit: (id: string) => void }
+interface Props {
+  tasks: PurchaseTask[]
+  groupBy: GroupBy
+  onRequestEdit: (id: string) => void
+  editingId: string | null
+  onSave: (data: Partial<PurchaseTask>) => void
+  onCancel: () => void
+  onDelete: (id: string) => void
+}
 
-export function TaskList({ tasks, onRequestEdit }: Props) {
-  const { sortBy, setSortBy, selectedIds, onToggleSelect, clearSelection, selectAll } = usePlanStore()
+function dateHdr(d: string): string {
+  if (!d) return ""
+  const [y, mo, da] = d.split("-").map(Number)
+  const dt = new Date(y, mo - 1, da)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const mm = String(dt.getMonth() + 1).padStart(2, "0")
+  const dd = String(dt.getDate()).padStart(2, "0")
+  const wd = ["日", "一", "二", "三", "四", "五", "六"][dt.getDay()]
+  const diff = Math.round((dt.getTime() - today.getTime()) / 86400000)
+  return diff === 0 ? `${mm}-${dd} ${wd}` : `${mm}-${dd} ${wd} ${diff > 0 ? "+" : ""}${diff}`
+}
 
-  if (tasks.length === 0) return <div className="empty">无任务</div>
+export function TaskList({ tasks, groupBy, onRequestEdit, editingId, onSave, onCancel, onDelete }: Props) {
+  const { selectedIds, onToggleSelect } = usePlanStore()
 
-  const isActive = (s: SortBy) => s === sortBy
+  const { groups, sortedKeys } = useMemo(() => {
+    const g = new Map<string, PurchaseTask[]>()
+    const getKey = (t: PurchaseTask): string => {
+      switch (groupBy) {
+        case "plannedDate": return t.plannedDate || "__none__"
+        case "status": return String(t.status)
+        case "urgency": return String(t.urgency || 1)
+        case "supplier": return t.supplierId || "__none__"
+        case "booker": return t.bookerId || "__none__"
+        default: return "__all__"
+      }
+    }
+    for (const t of tasks) {
+      const key = getKey(t)
+      if (!g.has(key)) g.set(key, [])
+      g.get(key)!.push(t)
+    }
+    let keys: string[]
+    if (groupBy === "plannedDate") {
+      keys = [...g.keys()].sort((a, b) => {
+        if (a === "__none__") return 1
+        if (b === "__none__") return -1
+        return a.localeCompare(b)
+      })
+    } else if (groupBy === "status") {
+      keys = [...g.keys()].sort((a, b) => Number(a) - Number(b))
+    } else if (groupBy === "urgency") {
+      keys = [...g.keys()].sort((a, b) => Number(b) - Number(a))
+    } else if (groupBy === "supplier" || groupBy === "booker") {
+      keys = [...g.keys()].sort((a, b) => {
+        if (a === "__none__") return 1
+        if (b === "__none__") return -1
+        return a.localeCompare(b)
+      })
+    } else {
+      keys = ["__all__"]
+    }
+    return { groups: g, sortedKeys: keys }
+  }, [tasks, groupBy])
 
-  const allSelected = tasks.length > 0 && tasks.every(t => selectedIds.has(t.id))
+  if (tasks.length === 0) return <div className="plan-empty">无任务</div>
 
-  return (<>
-    <div className="col-headers">
-      <span className="tc cb-col" onClick={() => { if (allSelected) clearSelection(); else selectAll(tasks.map(t => t.id)) }} style={{ cursor: "pointer" }}>{allSelected ? "✓" : ""}</span>
-      <span className="tc badge sortable" onClick={() => setSortBy("status")}>{isActive("status") ? "▾" : ""}S</span>
-      <span className="tc badge sortable" onClick={() => setSortBy("urgency")}>{isActive("urgency") ? "▾" : ""}U</span>
-      <span className="tc name sortable" onClick={() => setSortBy("name")}>{isActive("name") ? "▾品名" : "品名"}</span>
-      <span className="tc dim-text sortable" onClick={() => setSortBy("brand")}>{isActive("brand") ? "▾品牌" : "品牌"}</span>
-      <span className="tc dim-text sortable" onClick={() => setSortBy("spec")}>{isActive("spec") ? "▾规格" : "规格"}</span>
-      <span className="tc num sortable" onClick={() => setSortBy("quantity")}>{isActive("quantity") ? "▾数量" : "数量"}</span>
-      <span className="tc num sortable" onClick={() => setSortBy("unitPrice")}>{isActive("unitPrice") ? "▾单价" : "单价"}</span>
-      <span className="tc num amt">金额</span>
-      <span className="tc sup sortable" onClick={() => setSortBy("supplierId")}>{isActive("supplierId") ? "▾商家" : "商家"}</span>
-      <span className="tc date sortable" onClick={() => setSortBy("plannedDate")}>{isActive("plannedDate") ? "▾日期" : "日期"}</span>
+  function groupHeader(k: string): string {
+    switch (groupBy) {
+      case "plannedDate": return k === "__none__" ? "未计划" : dateHdr(k)
+      case "status": return `状态 ${k}`
+      case "urgency": return `紧急 ${k}`
+      case "supplier": return k === "__none__" ? "无商家" : k
+      case "booker": return k === "__none__" ? "无预定人" : k
+      default: return ""
+    }
+  }
+
+  return (
+    <div>
+      {sortedKeys.map(k => (
+        <Fragment key={k}>
+          {(groupBy !== "status" && groupBy !== "urgency" && k !== "__all__") && (
+            <div className="date-hdr">{groupHeader(k)}</div>
+          )}
+          {groups.get(k)!.map(task => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              onRequestEdit={onRequestEdit}
+              isEditing={editingId === task.id}
+              selected={selectedIds.has(task.id)}
+              onToggleSelect={onToggleSelect}
+              onSave={onSave}
+              onCancel={onCancel}
+              onDelete={() => onDelete(task.id)}
+            />
+          ))}
+        </Fragment>
+      ))}
     </div>
-    {tasks.map(task => <TaskItem key={task.id} task={task} onRequestEdit={onRequestEdit} selected={selectedIds.has(task.id)} onToggleSelect={onToggleSelect} />)}
-  </>)
+  )
 }

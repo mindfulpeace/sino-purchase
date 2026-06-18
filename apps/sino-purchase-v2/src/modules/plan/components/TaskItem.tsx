@@ -4,12 +4,17 @@ import { STATUS_BADGE, STATUS_LABEL_CN } from "../types"
 import { urgencyLabel } from "../helpers"
 import { usePlanStore } from "../../../app/stores/planStore"
 import { useDock } from "@sino-purchase/ui-dock"
+import { TaskDetail } from "./TaskDetail"
 
 interface Props {
   task: PurchaseTask
   onRequestEdit: (id: string) => void
+  isEditing: boolean
   selected: boolean
   onToggleSelect: (id: string) => void
+  onSave: (data: Partial<PurchaseTask>) => void
+  onCancel: () => void
+  onDelete: () => void
 }
 
 /* ── Inline status selector popover ────────── */
@@ -35,7 +40,7 @@ function StatusSelector({ task, onClose }: { task: PurchaseTask; onClose: () => 
 
   const statuses: TaskStatus[] = [1, 2, 3, 4, 5]
   return (
-    <div ref={ref} style={{ position: "absolute", top: "100%", left: 0, zIndex: 50, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", display: "flex", gap: 2, padding: 4 }}>
+    <div ref={ref} style={{ position: "absolute", top: "100%", left: 0, zIndex: 50, background: "var(--dv-tabs-and-actions-container-background-color, #1c1c2a)", border: "1px solid var(--dv-separator-border, #2b2b4a)", borderRadius: 4, boxShadow: "0 4px 12px rgba(0,0,0,0.3)", display: "flex", gap: 2, padding: 4 }}>
       {statuses.map(s => (
         <button
           key={s}
@@ -73,7 +78,7 @@ function UrgencySelector({ task, onClose }: { task: PurchaseTask; onClose: () =>
   }, [task.id, updateTask, setStatus, onClose])
 
   return (
-    <div ref={ref} style={{ position: "absolute", top: "100%", left: 0, zIndex: 50, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", display: "flex", gap: 2, padding: 4 }}>
+    <div ref={ref} style={{ position: "absolute", top: "100%", left: 0, zIndex: 50, background: "var(--dv-tabs-and-actions-container-background-color, #1c1c2a)", border: "1px solid var(--dv-separator-border, #2b2b4a)", borderRadius: 4, boxShadow: "0 4px 12px rgba(0,0,0,0.3)", display: "flex", gap: 2, padding: 4 }}>
       {[1, 2, 3, 4, 5].map(u => (
         <button
           key={u}
@@ -89,16 +94,37 @@ function UrgencySelector({ task, onClose }: { task: PurchaseTask; onClose: () =>
   )
 }
 
-/* ── TaskItem ──────────────────────────────── */
+/* ── Task body text ─────────────────────────── */
 
-export function TaskItem({ task, onRequestEdit, selected, onToggleSelect }: Props) {
+function TaskBody({ task }: { task: PurchaseTask }) {
+  const ccy = task.currency === "USD" ? "$" : task.currency === "CNY" ? "¥" : "k"
+  return (
+    <span className="task-body">
+      <span className="n">{task.name}</span>
+      {task.brand && <span>(<span className="v">{task.brand}</span>)</span>}
+      {task.spec && <span>-<span className="v">{task.spec}</span></span>}
+      <span> x<span className="qty">{task.quantity ?? 1}</span>{task.unit || ""}</span>
+      {(task.unitPrice ?? 0) > 0 && <span> <span className="prc">{ccy}{task.unitPrice}</span></span>}
+      {task.supplierId && <span> @<span className="sup">{task.supplierId}</span></span>}
+      {task.bookerId && <span> #<span className="bok">{task.bookerId}</span></span>}
+    </span>
+  )
+}
+
+/* ── TaskItem ───────────────────────────────── */
+
+export function TaskItem({ task, onRequestEdit, isEditing, selected, onToggleSelect, onSave, onCancel, onDelete }: Props) {
   const [showStatus, setShowStatus] = useState(false)
   const [showUrgency, setShowUrgency] = useState(false)
-  const amount = (task.unitPrice ?? 0) * (task.quantity ?? 0)
 
   return (
-    <div className={`task-row${task.status >= 3 ? " dim" : ""}${selected ? " selected" : ""}`} onClick={() => onRequestEdit(task.id)}>
-      <span className="tc cb-col" onClick={e => { e.stopPropagation(); onToggleSelect(task.id) }}>{selected ? "✓" : ""}</span>
+    <div
+      className={`task-row${task.status >= 3 ? " dim" : ""}${selected ? " selected" : ""}${isEditing ? " open" : ""}`}
+      onClick={() => onRequestEdit(task.id)}
+    >
+      <span className="tc cb-col" onClick={e => { e.stopPropagation(); onToggleSelect(task.id) }}>
+        {selected ? "✓" : ""}
+      </span>
       <span style={{ position: "relative" }} onClick={e => { e.stopPropagation(); setShowStatus(v => !v); setShowUrgency(false) }}>
         <span className={`tc badge badge-${task.status}`} title={STATUS_LABEL_CN[task.status]}>{STATUS_BADGE[task.status]}</span>
         {showStatus && <StatusSelector task={task} onClose={() => setShowStatus(false)} />}
@@ -107,14 +133,20 @@ export function TaskItem({ task, onRequestEdit, selected, onToggleSelect }: Prop
         <span className={`tc badge badge-u${task.urgency}`} title={`紧急${task.urgency}/5`}>{urgencyLabel(task.urgency)}</span>
         {showUrgency && <UrgencySelector task={task} onClose={() => setShowUrgency(false)} />}
       </span>
-      <span className="tc name">{task.name}</span>
-      <span className="tc dim-text">{task.brand}</span>
-      <span className="tc dim-text">{task.spec}</span>
-      <span className="tc num">{task.quantity ?? 1}{task.unit}</span>
-      <span className="tc num">{amount > 0 ? `${task.currency === "USD" ? "$" : task.currency === "CNY" ? "¥" : "k"}${task.unitPrice}` : ""}</span>
-      <span className="tc num amt">{amount > 0 ? `${task.currency === "USD" ? "$" : task.currency === "CNY" ? "¥" : "k"}${amount.toFixed(2)}` : ""}</span>
-      <span className="tc sup" title={task.supplierId}>{task.supplierId}</span>
+      <TaskBody task={task} />
       <span className="tc date">{task.plannedDate ? task.plannedDate.slice(5) : ""}</span>
+
+      {isEditing && (
+        <div style={{ width: "100%" }}>
+          <TaskDetail
+            initial={task}
+            mode="edit"
+            onSave={onSave}
+            onCancel={onCancel}
+            onDelete={onDelete}
+          />
+        </div>
+      )}
     </div>
   )
 }
