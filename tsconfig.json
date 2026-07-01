@@ -5,7 +5,9 @@
     { "path": "./packages/utils/tsconfig.json" },
     { "path": "./packages/doc/tsconfig.json" },
     { "path": "./packages/print/tsconfig.json" },
-    { "path": "./packages/ui-dock/tsconfig.json" },
+    { "path": "./packages/layout-dock/tsconfig.json" },
+    { "path": "./packages/sheets-api/tsconfig.json" },
+    { "path": "./apps/sino-purchase-v2/tsconfig.json" },
     { "path": "./apps/demo-ui/tsconfig.json" }
   ]
 }
