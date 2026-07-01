@@ -65,6 +65,8 @@ export function DockLayout({
   defaultTheme = "dark",
   rightDefault = false,
   bottomDefault = false,
+  rightVisible: rightVisibleProp,
+  onRightVisibleChange,
   statusBar = true,
   onReady,
 }: DockLayoutProps) {
@@ -73,8 +75,18 @@ export function DockLayout({
   editorsRef.current = editors
   const centerGroupRef = useRef<string | null>(null)
   const [leftVisible, setLeftVisible] = useState(true)
-  const [rightVisible, setRightVisible] = useState(rightDefault)
+  const [_rightVisible, _setRightVisible] = useState(rightDefault)
   const [bottomVisible, setBottomVisible] = useState(bottomDefault)
+
+  // support external control of rightVisible
+  const rightVisible = rightVisibleProp !== undefined ? rightVisibleProp : _rightVisible
+  const setRightVisible = useCallback((v: boolean) => {
+    if (onRightVisibleChange) {
+      onRightVisibleChange(v)
+    } else {
+      _setRightVisible(v)
+    }
+  }, [onRightVisibleChange])
   const [status, setStatus] = useState("")
   const [summary, setSummary] = useState("")
   const [theme, setTheme] = useState<"dark" | "light">(defaultTheme)

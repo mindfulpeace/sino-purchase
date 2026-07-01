@@ -1,9 +1,11 @@
-import { lazy, Suspense } from "react"
+import { lazy, Suspense, useCallback } from "react"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { DockLayout, useDock } from "@sino-purchase/ui-dock"
-import { SheetsProvider, useAuth } from "@sino-purchase/sheets-api"
+import { DockLayout, useDock } from "@sino-purchase/layout-dock"
+import { SheetsProvider } from "@sino-purchase/sheets-api"
 import { CLIENT_ID, SPREADSHEET_ID } from "./config/sheets"
+import { useDocSettingsStore } from "./app/stores/docSettingsStore"
+import AccountingSettings from "./modules/accounting/AccountingSettings"
 
 const PlanManagement = lazy(() => import("./pages/PlanManagement"))
 const MaterialInfo = lazy(() => import("./pages/MaterialInfo"))
@@ -16,10 +18,10 @@ const fallback = <div className="dv-panel" style={{ color: "var(--text-dim)" }}>
 /* ── Navigation panels ── */
 
 function PlanNavPanel() {
-  const { openEditor, setStatus } = useDock()
+  const { openEditor } = useDock()
   return (
     <div className="dv-panel">
-      <div className="dv-panel-item" onClick={() => { openEditor("plan"); setStatus("已打开 采购清单") }}>
+      <div className="dv-panel-item" onClick={() => openEditor("plan")}>
         <Icon icon={IconNames.SHOPPING_CART} size={14} />
         <span>采购清单</span>
       </div>
@@ -39,10 +41,10 @@ function MaterialNavPanel() {
 }
 
 function AccountingNavPanel() {
-  const { openEditor, setStatus } = useDock()
+  const { openEditor } = useDock()
   return (
     <div className="dv-panel">
-      <div className="dv-panel-item" onClick={() => { openEditor("accounting"); setStatus("已打开 现金日记账") }}>
+      <div className="dv-panel-item" onClick={() => openEditor("accounting")}>
         <Icon icon={IconNames.DOLLAR} size={14} />
         <span>现金日记账</span>
       </div>
@@ -62,10 +64,10 @@ function PaymentsNavPanel() {
 }
 
 function SettingsNavPanel() {
-  const { openEditor, setStatus } = useDock()
+  const { openEditor } = useDock()
   return (
     <div className="dv-panel">
-      <div className="dv-panel-item" onClick={() => { openEditor("sheets-editor"); setStatus("已打开 Google Sheets") }}>
+      <div className="dv-panel-item" onClick={() => openEditor("sheets-editor")}>
         <Icon icon={IconNames.GRID_VIEW} size={14} />
         <span>Google Sheets 数据编辑</span>
       </div>
@@ -73,28 +75,18 @@ function SettingsNavPanel() {
   )
 }
 
-/* ── Header right buttons ── */
-
-function HeaderRight() {
-  const auth = useAuth()
-  return (
-    <button
-      className="dv-titlebar-btn"
-      title={auth.loggedIn ? "已登录" : "登录 Google"}
-      onClick={auth.loggedIn ? auth.logout : auth.login}
-    >
-      <Icon icon={auth.loggedIn ? IconNames.USER : IconNames.LOG_IN} size={14} />
-    </button>
-  )
-}
-
 /* ── App ── */
 
 function PlanAwareApp() {
+  const { propertiesVisible, setPropertiesVisible } = useDocSettingsStore()
+
+  const handleRightVisibleChange = useCallback(
+    (v: boolean) => setPropertiesVisible(v),
+    [setPropertiesVisible],
+  )
+
   return (
     <DockLayout
-      title="sino-purchase-v2"
-      headerRight={<HeaderRight />}
       navigation={[
         { id: "plan", icon: <Icon icon={IconNames.PROPERTIES} size={20} />, label: "计划管理", content: <PlanNavPanel /> },
         { id: "material", icon: <Icon icon={IconNames.LAYERS} size={20} />, label: "物料信息", content: <MaterialNavPanel /> },
@@ -105,17 +97,20 @@ function PlanAwareApp() {
       editors={[
         { id: "plan", label: "计划管理", content: <Suspense fallback={fallback}><PlanManagement /></Suspense> },
         { id: "material", label: "物料信息", content: <Suspense fallback={fallback}><MaterialInfo /></Suspense> },
-        { id: "accounting", label: "记账报销", content: <Suspense fallback={fallback}><Accounting /></Suspense> },
+        {
+          id: "accounting",
+          label: "记账报销",
+          content: <Suspense fallback={fallback}><Accounting /></Suspense>,
+          rightPanels: [
+            { id: "print-settings", label: "打印设置", content: <AccountingSettings /> },
+          ],
+        },
         { id: "payments", label: "往来付款", content: <Suspense fallback={fallback}><Payments /></Suspense> },
         { id: "sheets-editor", label: "Google Sheets", content: <Suspense fallback={fallback}><SheetsEditor /></Suspense> },
       ]}
-      right={{ size: 280, minSize: 200, title: "属性" }}
-      properties={
-        <div className="dv-panel-wide">
-          <h4>属性</h4>
-          <div>选中内容后显示属性</div>
-        </div>
-      }
+      right={{ size: 280, minSize: 200 }}
+      rightVisible={propertiesVisible}
+      onRightVisibleChange={handleRightVisibleChange}
     />
   )
 }

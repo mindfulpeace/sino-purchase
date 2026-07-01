@@ -38,6 +38,8 @@ export interface DockLayoutProps {
   defaultTheme?: "dark" | "light"
   rightDefault?: boolean
   bottomDefault?: boolean
+  rightVisible?: boolean
+  onRightVisibleChange?: (v: boolean) => void
   statusBar?: boolean
   onReady?: (api: import("dockview").DockviewApi) => void
 }
