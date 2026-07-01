@@ -23,3 +23,30 @@ button:focus { outline: none; }
   0%, 100% { opacity: 0.4; }
   50% { opacity: 0.7; }
 }
+
+/* ── Print: only printable paper content is output ── */
+
+@media print {
+  html, body, #root {
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-scaler-outer,
+  .print-preview-scaler {
+    transform: none !important;
+    transform-origin: top left !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .print-preview-scaler .print-view {
+    width: 100% !important;
+  }
+}

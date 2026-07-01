@@ -3,7 +3,7 @@ import { Button } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { Icon } from "@blueprintjs/core"
 import { useAuth } from "@sino-purchase/sheets-api"
-import { useDock } from "@sino-purchase/ui-dock"
+import { useDock } from "@sino-purchase/layout-dock"
 import { SPREADSHEET_ID } from "../config/sheets"
 
 export default function SheetsEditor() {

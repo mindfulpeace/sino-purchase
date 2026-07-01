@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react"
 import { ButtonGroup, Button, ControlGroup, HTMLSelect, InputGroup } from "@blueprintjs/core"
 import { useSheetData } from "@sino-purchase/sheets-api"
-import { useDock } from "@sino-purchase/ui-dock"
 import { usePlanStore } from "../app/stores/planStore"
 import { TaskList } from "../modules/plan/components/TaskList"
 import { AddNewTaskBar } from "../modules/plan/components/AddNewTaskBar"
@@ -55,7 +54,7 @@ const GROUP_SORT_MAP: Record<string, SortBy> = {
 }
 
 export default function PlanManagement() {
-  const { data: sheetData, reload: sheetReload, add, update, remove, isDemo } = useSheetData<PurchaseTask>({
+  const { data: sheetData, reload: sheetReload, add, update, remove } = useSheetData<PurchaseTask>({
     sheetName: SHEET,
     headers: TASK_HEADERS,
     numericFields: NUMERIC_FIELDS,
@@ -74,8 +73,6 @@ export default function PlanManagement() {
     showSettings, setShowSettings,
   } = usePlanStore()
 
-  const { setStatus, setSummary } = useDock()
-
   // Sync sheet data to store
   useEffect(() => { setAllTasks(sheetData) }, [sheetData])
 
@@ -90,19 +87,6 @@ export default function PlanManagement() {
   const batchInitialRef = useRef<Partial<PurchaseTask>>({})
   const [batchChanges, setBatchChanges] = useState<Partial<PurchaseTask>>({})
   const [showBatchConfirm, setShowBatchConfirm] = useState(false)
-
-  // Status bar sync
-  const { completed } = usePlanStore()
-  useEffect(() => {
-    const demoTag = isDemo ? " [Demo]" : ""
-    if (selectedIds.size > 0) {
-      setStatus(`${selectedIds.size} 项已选${demoTag}`)
-      setSummary(`${allTasks.length - completed} 待办 / ${completed} 完成${demoTag}`)
-    } else {
-      setStatus(`${allTasks.length} 项${demoTag}`)
-      setSummary(`${allTasks.length - completed} 待办 / ${completed} 完成${demoTag}`)
-    }
-  }, [selectedIds.size, allTasks.length, completed, setStatus, setSummary, isDemo])
 
   /* ── Detail editing ── */
 
@@ -191,8 +175,7 @@ export default function PlanManagement() {
       return s
     })
     navigator.clipboard.writeText(lines.join("\n"))
-    setStatus(`已复制 ${selectedIds.size} 项`)
-  }, [allTasks, selectedIds, setStatus])
+  }, [allTasks, selectedIds])
 
   /* ── Keyboard ── */
 

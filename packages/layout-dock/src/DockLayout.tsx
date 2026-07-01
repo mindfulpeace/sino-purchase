@@ -212,21 +212,21 @@ export function DockLayout({
     navPanel: (props: IDockviewPanelProps) => {
       const navId = props.params?.navId as string | undefined
       const item = navigation.find((n) => n.id === navId)
-      return item ? <>{item.content}</> : null
+      return item ? <div className="layout-dock-left">{item.content}</div> : null
     },
     editorPanel: (props: IDockviewPanelProps) => {
       const edId = props.params?.editorId as string | undefined
       const tab = editorsRef.current?.find((e) => e.id === edId)
-      return tab ? <>{tab.content}</> : null
+      return tab ? <div className="layout-dock-center">{tab.content}</div> : null
     },
     rightPanel: (props: IDockviewPanelProps) => {
       const panelId = props.params?.panelId as string | undefined
       const edId = props.params?.editorId as string | undefined
       const tab = editorsRef.current?.find((e) => e.id === edId)
       const panelCfg = tab?.rightPanels?.find((p) => p.id === panelId)
-      return panelCfg ? <>{panelCfg.content}</> : null
+      return panelCfg ? <div className="layout-dock-right">{panelCfg.content}</div> : null
     },
-    bottomPanel: () => (bottom ? <>{bottom}</> : null),
+    bottomPanel: () => (bottom ? <div className="layout-dock-bottom">{bottom}</div> : null),
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [navigation, bottom])
 

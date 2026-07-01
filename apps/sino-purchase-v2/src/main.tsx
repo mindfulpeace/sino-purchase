@@ -7,7 +7,7 @@ import "@blueprintjs/icons/lib/css/blueprint-icons.css"
 import "@blueprintjs/table/lib/css/table.css"
 
 import "dockview/dist/styles/dockview.css"
-import "@sino-purchase/ui-dock/style.css"
+import "@sino-purchase/layout-dock/style.css"
 import "@sino-purchase/doc/style.css"
 import "@sino-purchase/print/style.css"
 import "./index.css"

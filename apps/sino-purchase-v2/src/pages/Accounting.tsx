@@ -1,4 +1,3 @@
-import { useDock } from "@sino-purchase/ui-dock"
 import { useEffect, useCallback, useState } from "react"
 import { Button, Tooltip } from "@blueprintjs/core"
 import { useAccountingStore } from "../app/stores/accountingStore"
@@ -18,7 +17,6 @@ export default function Accounting() {
   const { records, activeTab, importDialog, setRecords, addRecords, hideImportDialog, switchTab } = useAccountingStore()
   const { propertiesVisible, setPropertiesVisible, setReimburseRecords } = useDocSettingsStore()
   const { loggedIn } = useAuth()
-  const { setStatus, setSummary } = useDock()
   const { importFromClipboard } = useImportClipboard()
   const { triggerImport, inputRef, handleFileChange } = useImportExcel()
   const [sheetsBatch, setSheetsBatch] = useState<string[]>([])
@@ -30,13 +28,8 @@ export default function Accounting() {
     }
   }, [loggedIn, records.length, setRecords])
 
-  // Status bar
+  // Sync records to doc settings for printing
   const summary = formatDataSummary(records)
-  useEffect(() => {
-    setStatus(loggedIn ? "现金日记账" : "现金日记账 [Demo]")
-    setSummary(summary + (loggedIn ? "" : " [Demo]"))
-  }, [records.length, summary, loggedIn, setStatus, setSummary])
-
   useEffect(() => {
     setReimburseRecords(records)
   }, [records])

@@ -1,7 +1,7 @@
 import { Button, Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { useAuth } from "@sino-purchase/sheets-api"
-import { useDock } from "@sino-purchase/ui-dock"
+import { useDock } from "@sino-purchase/layout-dock"
 
 interface SheetsViewerProps {
   spreadsheetId: string

@@ -4,7 +4,6 @@ import type { PurchaseTask, TaskStatus } from "../types"
 import { STATUS_BADGE, STATUS_LABEL_CN, STATUS_COLORS, URGENCY_COLORS } from "../types"
 import { urgencyLabel } from "../helpers"
 import { usePlanStore } from "../../../app/stores/planStore"
-import { useDock } from "@sino-purchase/ui-dock"
 import { TaskDetail } from "./TaskDetail"
 import "../plan.css"
 
@@ -36,7 +35,6 @@ function TaskBody({ task }: { task: PurchaseTask }) {
 
 export function TaskItem({ task, onRequestEdit, isEditing, selected, onToggleSelect, onSave, onCancel, onDelete }: Props) {
   const { updateTask } = usePlanStore()
-  const { setStatus } = useDock()
 
   const cls = `task-row${selected ? " selected" : ""}${isEditing ? " open" : ""}`
 
@@ -50,7 +48,7 @@ export function TaskItem({ task, onRequestEdit, isEditing, selected, onToggleSel
           text={STATUS_BADGE[s]}
           label={STATUS_LABEL_CN[s]}
           style={{ background: STATUS_COLORS[s] }}
-          onClick={() => { updateTask(task.id, { status: s }); setStatus(`状态: ${STATUS_LABEL_CN[s]}`) }}
+          onClick={() => { updateTask(task.id, { status: s }) }}
         />
       ))}
     </Menu>
@@ -65,7 +63,7 @@ export function TaskItem({ task, onRequestEdit, isEditing, selected, onToggleSel
           text={urgencyLabel(u)}
           label={`${u}/5`}
           style={{ background: URGENCY_COLORS[u] }}
-          onClick={() => { updateTask(task.id, { urgency: u as 1 | 2 | 3 | 4 | 5 }); setStatus(`紧急: ${u}/5`) }}
+          onClick={() => { updateTask(task.id, { urgency: u as 1 | 2 | 3 | 4 | 5 }) }}
         />
       ))}
     </Menu>
