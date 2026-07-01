@@ -37,6 +37,25 @@ function BusinessBNav() {
   )
 }
 
+function SettingsNav() {
+  const { theme, setTheme } = useDock()
+  return (
+    <div className="dv-panel">
+      <h4>主题设置</h4>
+      <div className="dv-panel-item" onClick={() => setTheme("dark")}>
+        <Icon icon={IconNames.MOON} size={14} />
+        <span>暗色模式</span>
+        {theme === "dark" && <Icon icon={IconNames.TICK} size={12} style={{ marginLeft: "auto" }} />}
+      </div>
+      <div className="dv-panel-item" onClick={() => setTheme("light")}>
+        <Icon icon={IconNames.FLASH} size={14} />
+        <span>亮色模式</span>
+        {theme === "light" && <Icon icon={IconNames.TICK} size={12} style={{ marginLeft: "auto" }} />}
+      </div>
+    </div>
+  )
+}
+
 /* ── Editor content ── */
 
 function BusinessADetail() {
@@ -218,6 +237,12 @@ export function App() {
           icon: <Icon icon={IconNames.GLOBE} size={20} />,
           label: "业务模块B",
           content: <BusinessBNav />,
+        },
+        {
+          id: "settings",
+          icon: <Icon icon={IconNames.COG} size={20} />,
+          label: "设置",
+          content: <SettingsNav />,
         },
       ]}
       editors={[

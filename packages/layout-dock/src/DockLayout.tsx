@@ -9,7 +9,7 @@ import {
 } from "react"
 import {
   DockviewReact,
-  themeVisualStudio,
+  themeAbyss,
   themeLight,
 } from "dockview"
 import type { DockviewTheme } from "dockview"
@@ -72,7 +72,7 @@ export function DockLayout({
   const [leftVisible, setLeftVisible] = useState(true)
   const [_rightVisible, _setRightVisible] = useState(rightDefault)
   const [bottomVisible, setBottomVisible] = useState(bottomDefault)
-  const [theme] = useState<"dark" | "light">(defaultTheme)
+  const [theme, setTheme] = useState<"dark" | "light">(defaultTheme)
 
   // support external control of rightVisible
   const rightVisible = rightVisibleProp !== undefined ? rightVisibleProp : _rightVisible
@@ -85,7 +85,7 @@ export function DockLayout({
     }
   }, [onRightVisibleChange])
 
-  const dvTheme: DockviewTheme = theme === "dark" ? themeVisualStudio : themeLight
+  const dvTheme: DockviewTheme = theme === "dark" ? themeAbyss : themeLight
 
   /* ─── Right panel management ─── */
 
@@ -367,14 +367,14 @@ export function DockLayout({
       rightVisible,
       bottomVisible,
       theme,
-      setTheme: () => {},
+      setTheme,
     }),
-    [openEditor, closeEditor, getApi, leftVisible, rightVisible, bottomVisible, theme],
+    [openEditor, closeEditor, getApi, leftVisible, rightVisible, bottomVisible, theme, setTheme],
   )
 
   return (
     <Ctx.Provider value={ctx}>
-      <div className={`dv-layout dockview-theme-${theme === "dark" ? "vs" : "light"} ${theme === "dark" ? "bp6-dark" : "bp6-light"}`}>
+      <div className={`dv-layout dockview-theme-${theme === "dark" ? "abyss" : "light"} ${theme === "dark" ? "bp6-dark" : "bp6-light"}`}>
         <div className="dv-body">
           <DockviewReact components={components} onReady={handleReady} theme={dvTheme} />
         </div>
