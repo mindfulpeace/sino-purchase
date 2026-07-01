@@ -1,7 +1,10 @@
 import { Fragment, useMemo } from "react"
+import { NonIdealState, Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import { usePlanStore } from "../../../app/stores/planStore"
 import type { PurchaseTask, GroupBy } from "../types"
 import { TaskItem } from "./TaskItem"
+import "../plan.css"
 
 interface Props {
   tasks: PurchaseTask[]
@@ -69,7 +72,7 @@ export function TaskList({ tasks, groupBy, onRequestEdit, editingId, onSave, onC
     return { groups: g, sortedKeys: keys }
   }, [tasks, groupBy])
 
-  if (tasks.length === 0) return <div className="plan-empty">无任务</div>
+  if (tasks.length === 0) return <NonIdealState icon={<Icon icon={IconNames.SEARCH} size={20} />} title="无任务" />
 
   function groupHeader(k: string): string {
     switch (groupBy) {

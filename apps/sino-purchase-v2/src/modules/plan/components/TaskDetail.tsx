@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect } from "react"
-import { Button, InputGroup, NumericInput, HTMLSelect, Tag, Icon } from "@blueprintjs/core"
+import { Button, InputGroup, NumericInput, HTMLSelect, Tag, Icon, Alert, Text } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { BadgeToggle } from "./BadgeToggle"
 import { usePlanStore } from "../../../app/stores/planStore"
 import type { PurchaseTask, TaskStatus, SupportedCurrency, TaxStatus } from "../types"
-import { STATUS_BADGE, TAX_STATUS_OPTIONS } from "../types"
+import { STATUS_BADGE, STATUS_COLORS, URGENCY_COLORS, TAX_STATUS_OPTIONS } from "../types"
 import { nameListOptions, urgencyLabel, todayISO } from "../helpers"
 
 interface Props {
@@ -39,13 +39,13 @@ export function TaskDetail({ initial, mode, onSave, onCancel, onDelete, selected
   const handleBookerChange = (v: string) => { if (v === "__new__") { const val = prompt("输入预定人名称") || ""; if (val.trim()) patch({ bookerId: val.trim() }) } else patch({ bookerId: v }) }
 
   return (
-    <div className="task-detail" style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 0 12px" }}>
-      {readOnly && <div style={{ fontSize: 11, color: "var(--text-dim)", textAlign: "center", padding: "2px 0" }}>🔒 只读 — 再次点击切换编辑</div>}
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 0 12px" }}>
+      {readOnly && <Text style={{ fontSize: 11, textAlign: "center", padding: "2px 0", color: "var(--text-dim)" }}>只读 — 再次点击切换编辑</Text>}
       <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
         <Tag minimal>状态</Tag>
-        <BadgeToggle values={[1, 2, 3, 4, 5] as TaskStatus[]} selected={d.status ?? 1} onChange={handleStatusChange} badgeClass={s => `badge-${s}`} label={s => STATUS_BADGE[s]} disabled={readOnly} />
+        <BadgeToggle values={[1, 2, 3, 4, 5] as TaskStatus[]} selected={d.status ?? 1} onChange={handleStatusChange} label={s => STATUS_BADGE[s]} color={s => STATUS_COLORS[s]} disabled={readOnly} />
         <Tag minimal>紧急</Tag>
-        <BadgeToggle values={[1, 2, 3, 4, 5]} selected={d.urgency ?? 1} onChange={n => patch({ urgency: n as 1 | 2 | 3 | 4 | 5 })} badgeClass={n => `badge-u${n}`} label={n => urgencyLabel(n)} disabled={readOnly} />
+        <BadgeToggle values={[1, 2, 3, 4, 5]} selected={d.urgency ?? 1} onChange={n => patch({ urgency: n as 1 | 2 | 3 | 4 | 5 })} label={n => urgencyLabel(n)} color={n => URGENCY_COLORS[n]} disabled={readOnly} />
       </div>
       <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
         <InputGroup placeholder="品名 *" value={d.name || ""} onChange={e => patch({ name: e.target.value })} style={{ flex: 1.5 }} readOnly={readOnly} />
@@ -78,11 +78,11 @@ export function TaskDetail({ initial, mode, onSave, onCancel, onDelete, selected
         </HTMLSelect>
       </div>
       <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-        <Button small minimal className={d.plannedDate ? "on" : ""} onClick={() => { if (readOnly) return; const v = prompt("计划日期 (YYYY-MM-DD)", d.plannedDate || todayISO()); if (v) patch({ plannedDate: v }) }} disabled={readOnly}>{d.plannedDate ? d.plannedDate.slice(5) : "计划"}</Button>
-        <Button small minimal className={d.receivedDate ? "on" : ""} onClick={() => { if (readOnly) return; const v = prompt("入库日期 (YYYY-MM-DD)", d.receivedDate || todayISO()); if (v) patch({ receivedDate: v }) }} disabled={readOnly}>{d.receivedDate ? d.receivedDate.slice(5) : "入库"}</Button>
-        <Button small minimal className={d.reimbursementDate ? "on" : ""} onClick={() => { if (readOnly) return; const v = prompt("报销日期 (YYYY-MM-DD)", d.reimbursementDate || todayISO()); if (v) patch({ reimbursementDate: v }) }} disabled={readOnly}>{d.reimbursementDate ? d.reimbursementDate.slice(5) : "报销"}</Button>
+        <Button small minimal style={d.plannedDate ? { color: "var(--dv-activegroup-visiblepanel-tab-color, white)" } : undefined} onClick={() => { if (readOnly) return; const v = prompt("计划日期 (YYYY-MM-DD)", d.plannedDate || todayISO()); if (v) patch({ plannedDate: v }) }} disabled={readOnly}>{d.plannedDate ? d.plannedDate.slice(5) : "计划"}</Button>
+        <Button small minimal style={d.receivedDate ? { color: "var(--dv-activegroup-visiblepanel-tab-color, white)" } : undefined} onClick={() => { if (readOnly) return; const v = prompt("入库日期 (YYYY-MM-DD)", d.receivedDate || todayISO()); if (v) patch({ receivedDate: v }) }} disabled={readOnly}>{d.receivedDate ? d.receivedDate.slice(5) : "入库"}</Button>
+        <Button small minimal style={d.reimbursementDate ? { color: "var(--dv-activegroup-visiblepanel-tab-color, white)" } : undefined} onClick={() => { if (readOnly) return; const v = prompt("报销日期 (YYYY-MM-DD)", d.reimbursementDate || todayISO()); if (v) patch({ reimbursementDate: v }) }} disabled={readOnly}>{d.reimbursementDate ? d.reimbursementDate.slice(5) : "报销"}</Button>
         <div style={{ marginLeft: "auto", display: "flex", gap: 4 }}>
-          {!readOnly && mode === "edit" && onDelete && (<><Button small intent="danger" onClick={() => setConfirmDel(true)}><Icon icon={IconNames.TRASH} size={12} /></Button>{confirmDel && (<><Button small intent="danger" onClick={() => { onDelete(); setConfirmDel(false) }}>确认</Button><Button small minimal onClick={() => setConfirmDel(false)}>取消</Button></>)}</>)}
+          {!readOnly && mode === "edit" && onDelete && (<><Button small intent="danger" onClick={() => setConfirmDel(true)}><Icon icon={IconNames.TRASH} size={12} /></Button><Alert isOpen={confirmDel} onClose={() => setConfirmDel(false)} cancelButtonText="取消" confirmButtonText="确认" intent="danger" canEscapeKeyCancel canOutsideClickCancel onConfirm={() => { onDelete(); setConfirmDel(false) }}>确认删除？</Alert></>)}
           {!readOnly && mode === "add" && <Button small intent="primary" onClick={handleSave}>添加</Button>}
           {!readOnly && mode === "batch" && selectedCount !== undefined && <Button small intent="primary" onClick={handleSave}>应用 ({selectedCount})</Button>}
           {!readOnly && (mode === "add" || mode === "batch") && <Button small minimal onClick={onCancel}>取消</Button>}

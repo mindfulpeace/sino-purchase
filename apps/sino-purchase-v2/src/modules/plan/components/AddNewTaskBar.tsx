@@ -1,5 +1,5 @@
 import { useState, useRef } from "react"
-import { Button, InputGroup, Icon } from "@blueprintjs/core"
+import { Button, ButtonGroup, InputGroup, Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import type { PurchaseTask } from "../types"
 import { todayISO } from "../helpers"
@@ -25,10 +25,12 @@ export function AddNewTaskBar({ onAdd, onOpenAdd, onBatch }: Props) {
   }
 
   return (
-    <div className="add-bar" style={{ display: "flex", gap: 4, alignItems: "center", padding: "4px 0", flexShrink: 0 }}>
+    <div style={{ display: "flex", gap: 4, alignItems: "center", flex: 1 }}>
       <InputGroup inputRef={inputRef} placeholder="品名 回车快速添加" value={text} onChange={e => setText(e.target.value)} onKeyDown={handleKeyDown} style={{ flex: 1 }} />
-      <Button small icon={<Icon icon={IconNames.NEW_OBJECT} />} onClick={onOpenAdd}>新任务</Button>
-      <Button small icon={<Icon icon={IconNames.IMPORT} />} onClick={onBatch}>批量</Button>
+      <ButtonGroup size="small">
+        <Button icon={<Icon icon={IconNames.NEW_OBJECT} />} onClick={onOpenAdd}>新任务</Button>
+        <Button icon={<Icon icon={IconNames.IMPORT} />} onClick={onBatch}>批量</Button>
+      </ButtonGroup>
     </div>
   )
 }

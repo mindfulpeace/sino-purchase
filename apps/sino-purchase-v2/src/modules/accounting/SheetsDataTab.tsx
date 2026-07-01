@@ -6,6 +6,7 @@ import { Icon } from "@blueprintjs/core"
 import { useAuth, listSheets, loadTable } from "@sino-purchase/sheets-api"
 import { SPREADSHEET_ID } from "../../config/sheets"
 import { useAccountingStore } from "../../app/stores/accountingStore"
+import { DEMO_RECORDS } from "../../config/demo-data"
 import type { CashRecord } from "./types"
 import EmptyPlaceholder from "../../shared/components/EmptyPlaceholder"
 
@@ -43,7 +44,7 @@ interface SheetsDataTabProps {
 }
 
 export default function SheetsDataTab({ batch, onBatchChange }: SheetsDataTabProps) {
-  const { ready, loggedIn, login } = useAuth()
+  const { ready, loggedIn } = useAuth()
   const { showImportDialog } = useAccountingStore()
   const [sheets, setSheets] = useState<string[]>([])
   const [selectedSheet, setSelectedSheet] = useState("")
@@ -118,10 +119,35 @@ export default function SheetsDataTab({ batch, onBatchChange }: SheetsDataTabPro
   if (!ready) { return <EmptyPlaceholder description="加载 Google 认证..." /> }
 
   if (!loggedIn) {
+    // Demo mode: show demo data as a read-only preview
+    const demoHeaders = ["日期", "描述", "金额", "税务处理", "类型", "批次", "备注"]
+    const demoDisplay = ["date", "description", "amount", "tax", "type", "batch", "note"]
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", flexDirection: "column", gap: 12, width: "100%" }}>
-        <div style={{ fontSize: 14, color: "var(--text-dim)", textAlign: "center" }}>需要登录 Google 账号才能编辑数据表</div>
-        <Button intent="primary" icon={<Icon icon={IconNames.LOG_IN} />} onClick={login}>登录 Google</Button>
+      <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 8px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
+          <span style={{ fontSize: 12, color: "var(--text-dim)" }}>Demo 数据（登录后可编辑 Google Sheets）</span>
+          <Button icon="database" text="导入数据源" intent="primary" onClick={handleImport} disabled small />
+          <div style={{ flex: 1 }} />
+          <span style={{ fontSize: 12, color: "var(--text-dim)" }}>{DEMO_RECORDS.length} 条 [Demo]</span>
+        </div>
+        <div style={{ flex: 1, overflow: "auto", minHeight: 0, width: "100%" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+            <thead>
+              <tr style={{ borderBottom: "2px solid var(--border)", background: "var(--bg-hover)", position: "sticky", top: 0, zIndex: 1 }}>
+                <th style={{ padding: "6px 8px", textAlign: "left", fontWeight: 600, fontSize: 11 }}>#</th>
+                {demoHeaders.map(h => (<th key={h} style={{ padding: "6px 8px", textAlign: "left", fontWeight: 600, fontSize: 11 }}>{h}</th>))}
+              </tr>
+            </thead>
+            <tbody>
+              {DEMO_RECORDS.map((row, i) => (
+                <tr key={row.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                  <td style={{ padding: "2px 8px", textAlign: "center", color: "var(--text-dim)", fontSize: 11 }}>{i + 1}</td>
+                  {demoDisplay.map(h => (<td key={h} style={{ padding: "2px 8px", whiteSpace: "nowrap" }}>{String(row[h as keyof CashRecord] ?? "")}</td>))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     )
   }

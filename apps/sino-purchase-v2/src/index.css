@@ -13,3 +13,13 @@ body {
 #root {
   height: 100vh;
 }
+
+button:focus { outline: none; }
+
+:root { --text-dim: #858585; }
+:root.bp6-theme-light { --text-dim: #888888; }
+
+@keyframes planPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}

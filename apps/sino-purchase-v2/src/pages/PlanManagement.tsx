@@ -1,17 +1,18 @@
-import { useState, useCallback, useEffect, useRef, useMemo } from "react"
-import { ButtonGroup, Button, HTMLSelect, InputGroup } from "@blueprintjs/core"
+import { useState, useCallback, useEffect, useRef } from "react"
+import { ButtonGroup, Button, ControlGroup, HTMLSelect, InputGroup } from "@blueprintjs/core"
 import { useSheetData } from "@sino-purchase/sheets-api"
 import { useDock } from "@sino-purchase/ui-dock"
 import { usePlanStore } from "../app/stores/planStore"
 import { TaskList } from "../modules/plan/components/TaskList"
 import { AddNewTaskBar } from "../modules/plan/components/AddNewTaskBar"
 import { TaskDetail } from "../modules/plan/components/TaskDetail"
-import { FilterPopover } from "../modules/plan/components/FilterModals"
+import { StatusFilter, UrgencyFilter, SupplierFilter, BookerFilter } from "../modules/plan/components/FilterModals"
 import { SettingsDialog } from "../modules/plan/components/SettingsDialog"
 import { BatchImportDialog } from "../modules/plan/components/BatchImportDialog"
 import { BatchConfirmDialog } from "../modules/plan/components/BatchConfirmDialog"
 import type { PurchaseTask, GroupBy, SortBy } from "../modules/plan/types"
-import { TASK_HEADERS, NUMERIC_FIELDS, DATE_FIELDS, STATUS_BADGE } from "../modules/plan/types"
+import { TASK_HEADERS, NUMERIC_FIELDS, DATE_FIELDS } from "../modules/plan/types"
+import { DEMO_TASKS } from "../config/demo-data"
 import "../modules/plan/plan.css"
 
 const SHEET = "tasks"
@@ -54,21 +55,21 @@ const GROUP_SORT_MAP: Record<string, SortBy> = {
 }
 
 export default function PlanManagement() {
-  const { data: sheetData, reload: sheetReload, add, update, remove } = useSheetData<PurchaseTask>({
+  const { data: sheetData, reload: sheetReload, add, update, remove, isDemo } = useSheetData<PurchaseTask>({
     sheetName: SHEET,
     headers: TASK_HEADERS,
     numericFields: NUMERIC_FIELDS,
     dateFields: DATE_FIELDS,
+    demoData: DEMO_TASKS,
   })
 
   const {
     allTasks, loading, filteredTasks: tasks, setAllTasks, setCrudActions,
     searchQuery, setSearchQuery,
-    statusFilter, urgencyFilter, supplierFilter, bookerFilter, groupBy,
-    setStatusFilter, setUrgencyFilter, setSupplierFilter, setBookerFilter,
+    groupBy,
     setGroupBy, setSortBy, sortBy,
     editingTaskId, setEditingTaskId, setIsAdding, setBatchEdit,
-    selectedIds, onToggleSelect, clearSelection,
+    selectedIds, clearSelection,
     addTask,
     showSettings, setShowSettings,
   } = usePlanStore()
@@ -91,16 +92,17 @@ export default function PlanManagement() {
   const [showBatchConfirm, setShowBatchConfirm] = useState(false)
 
   // Status bar sync
-  const { urgentAll, urgentHigh, urgentMid, urgentLow, completed } = usePlanStore()
+  const { completed } = usePlanStore()
   useEffect(() => {
+    const demoTag = isDemo ? " [Demo]" : ""
     if (selectedIds.size > 0) {
-      setStatus(`${selectedIds.size} 项已选`)
-      setSummary(`${allTasks.length - completed} 待办 / ${completed} 完成`)
+      setStatus(`${selectedIds.size} 项已选${demoTag}`)
+      setSummary(`${allTasks.length - completed} 待办 / ${completed} 完成${demoTag}`)
     } else {
-      setStatus(`${allTasks.length} 项`)
-      setSummary(`${allTasks.length - completed} 待办 / ${completed} 完成`)
+      setStatus(`${allTasks.length} 项${demoTag}`)
+      setSummary(`${allTasks.length - completed} 待办 / ${completed} 完成${demoTag}`)
     }
-  }, [selectedIds.size, allTasks.length, completed, setStatus, setSummary])
+  }, [selectedIds.size, allTasks.length, completed, setStatus, setSummary, isDemo])
 
   /* ── Detail editing ── */
 
@@ -108,8 +110,8 @@ export default function PlanManagement() {
     if (showBatchEdit) { setShowBatchEdit(false); return }
     setIsAdding(false)
     setBatchEdit(false)
-    setEditingTaskId(id)
-  }, [setIsAdding, setBatchEdit, setEditingTaskId, showBatchEdit])
+    setEditingTaskId(editingTaskId === id ? null : id)
+  }, [editingTaskId, setIsAdding, setBatchEdit, setEditingTaskId, showBatchEdit])
 
   const handleOpenAdd = useCallback(() => {
     setIsAdding(true)
@@ -198,7 +200,7 @@ export default function PlanManagement() {
     function onKey(e: KeyboardEvent) {
       const tag = (e.target as HTMLElement)?.tagName
       if (e.key === "n" && !e.ctrlKey && !e.metaKey && tag !== "INPUT" && tag !== "TEXTAREA") {
-        const input = document.querySelector<HTMLInputElement>(".add-bar input")
+        const input = document.querySelector<HTMLInputElement>('[placeholder="品名 回车快速添加"]')
         input?.focus()
         e.preventDefault()
       }
@@ -214,35 +216,30 @@ export default function PlanManagement() {
     for (const t of tasks) addTask(t)
   }, [addTask])
 
-  /* ── Filter labels ── */
-
-  const statusLabel = useMemo(() => statusFilter.length > 0 ? statusFilter.map(s => STATUS_BADGE[s]).join("") : "状态", [statusFilter])
-  const urgencyLabelStr = useMemo(() => urgencyFilter.length > 0 ? urgencyFilter.sort().join("") : "紧急", [urgencyFilter])
-  const supplierLabel = useMemo(() => supplierFilter ? `@${supplierFilter}` : "商家", [supplierFilter])
-  const bookerLabel = useMemo(() => bookerFilter ? `#${bookerFilter}` : "预定", [bookerFilter])
-
   return (
     <div className="plan-root">
       {/* Filter bar */}
       <div className="plan-toolbar">
-        <FilterPopover type="status" label={statusLabel} />
-        <FilterPopover type="urgency" label={urgencyLabelStr} />
-        <FilterPopover type="supplier" label={supplierLabel} />
-        <FilterPopover type="booker" label={bookerLabel} />
-        <InputGroup
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          placeholder="搜索品名/品牌/规格/商家/预定人"
-        />
+        <ControlGroup fill>
+          <StatusFilter />
+          <UrgencyFilter />
+          <SupplierFilter />
+          <BookerFilter />
+          <InputGroup
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="搜索品名/品牌/规格/商家/预定人"
+            style={{ minWidth: 80 }}
+          />
+        </ControlGroup>
       </div>
 
       {/* Sort bar */}
       <div className="plan-sortbar">
-        <ButtonGroup>
+        <ButtonGroup size="small">
           {GROUP_OPTIONS.map(o => (
             <Button
               key={o.value}
-              small
               active={groupBy === o.value}
               onClick={() => setGroupBy(o.value)}
             >
@@ -289,7 +286,7 @@ export default function PlanManagement() {
 
       {/* Batch edit detail */}
       {showBatchEdit && (
-        <div className="plan-batch-detail">
+        <div className="plan-batch">
           <TaskDetail
             initial={batchInitial}
             mode="batch"
@@ -311,15 +308,7 @@ export default function PlanManagement() {
 
       {/* Status bar extras (buttons when selected) */}
       {selectedIds.size > 0 && (
-        <div style={{
-          flexShrink: 0,
-          display: "flex",
-          gap: 4,
-          alignItems: "center",
-          padding: "2px 8px",
-          borderTop: "1px solid var(--dv-separator-border, #2b2b4a)",
-          fontSize: 12,
-        }}>
+        <div className="plan-selbar">
           <Button small minimal onClick={copySelected}>复制</Button>
           <Button small minimal onClick={openBatchEdit}>编辑</Button>
           <Button small minimal onClick={clearSelection}>取消</Button>

@@ -53,6 +53,8 @@ export const DATE_FIELDS = new Set<keyof PurchaseTask>([
 export const ALL_STATUSES: TaskStatus[] = [1, 2, 3, 4, 5]
 export const STATUS_LABEL_CN: Record<number, string> = { 1: "计划", 2: "预留", 3: "已收", 4: "取消", 5: "记账" }
 export const STATUS_BADGE: Record<number, string> = { 1: "-", 2: "H", 3: "D", 4: "C", 5: "B" }
+export const STATUS_COLORS: Record<number, string> = { 1: "#2a4a6e", 2: "#1a3452", 3: "#238636", 4: "#6e40c9", 5: "#0d4018" }
+export const URGENCY_COLORS: Record<number, string> = { 1: "#2b2b4a", 2: "#2b2b4a", 3: "#9e6a03", 4: "#bd561d", 5: "#da3633" }
 
 const SYMBOLS: Record<SupportedCurrency, string> = { ZMW: "k", USD: "$", CNY: "¥" }
 export function currencySymbol(ccy: SupportedCurrency): string {

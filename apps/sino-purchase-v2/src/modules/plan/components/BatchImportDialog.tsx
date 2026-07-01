@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react"
-import { Dialog, Button, TextArea } from "@blueprintjs/core"
+import { Dialog, Button, TextArea, Text, Card } from "@blueprintjs/core"
 import type { PurchaseTask, SupportedCurrency, TaskStatus, Urgency } from "../types"
 import { todayISO } from "../helpers"
+import "../plan.css"
 
 function PreviewTask({ task }: { task: Partial<PurchaseTask> }) {
   return (<div style={{ fontSize: 12, padding: "2px 0", borderBottom: "1px solid var(--border)", display: "flex", gap: 4 }}>
-    <span style={{ fontWeight: 600 }}>{task.name}</span>
-    {task.brand && <span style={{ color: "var(--text-dim)" }}>({task.brand})</span>}
-    {task.spec && <span style={{ color: "var(--text-dim)" }}>-{task.spec}</span>}
-    <span> x{task.quantity ?? 1}{task.unit || ""}</span>
+    <Text style={{ fontWeight: 600, margin: 0 }}>{task.name}</Text>
+    {task.brand && <Text style={{ color: "var(--text-dim)", margin: 0 }}>({task.brand})</Text>}
+    {task.spec && <Text style={{ color: "var(--text-dim)", margin: 0 }}>-{task.spec}</Text>}
+    <Text style={{ margin: 0 }}> x{task.quantity ?? 1}{task.unit || ""}</Text>
   </div>)
 }
 
@@ -66,14 +67,14 @@ export function BatchImportDialog({ isOpen, onClose, onImport }: Props) {
   function handleClose() { setInput(""); setParsed([]); onClose() }
 
   return (<Dialog isOpen={isOpen} onClose={handleClose} title="批量导入" style={{ width: 480 }}>
-    <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-      <p style={{ margin: 0, fontSize: 13, color: "var(--text-dim)" }}>从 Google Sheets 或 Excel 复制数据粘贴到下方。表头会自动识别列对应关系。</p>
+    <div className="col-gap" style={{ padding: 12 }}>
+      <Text className="dim">从 Google Sheets 或 Excel 复制数据粘贴到下方。表头会自动识别列对应关系。</Text>
       <TextArea large value={input} onChange={e => handleInput(e.target.value)} placeholder="名称\t品牌\t型号\t单位\t数量\t用途\t申请人\n油漆\t\t灰色\t桶\t4\t\t备货\n..." rows={6} style={{ width: "100%", fontFamily: "monospace" }} />
       {parsed.length > 0 && (<>
-        <p style={{ margin: 0, fontSize: 13, color: "var(--text-dim)" }}>已解析 <strong>{parsed.length}</strong> 条任务</p>
-        <div style={{ maxHeight: 150, overflowY: "auto", border: "1px solid var(--border)", padding: 4 }}>{parsed.map((t, i) => <PreviewTask key={i} task={t} />)}</div>
+        <Text className="dim">已解析 <strong>{parsed.length}</strong> 条任务</Text>
+        <Card style={{ maxHeight: 150, overflowY: "auto", padding: 4 }}>{parsed.map((t, i) => <PreviewTask key={i} task={t} />)}</Card>
       </>)}
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: 4 }}>
+      <div className="flex-end">
         <Button minimal onClick={handleClose}>取消</Button>
         <Button intent="primary" onClick={handleImport} disabled={parsed.length === 0}>导入 ({parsed.length})</Button>
       </div>

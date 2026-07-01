@@ -9,12 +9,17 @@ export interface UseSheetDataConfig<T extends Record<string, unknown>> {
   numericFields?: Set<keyof T>
   dateFields?: Set<keyof T>
   idField?: keyof T
+  /** 未登录时使用的 demo 数据 */
+  demoData?: T[]
 }
 
 export function useSheetData<T extends Record<string, unknown>>(config: UseSheetDataConfig<T>) {
-  const { sheetName, headers, numericFields, dateFields, idField = "id" as keyof T } = config
+  const { sheetName, headers, numericFields, dateFields, idField = "id" as keyof T, demoData } = config
 
-  const [data, setData] = useState<T[]>([])
+  const [data, setData] = useState<T[]>(() => {
+    if (!isLoggedIn() && demoData?.length) return demoData
+    return []
+  })
   const [loading, setLoading] = useState(true)
   const [loadKey, setLoadKey] = useState(0)
 
@@ -31,6 +36,10 @@ export function useSheetData<T extends Record<string, unknown>>(config: UseSheet
     let cancelled = false
 
     if (!isLoggedIn()) {
+      // Demo mode: use demoData if available
+      if (demoData?.length) {
+        setData(demoData)
+      }
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false)
       return
@@ -45,7 +54,7 @@ export function useSheetData<T extends Record<string, unknown>>(config: UseSheet
       if (!cancelled) setLoading(false)
     })
     return () => { cancelled = true }
-  }, [loadKey, sheetName, headers, numericFields, dateFields])
+  }, [loadKey, sheetName, headers, numericFields, dateFields, demoData])
 
   useEffect(() => {
     return onTokenChange(token => {
@@ -53,33 +62,38 @@ export function useSheetData<T extends Record<string, unknown>>(config: UseSheet
     })
   }, [reload])
 
+  const isDemo = !isLoggedIn()
+
   const add = useCallback((partial: Partial<T>) => {
     const now = Date.now()
     const id = crypto.randomUUID()
     const record = { ...partial, [idField]: id, createdAt: now, updatedAt: now } as unknown as T
     setData(prev => [record, ...prev])
+    if (isDemo) return
     insertRow(sheetName, record as Record<string, unknown>).catch(() => enqueue({ sheet: sheetName, op: "insert", data: record as Record<string, unknown> }))
-  }, [sheetName, idField])
+  }, [sheetName, idField, isDemo])
 
   const update = useCallback((id: string, changes: Partial<T>) => {
     const existing = dataRef.current.find(d => String(d[idField]) === id)
     if (!existing) return
     const merged = { ...existing, ...changes, updatedAt: Date.now() } as T
     setData(prev => prev.map(d => String(d[idField]) === id ? merged : d))
+    if (isDemo) return
     findRow(sheetName, id).then(ri => {
       if (ri) updateRow(sheetName, ri, merged as Record<string, unknown>, headers as string[]).catch(() => enqueue({ sheet: sheetName, op: "update", rowIndex: ri, data: merged as Record<string, unknown>, headers: headers as string[] }))
     })
-  }, [sheetName, headers, idField])
+  }, [sheetName, headers, idField, isDemo])
 
   const remove = useCallback((id: string) => {
     const dataBefore = dataRef.current.find(d => String(d[idField]) === id)
     setData(prev => prev.filter(d => String(d[idField]) !== id))
+    if (isDemo) return
     findRow(sheetName, id).then(ri => {
       if (ri) deleteRow(sheetName, ri).catch(() => {
         if (dataBefore) enqueue({ sheet: sheetName, op: "delete", data: dataBefore as Record<string, unknown> })
       })
     })
-  }, [sheetName, idField])
+  }, [sheetName, idField, isDemo])
 
-  return { data, loading, reload, add, update, remove }
+  return { data, loading, reload, add, update, remove, isDemo }
 }

@@ -1,7 +1,9 @@
+import { useDock } from "@sino-purchase/ui-dock"
 import { useEffect, useCallback, useState } from "react"
 import { Button, Tooltip } from "@blueprintjs/core"
 import { useAccountingStore } from "../app/stores/accountingStore"
 import { useDocSettingsStore } from "../app/stores/docSettingsStore"
+import { useAuth } from "@sino-purchase/sheets-api"
 import CashGrid from "../modules/accounting/CashGrid"
 import ImportDialog from "../modules/accounting/ImportDialog"
 import SheetsDataTab from "../modules/accounting/SheetsDataTab"
@@ -10,13 +12,30 @@ import { useImportExcel } from "../modules/accounting/useImportExcel"
 import { exportExcel } from "../modules/accounting/sheetjs"
 import { formatDataSummary } from "../modules/accounting/helpers"
 import type { CashRecord } from "../modules/accounting/types"
+import { DEMO_RECORDS } from "../config/demo-data"
 
 export default function Accounting() {
   const { records, activeTab, importDialog, setRecords, addRecords, hideImportDialog, switchTab } = useAccountingStore()
   const { propertiesVisible, setPropertiesVisible, setReimburseRecords } = useDocSettingsStore()
+  const { loggedIn } = useAuth()
+  const { setStatus, setSummary } = useDock()
   const { importFromClipboard } = useImportClipboard()
   const { triggerImport, inputRef, handleFileChange } = useImportExcel()
   const [sheetsBatch, setSheetsBatch] = useState<string[]>([])
+
+  // Demo mode: seed records when not logged in
+  useEffect(() => {
+    if (!loggedIn && records.length === 0) {
+      setRecords(DEMO_RECORDS)
+    }
+  }, [loggedIn, records.length, setRecords])
+
+  // Status bar
+  const summary = formatDataSummary(records)
+  useEffect(() => {
+    setStatus(loggedIn ? "现金日记账" : "现金日记账 [Demo]")
+    setSummary(summary + (loggedIn ? "" : " [Demo]"))
+  }, [records.length, summary, loggedIn, setStatus, setSummary])
 
   useEffect(() => {
     setReimburseRecords(records)
@@ -57,8 +76,6 @@ export default function Accounting() {
     hideImportDialog()
     switchTab("preview")
   }, [setRecords, addRecords, hideImportDialog, switchTab])
-
-  const summary = formatDataSummary(records)
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>

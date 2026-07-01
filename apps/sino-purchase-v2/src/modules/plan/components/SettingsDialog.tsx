@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
-import { Dialog, Button, InputGroup, NumericInput, Icon } from "@blueprintjs/core"
+import { Dialog, Button, InputGroup, NumericInput, Icon, H4 } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { usePlanStore } from "../../../app/stores/planStore"
 import { todayISO } from "../helpers"
+import "../plan.css"
 
 const STORAGE_KEY = "sino-exchange-rates"
 const FETCH_INTERVAL = 24 * 60 * 60 * 1000
@@ -47,36 +48,36 @@ export function SettingsDialog({ isOpen, onClose }: Props) {
   const formatTS = (ts: number) => { if (!ts) return "从未"; const d = new Date(ts); return `${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}` }
 
   return (<Dialog isOpen={isOpen} onClose={onClose} title="设置" style={{ width: 420 }}>
-    <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-      <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "var(--text-dim)" }}>汇率</h3>
-      <div style={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap" }}>
+    <div className="col-gap" style={{ padding: 12 }}>
+      <H4 className="dim">汇率</H4>
+      <div className="flex-wrap">
         <span>$ 1 = k</span><NumericInput value={editUSD} onValueChange={v => setEditUSD(String(v))} style={{ width: 70 }} />
         <span>¥ 1 = k</span><NumericInput value={editCNY} onValueChange={v => setEditCNY(String(v))} style={{ width: 70 }} />
         <Button small minimal onClick={() => { setEditUSD(rates.rates.USD.toFixed(2)); setEditCNY(rates.rates.CNY.toFixed(2)) }}>重置</Button>
       </div>
-      <div style={{ display: "flex", gap: 4, alignItems: "center", fontSize: 12, color: "var(--text-dim)" }}>
+      <div className="flex dim-sm">
         <span>更新于 {formatTS(rates.timestamp)}</span>
         <Button small minimal icon={<Icon icon={IconNames.REFRESH} />} onClick={handleRefresh} disabled={loading}>刷新</Button>
         <Button small intent="primary" onClick={handleSaveRates}>保存</Button>
       </div>
-      <h3 style={{ margin: "8px 0 0", fontSize: 14, fontWeight: 600, color: "var(--text-dim)" }}>日期区间 {dateStart && dateEnd ? `(${Math.round((new Date(dateEnd).getTime() - new Date(dateStart).getTime()) / 86400000) + 1})` : ""}</h3>
-      <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>{[-5, -4, -3, -2, -1, 0].map(offset => { const d = new Date(); d.setMonth(d.getMonth() + offset); return (<Button key={offset} small minimal onClick={() => { const r = monthRange(offset); setDateStart(r.start); if (!dateEndToday) setDateEnd(r.end) }}>{d.getMonth() + 1}月</Button>) })}</div>
-      <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-        <span style={{ fontSize: 12, color: "var(--text-dim)" }}>开始</span>
+      <H4 className="dim" style={{ marginTop: 8 }}>日期区间 {dateStart && dateEnd ? `(${Math.round((new Date(dateEnd).getTime() - new Date(dateStart).getTime()) / 86400000) + 1})` : ""}</H4>
+      <div className="flex-wrap">{[-5, -4, -3, -2, -1, 0].map(offset => { const d = new Date(); d.setMonth(d.getMonth() + offset); return (<Button key={offset} small minimal onClick={() => { const r = monthRange(offset); setDateStart(r.start); if (!dateEndToday) setDateEnd(r.end) }}>{d.getMonth() + 1}月</Button>) })}</div>
+      <div className="flex">
+        <span className="dim-sm">开始</span>
         <InputGroup type="date" value={dateStart} onChange={e => setDateStart(e.target.value)} style={{ width: 150 }} />
         <Button small minimal onClick={() => { const y = new Date().getFullYear(); setDateStart(`${y}-01-01`) }}>年初</Button>
         <Button small minimal onClick={() => { const d = new Date(); setDateStart(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`) }}>月初</Button>
         <Button small minimal onClick={() => setDateStart(thisMonday())}>周一</Button>
       </div>
-      <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-        <span style={{ fontSize: 12, color: "var(--text-dim)" }}>结束</span>
+      <div className="flex">
+        <span className="dim-sm">结束</span>
         <InputGroup type="date" value={dateEnd} disabled={dateEndToday} onChange={e => { setDateEndToday(false); setDateEnd(e.target.value) }} style={{ width: 150 }} />
         <Button small minimal active={dateEndToday} onClick={() => setDateEndToday(!dateEndToday)}>至今</Button>
         <Button small minimal onClick={() => daysBack(7)}>7天</Button>
         <Button small minimal onClick={() => daysBack(30)}>30天</Button>
         <Button small minimal onClick={() => daysBack(90)}>90天</Button>
       </div>
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: 4, marginTop: 8 }}>
+      <div className="flex-end" style={{ marginTop: 8 }}>
         <Button onClick={() => { reload(); onClose() }}>刷新 & 关闭</Button>
         <Button intent="primary" onClick={onClose}>关闭</Button>
       </div>
