@@ -6,7 +6,9 @@ export type { LoadTableResult } from "./db"
 export {
   initAuth, requestToken, login, logout,
   getToken, isLoggedIn, clearToken, onTokenChange,
+  getUserInfo, getCachedUser,
 } from "./auth"
+export type { GoogleUserInfo } from "./auth"
 
 export {
   loadTable, insertRow, updateRow, deleteRow, processQueue, findRow, listSheets,

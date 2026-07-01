@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback } from "react"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { DockLayout, useDock } from "@sino-purchase/layout-dock"
-import { SheetsProvider } from "@sino-purchase/sheets-api"
+import { SheetsProvider, useAuth } from "@sino-purchase/sheets-api"
 import { CLIENT_ID, SPREADSHEET_ID } from "./config/sheets"
 import { useDocSettingsStore } from "./app/stores/docSettingsStore"
 import AccountingSettings from "./modules/accounting/AccountingSettings"
@@ -75,6 +75,34 @@ function SettingsNavPanel() {
   )
 }
 
+function LoginNavPanel() {
+  const { loggedIn, user, login, logout } = useAuth()
+
+  if (!loggedIn) {
+    return (
+      <div className="dv-panel">
+        <div className="dv-panel-item" onClick={() => login()}>
+          <Icon icon={IconNames.LOG_IN} size={14} />
+          <span>登录 Google</span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="dv-panel">
+      <div className="dv-panel-item" style={{ cursor: "default" }}>
+        <Icon icon={IconNames.PERSON} size={14} />
+        <span>{user?.name ?? user?.email ?? "已登录"}</span>
+      </div>
+      <div className="dv-panel-item" onClick={() => logout()}>
+        <Icon icon={IconNames.LOG_OUT} size={14} />
+        <span>退出登录</span>
+      </div>
+    </div>
+  )
+}
+
 /* ── App ── */
 
 function PlanAwareApp() {
@@ -93,6 +121,7 @@ function PlanAwareApp() {
         { id: "accounting", icon: <Icon icon={IconNames.DOLLAR} size={20} />, label: "记账报销", content: <AccountingNavPanel /> },
         { id: "payments", icon: <Icon icon={IconNames.EXCHANGE} size={20} />, label: "往来付款", content: <PaymentsNavPanel /> },
         { id: "settings", icon: <Icon icon={IconNames.COG} size={20} />, label: "设置", content: <SettingsNavPanel /> },
+        { id: "login", icon: <Icon icon={IconNames.PERSON} size={20} />, label: "登录", content: <LoginNavPanel /> },
       ]}
       editors={[
         { id: "plan", label: "计划管理", content: <Suspense fallback={fallback}><PlanManagement /></Suspense> },

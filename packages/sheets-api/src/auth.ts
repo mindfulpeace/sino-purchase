@@ -2,6 +2,17 @@ import { getConfig } from "./config"
 
 const TOKEN_KEY = "sino-purchase-google-token"
 const EXPIRES_KEY = "sino-purchase-google-expires"
+const USER_KEY = "sino-purchase-google-user"
+
+export interface GoogleUserInfo {
+  sub: string
+  name: string
+  given_name: string
+  family_name: string
+  picture: string
+  email: string
+  email_verified: boolean
+}
 
 type TokenResponse = { access_token: string; expires_in: number; scope: string; token_type: string }
 type Callback = (token: string) => void
@@ -106,14 +117,41 @@ export function logout(): void {
   const t = accessToken
   accessToken = ""
   expiresAt = 0
+  localStorage.removeItem(USER_KEY)
   broadcast()
   if (t) google.accounts.oauth2.revoke(t, () => {}, () => {})
 }
 
 export function getToken(): string { return accessToken }
 export function isLoggedIn(): boolean { return !!accessToken }
+
+export function getCachedUser(): GoogleUserInfo | null {
+  try {
+    const raw = localStorage.getItem(USER_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch { return null }
+}
+
+export async function getUserInfo(): Promise<GoogleUserInfo> {
+  const token = accessToken
+  if (!token) throw new Error("未登录")
+
+  // Try cache first
+  const cached = getCachedUser()
+  if (cached) return cached
+
+  const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) throw new Error("获取用户信息失败")
+  const info: GoogleUserInfo = await res.json()
+  localStorage.setItem(USER_KEY, JSON.stringify(info))
+  return info
+}
+
 export function clearToken(): void {
   accessToken = ""
   expiresAt = 0
+  localStorage.removeItem(USER_KEY)
   broadcast()
 }
