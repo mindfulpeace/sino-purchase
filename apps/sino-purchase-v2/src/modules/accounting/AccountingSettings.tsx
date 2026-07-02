@@ -1,5 +1,5 @@
 import { useCallback } from "react"
-import { Button, InputGroup, HTMLSelect } from "@blueprintjs/core"
+import { Button, InputGroup, HTMLSelect, Switch } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { useDocSettingsStore } from "../../app/stores/docSettingsStore"
 import { PrintPreview } from "@sino-purchase/print"
@@ -13,7 +13,7 @@ interface CompanyPreset {
 
 const PRESETS: CompanyPreset[] = [
   { label: "中矿新元矿业有限公司", companyName: "中矿新元矿业有限公司", companyNameEn: "Sino Xinyuan Mining company Limited" },
-  { label: "玛瑞纳斯投资有限公司", companyName: "玛瑞纳斯投资有限公司", companyNameEn: "MARINUS INVESTMENTS LIMITED" },
+  { label: "海神投资有限公司", companyName: "海神投资有限公司", companyNameEn: "MARINUS INVESTMENTS LIMITED" },
 ]
 
 function findPresetIndex(cn: string, en: string): number {
@@ -21,7 +21,7 @@ function findPresetIndex(cn: string, en: string): number {
 }
 
 export default function AccountingSettings() {
-  const { settings, setCompanyName, setCompanyNameEn, setApplicant, reimburseRecords } = useDocSettingsStore()
+  const { settings, autoCompany, setCompanyName, setCompanyNameEn, setApplicant, setAutoCompany, reimburseRecords } = useDocSettingsStore()
 
   const presetIndex = findPresetIndex(settings.companyName, settings.companyNameEn)
   const isCustom = presetIndex === -1
@@ -39,12 +39,13 @@ export default function AccountingSettings() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8, height: "100%", overflow: "hidden", padding: 12 }}>
       <div className="no-print" style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
-        <HTMLSelect value={isCustom ? "-1" : String(presetIndex)} onChange={e => handlePresetChange(e.target.value)} fill>
+        <Switch checked={autoCompany} label="自动配置公司名称" onChange={(e) => setAutoCompany(e.currentTarget.checked)} />
+        <HTMLSelect value={isCustom ? "-1" : String(presetIndex)} onChange={e => handlePresetChange(e.target.value)} fill disabled={autoCompany}>
           {PRESETS.map((p, i) => (<option key={i} value={String(i)}>{p.label}</option>))}
           <option value="-1">自定义</option>
         </HTMLSelect>
-        <InputGroup placeholder="公司名(中文)" value={settings.companyName} onChange={(e) => setCompanyName(e.target.value)} />
-        <InputGroup placeholder="Company Name" value={settings.companyNameEn} onChange={(e) => setCompanyNameEn(e.target.value)} />
+        <InputGroup placeholder="公司名(中文)" value={settings.companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={autoCompany} />
+        <InputGroup placeholder="Company Name" value={settings.companyNameEn} onChange={(e) => setCompanyNameEn(e.target.value)} disabled={autoCompany} />
         <div style={{ display: "flex", gap: 8, width: "100%" }}>
           <div style={{ flex: 0.7 }}>
             <InputGroup placeholder="申请人" value={settings.applicant} onChange={(e) => setApplicant(e.target.value)} />
@@ -57,7 +58,13 @@ export default function AccountingSettings() {
       {reimburseRecords.length > 0 && (
         <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", minHeight: 0, minWidth: 0 }}>
           <PrintPreview>
-            <PrintableReimburse records={reimburseRecords} applicant={settings.applicant} companyName={settings.companyName} companyNameEn={settings.companyNameEn} />
+            <PrintableReimburse
+              records={reimburseRecords}
+              applicant={settings.applicant}
+              companyName={settings.companyName}
+              companyNameEn={settings.companyNameEn}
+              autoCompany={autoCompany}
+            />
           </PrintPreview>
         </div>
       )}
