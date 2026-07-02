@@ -1,24 +1,36 @@
 import { useRef, useLayoutEffect, useState, useEffect, type ReactNode } from "react"
 import { createPortal } from "react-dom"
 
-const A4_BASE = 800
+const A4_BASE_DEFAULT = 800
 
-interface PrintScalerProps {
+export interface PrintPreviewProps {
   children: ReactNode
+  /** A4 基准宽度（像素），内容按此宽度渲染后缩放到容器，默认 800 */
+  baseWidth?: number
 }
 
 /**
- * 双渲染打印组件：
- * - 屏幕预览：在 dockview 面板内，用 transform:scale() 缩放到容器宽度
- * - 打印输出：通过 createPortal 渲染到 body 顶层 (#print-portal-root)，
- *   完全脱离 dockview 布局引擎的 inline style 干扰
+ * 双渲染打印预览组件：
  *
- * 两份内容各自独立渲染。打印时 #root 被 CSS 隐藏 (display:none)，
- * 仅 #print-portal-root 可见。这从根本上避免了 dockview JS 布局引擎
- * 在打印期间对内容宽度/transform 的干扰，无需 beforeprint/afterprint
- * 手动操作 DOM，无时序竞态。
+ * - **屏幕预览**：`transform: scale()` 缩放到容器宽度，模拟 A4 纸张效果
+ * - **打印输出**：`createPortal` 渲染到 `document.body` 顶层 (`#print-portal-root`)，
+ *   脱离任何布局引擎（如 dockview）的 inline style 干扰
+ *
+ * 打印时 `#root` 被 CSS 隐藏 (`display: none`)，仅 `#print-portal-root` 可见。
+ * 无 `beforeprint`/`afterprint` DOM 操作，无时序竞态。
+ *
+ * @example
+ * ```tsx
+ * import { PrintPreview, PrintView, PrintPaper } from "@sino-purchase/print"
+ *
+ * <PrintPreview>
+ *   <PrintView>
+ *     <PrintPaper>...</PrintPaper>
+ *   </PrintView>
+ * </PrintPreview>
+ * ```
  */
-export default function PrintScaler({ children }: PrintScalerProps) {
+export default function PrintPreview({ children, baseWidth = A4_BASE_DEFAULT }: PrintPreviewProps) {
   const outerRef = useRef<HTMLDivElement>(null)
   const innerRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
@@ -40,13 +52,10 @@ export default function PrintScaler({ children }: PrintScalerProps) {
     const el = outerRef.current
     if (!el) return
 
-    // Measure the PARENT's content width, not our own (which may be
-    // stretched by the 800px inner content)
     const measure = () => {
       const parent = el.parentElement
       if (!parent) return
-      const w = parent.getBoundingClientRect().width
-      setScale(w / A4_BASE)
+      setScale(parent.getBoundingClientRect().width / baseWidth)
     }
 
     measure()
@@ -54,7 +63,7 @@ export default function PrintScaler({ children }: PrintScalerProps) {
     const ro = new ResizeObserver(() => measure())
     if (el.parentElement) ro.observe(el.parentElement)
     return () => ro.disconnect()
-  }, [])
+  }, [baseWidth])
 
   // 屏幕预览：跟踪内容高度（内容可能异步加载）
   useLayoutEffect(() => {
@@ -75,17 +84,17 @@ export default function PrintScaler({ children }: PrintScalerProps) {
 
   return (
     <>
-      {/* 屏幕预览：dockview 内，transform 缩放，打印时由 #root{display:none} 隐藏 */}
+      {/* 屏幕预览：容器内 transform 缩放，打印时由 #root{display:none} 隐藏 */}
       <div
         ref={outerRef}
-        className="print-scaler-outer"
+        className="print-preview-outer"
         style={{ width: "100%", overflow: "hidden" }}
       >
         <div
           ref={innerRef}
-          className="print-scaler-inner"
+          className="print-preview-inner"
           style={{
-            width: A4_BASE,
+            width: baseWidth,
             transform: `scale(${scale})`,
             transformOrigin: "top left",
           }}
@@ -94,9 +103,9 @@ export default function PrintScaler({ children }: PrintScalerProps) {
         </div>
       </div>
 
-      {/* 打印输出：Portal 到 body 顶层，脱离 dockview，屏幕时由 CSS 隐藏 */}
+      {/* 打印输出：Portal 到 body 顶层，脱离布局引擎，屏幕时由 CSS 隐藏 */}
       {portalEl && createPortal(
-        <div className="print-scaler-print">{children}</div>,
+        <div className="print-preview-print">{children}</div>,
         portalEl
       )}
     </>

@@ -1,3 +1,11 @@
+/* ── Screen: print portal hidden until actual print ── */
+
+#print-portal-root {
+  display: none;
+}
+
+/* ── PrintView: screen preview container ── */
+
 .print-view {
   background-color: #f5f5f5;
   padding: 4px;
@@ -18,26 +26,25 @@
   margin-bottom: 0;
 }
 
-/* --- Screen-only: disable scaling for actual print --- */
-@media screen {
-  .print-scaler-inner {
-    /* transform is applied via inline style for dynamic scaling */;
-  }
-}
+/* ── Print: hide app, show portal ── */
 
 @media print {
-  /* Undo PrintScaler transform so browser handles A4 natively */
-  .print-scaler-outer {
-    width: auto !important;
-    height: auto !important;
-    overflow: visible !important;
+  /* Hide the entire application root (standard React #root convention) */
+  #root {
+    display: none !important;
   }
 
-  .print-scaler-inner {
-    width: 100% !important;
-    transform: none !important;
+  /* Show the print portal */
+  #print-portal-root {
+    display: block !important;
   }
 
+  /* Utility: elements marked .no-print are hidden during print */
+  .no-print {
+    display: none !important;
+  }
+
+  /* PrintView: strip screen-only styling */
   .print-view {
     width: 100%;
     padding: 0;
