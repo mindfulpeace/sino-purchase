@@ -56,6 +56,28 @@ export async function exportExcel(data: CashRecord[], options: ExcelExportOption
     { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 20 },
   ]
   XLSX.utils.book_append_sheet(workbook, worksheet, options.sheetName || "明细")
+
+  // 优先使用 File System Access API 让用户选择保存路径
+  const picker = (window as unknown as { showSaveFilePicker?: (opts: unknown) => Promise<FileSystemFileHandle> }).showSaveFilePicker
+  if (picker) {
+    try {
+      const handle = await picker.call(window, {
+        suggestedName: filename,
+        types: [{ description: "Excel 文件", accept: { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"] } }],
+      })
+      const writable = await handle.createWritable()
+      const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" })
+      await writable.write(buffer)
+      await writable.close()
+      return
+    } catch (e) {
+      // 用户取消选择 (AbortError) 时静默返回
+      if (e instanceof DOMException && e.name === "AbortError") return
+      // 其他错误继续回退到直接下载
+    }
+  }
+
+  // 回退：直接触发浏览器下载
   XLSX.writeFile(workbook, filename)
 }
 
