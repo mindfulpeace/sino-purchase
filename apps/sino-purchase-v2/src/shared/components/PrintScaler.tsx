@@ -15,7 +15,7 @@ export default function PrintScaler({ children }: PrintScalerProps) {
     const el = outerRef.current
     if (!el) return
     const ro = new ResizeObserver(([entry]) => {
-      setScale(Math.min(entry.contentRect.width / A4_BASE, 1))
+      setScale(entry.contentRect.width / A4_BASE)
     })
     ro.observe(el)
     return () => ro.disconnect()
