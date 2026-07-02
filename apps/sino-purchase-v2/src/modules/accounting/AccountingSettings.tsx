@@ -55,7 +55,7 @@ export default function AccountingSettings() {
         </div>
       </div>
       {reimburseRecords.length > 0 && (
-        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", minHeight: 0 }}>
+        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", minHeight: 0, minWidth: 0 }}>
           <PrintScaler>
             <PrintableReimburse records={reimburseRecords} applicant={settings.applicant} companyName={settings.companyName} companyNameEn={settings.companyNameEn} />
           </PrintScaler>

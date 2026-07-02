@@ -47,6 +47,27 @@
   color: var(--dv-activegroup-visiblepanel-tab-color, white);
 }
 
+/* Edge groups must constrain their content to the group width,
+   otherwise wide children (e.g. 800px print preview) stretch the container. */
+.dv-edge-group .dv-content-container {
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* React part wrapper must constrain height so children can scroll */
+.dv-react-part {
+  overflow: hidden;
+}
+
+/* Panel wrappers fill their container and clip overflow */
+.layout-dock-left,
+.layout-dock-right,
+.layout-dock-center,
+.layout-dock-bottom {
+  height: 100%;
+  overflow: hidden;
+}
+
 .dv-content-container h1,
 .dv-content-container h2,
 .dv-content-container h3,
