@@ -18,9 +18,25 @@ export interface ExcelExportOptions {
   sheetName?: string
 }
 
+/**
+ * 生成导出文件名: 明细-YYYY_MM_DD-批次.xlsx
+ * - 日期取导出数据中日期最大值（最后一天）
+ * - 批次取数据中所有批次，去重后用 `-` 连接；无批次时省略
+ */
+function buildFilename(data: CashRecord[]): string {
+  const dates = data.map((r) => r.date).filter(Boolean).sort()
+  const lastDate = dates[dates.length - 1]
+  const formattedDate = lastDate ? lastDate.replace(/-/g, "_") : new Date().toISOString().split("T")[0].replace(/-/g, "_")
+
+  const batches = [...new Set(data.map((r) => r.batch).filter(Boolean))]
+  const batchPart = batches.length > 0 ? `-${batches.join("-")}` : ""
+
+  return `明细-${formattedDate}${batchPart}.xlsx`
+}
+
 export async function exportExcel(data: CashRecord[], options: ExcelExportOptions = {}): Promise<void> {
   const XLSX = await getXlsx()
-  const filename = options.filename || `明细_${new Date().toISOString().split("T")[0]}.xlsx`
+  const filename = options.filename || buildFilename(data)
 
   const worksheetData = data.map((item) => ({
     ID: item.id.slice(0, 8),
