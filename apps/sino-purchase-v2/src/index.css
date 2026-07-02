@@ -24,29 +24,30 @@ button:focus { outline: none; }
   50% { opacity: 0.7; }
 }
 
-/* ── Print: only printable paper content is output ── */
+/* ── Print output portal: hidden on screen, visible on print ── */
+
+#print-portal-root {
+  display: none;
+}
 
 @media print {
-  html, body, #root {
+  html, body {
     height: auto !important;
     overflow: visible !important;
     background: white !important;
   }
 
-  .no-print {
+  /* 隐藏整个应用（dockview 布局 + 所有面板），打印输出已 Portal 到 body 顶层 */
+  #root {
     display: none !important;
   }
 
-  .print-scaler-outer,
-  .print-preview-scaler {
-    transform: none !important;
-    transform-origin: top left !important;
-    width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
+  /* 显示打印输出 Portal */
+  #print-portal-root {
+    display: block !important;
   }
 
-  .print-preview-scaler .print-view {
-    width: 100% !important;
+  .no-print {
+    display: none !important;
   }
 }

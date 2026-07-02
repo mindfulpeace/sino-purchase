@@ -53,7 +53,7 @@
     page-break-after: always;
     break-after: page;
     margin-bottom: 0;
-    padding: 0.5em 15mm 20mm 15mm;
+    padding: 0 15mm 4mm 15mm;
     font-size: 14px;
   }
 
@@ -89,6 +89,6 @@
 
   @page {
     size: A4;
-    margin: 20mm 15mm;
+    margin: 8mm 15mm;
   }
 }
