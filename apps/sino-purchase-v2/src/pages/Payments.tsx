@@ -1,11 +1,12 @@
 import { useState } from "react"
-import { Button, Card, H3, HTMLTable, Tag, Intent } from "@blueprintjs/core"
+import { Button, Card, H3, HTMLTable, Tag, InputGroup } from "../components/ui"
+import type { Intent } from "../components/ui"
 import { usePaymentStore } from "../app/stores/paymentStore"
 
 const statusMap: Record<string, { label: string; intent: Intent }> = {
-  pending: { label: "待付款", intent: Intent.WARNING },
-  paid: { label: "已付款", intent: Intent.SUCCESS },
-  cancelled: { label: "已取消", intent: Intent.DANGER },
+  pending: { label: "待付款", intent: "warning" },
+  paid: { label: "已付款", intent: "success" },
+  cancelled: { label: "已取消", intent: "danger" },
 }
 
 export default function Payments() {
@@ -20,19 +21,11 @@ export default function Payments() {
     <div style={{ padding: 24 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <H3>往来付款</H3>
-        <input
+        <InputGroup
           placeholder="搜索供应商/单号..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{
-            padding: "6px 12px",
-            borderRadius: 4,
-            border: "1px solid var(--border)",
-            background: "var(--bg)",
-            color: "var(--text)",
-            fontSize: 13,
-            width: 240,
-          }}
+          style={{ width: 240 }}
         />
       </div>
 

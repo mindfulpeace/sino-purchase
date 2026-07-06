@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
-import { Dialog, Button, InputGroup, NumericInput, Icon, H4 } from "@blueprintjs/core"
-import { IconNames } from "@blueprintjs/icons"
+import { Dialog, Button, InputGroup, NumericInput, Icon, H4, DialogActions, IconNames } from "../../../components/ui"
 import { usePlanStore } from "../../../app/stores/planStore"
 import { todayISO } from "../helpers"
 import "../plan.css"
@@ -77,10 +76,10 @@ export function SettingsDialog({ isOpen, onClose }: Props) {
         <Button small minimal onClick={() => daysBack(30)}>30天</Button>
         <Button small minimal onClick={() => daysBack(90)}>90天</Button>
       </div>
-      <div className="flex-end" style={{ marginTop: 8 }}>
+      <DialogActions>
         <Button onClick={() => { reload(); onClose() }}>刷新 & 关闭</Button>
         <Button intent="primary" onClick={onClose}>关闭</Button>
-      </div>
+      </DialogActions>
     </div>
   </Dialog>)
 }

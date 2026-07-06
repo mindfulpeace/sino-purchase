@@ -1,4 +1,4 @@
-import { Dialog, Button, Text } from "@blueprintjs/core"
+import { Dialog, Button, Text, DialogActions } from "../../../components/ui"
 import type { PurchaseTask } from "../types"
 import { STATUS_BADGE } from "../types"
 import { currencySymbol } from "../types"
@@ -21,10 +21,10 @@ export function BatchConfirmDialog({ isOpen, changes, count, onConfirm, onClose 
     <div className="col-gap" style={{ padding: 12 }}>
       {entries.map(([k, v]) => (<Text key={k} className="dim">{fmt(k, v)}</Text>))}
       <Text style={{ fontWeight: 600 }}>影响 {count} 项任务</Text>
-      <div className="flex-end" style={{ marginTop: 8 }}>
+      <DialogActions>
         <Button minimal onClick={onClose}>取消</Button>
         <Button intent="primary" onClick={onConfirm}>确认</Button>
-      </div>
+      </DialogActions>
     </div>
   </Dialog>)
 }

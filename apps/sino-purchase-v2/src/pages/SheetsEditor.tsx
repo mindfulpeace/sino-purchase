@@ -1,7 +1,5 @@
 import { useState } from "react"
-import { Button } from "@blueprintjs/core"
-import { IconNames } from "@blueprintjs/icons"
-import { Icon } from "@blueprintjs/core"
+import { Button, Icon, IconNames } from "../components/ui"
 import { useAuth } from "@sino-purchase/sheets-react"
 import { useDock } from "@sino-purchase/layout-dock"
 import { SPREADSHEET_ID } from "../config/sheets"

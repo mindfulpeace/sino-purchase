@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { ButtonGroup, Button, Collapse, Icon, Popover, Menu, MenuItem } from "@blueprintjs/core"
-import { IconNames } from "@blueprintjs/icons"
+import { Icon, Checkbox, Accordion, AccordionSummary, AccordionDetails, ButtonGroup, Button, Popover, Menu, MenuItem } from "../../../components/ui"
+import { IconNames } from "../../../components/ui"
 import type { PurchaseTask, TaskStatus } from "../types"
 import { STATUS_BADGE, STATUS_LABEL_CN, STATUS_COLORS, URGENCY_COLORS } from "../types"
 import { urgencyLabel } from "../helpers"
@@ -73,52 +73,57 @@ export function TaskItem({ task, onRequestEdit, isEditing, selected, onToggleSel
   )
 
   return (
-    <div>
-      <div className={cls} onClick={() => onRequestEdit(task.id)}>
-        <span className="cb-col" onClick={e => { e.stopPropagation(); onToggleSelect(task.id) }}>
-          {selected ? "✓" : ""}
-        </span>
-        <ButtonGroup size="small" style={{ flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-          <Popover
-            content={statusMenu}
-            placement="bottom-start"
-            minimal
-            isOpen={statusOpen}
-            onInteraction={setStatusOpen}
-          >
-            <Button minimal style={{ background: STATUS_COLORS[task.status] }} title={STATUS_LABEL_CN[task.status]}>
-              {STATUS_BADGE[task.status]}
-            </Button>
-          </Popover>
-          <Popover
-            content={urgencyMenu}
-            placement="bottom-start"
-            minimal
-            isOpen={urgencyOpen}
-            onInteraction={setUrgencyOpen}
-          >
-            <Button minimal style={{ background: URGENCY_COLORS[task.urgency] }} title={`紧急${task.urgency}/5`}>
-              {urgencyLabel(task.urgency)}
-            </Button>
-          </Popover>
-        </ButtonGroup>
-        <TaskBody task={task} />
-        <span className="date">{task.plannedDate ? task.plannedDate.slice(5) : ""}</span>
-        <Button minimal small style={{ flexShrink: 0 }} onClick={e => { e.stopPropagation(); onRequestEdit(task.id) }}>
-          <Icon icon={isEditing ? IconNames.CHEVRON_UP : IconNames.CHEVRON_DOWN} size={12} />
-        </Button>
-      </div>
-      <Collapse isOpen={isEditing} keepChildrenMounted={true}>
-        <div>
-          <TaskDetail
-            initial={task}
-            mode="edit"
-            onSave={onSave}
-            onCancel={onCancel}
-            onDelete={onDelete}
-          />
+    <Accordion
+      expanded={isEditing}
+      onChange={(_, expanded) => expanded ? onRequestEdit(task.id) : onCancel()}
+      className={selected ? "task-acc-selected" : undefined}
+    >
+      <AccordionSummary
+        expandIcon={<Icon icon={isEditing ? IconNames.CHEVRON_UP : IconNames.CHEVRON_DOWN} size={12} />}
+      >
+        <div className={cls} style={{ width: "100%" }}>
+          <span onClick={e => e.stopPropagation()}>
+            <Checkbox checked={selected} onChange={() => onToggleSelect(task.id)} />
+          </span>
+          <span className="task-menubars" onClick={e => e.stopPropagation()}>
+            <ButtonGroup size="small">
+              <Popover
+                content={statusMenu}
+                placement="bottom-start"
+                minimal
+                isOpen={statusOpen}
+                onInteraction={setStatusOpen}
+              >
+                <Button minimal style={{ background: STATUS_COLORS[task.status] }} title={STATUS_LABEL_CN[task.status]}>
+                  {STATUS_BADGE[task.status]}
+                </Button>
+              </Popover>
+              <Popover
+                content={urgencyMenu}
+                placement="bottom-start"
+                minimal
+                isOpen={urgencyOpen}
+                onInteraction={setUrgencyOpen}
+              >
+                <Button minimal style={{ background: URGENCY_COLORS[task.urgency] }} title={`紧急${task.urgency}/5`}>
+                  {urgencyLabel(task.urgency)}
+                </Button>
+              </Popover>
+            </ButtonGroup>
+          </span>
+          <TaskBody task={task} />
+          <span className="date">{task.plannedDate ? task.plannedDate.slice(5) : ""}</span>
         </div>
-      </Collapse>
-    </div>
+      </AccordionSummary>
+      <AccordionDetails>
+        <TaskDetail
+          initial={task}
+          mode="edit"
+          onSave={onSave}
+          onCancel={onCancel}
+          onDelete={onDelete}
+        />
+      </AccordionDetails>
+    </Accordion>
   )
 }

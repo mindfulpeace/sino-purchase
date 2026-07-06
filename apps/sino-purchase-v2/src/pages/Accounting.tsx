@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState } from "react"
-import { Button, Tooltip } from "@blueprintjs/core"
+import { Button, Tooltip, Tabs, Tab } from "../components/ui"
 import { useAccountingStore } from "../app/stores/accountingStore"
 import { useDocSettingsStore } from "../app/stores/docSettingsStore"
 import { useAuth } from "@sino-purchase/sheets-react"
@@ -74,36 +74,10 @@ export default function Accounting() {
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
       <div className="no-print" style={{ display: "flex", alignItems: "center", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
         <div style={{ display: "flex" }}>
-          <button
-            onClick={() => switchTab("sheets")}
-              style={{
-                padding: "6px 16px",
-                fontSize: 12,
-                border: "none",
-                background: activeTab === "sheets" ? "var(--bg-active)" : "transparent",
-                color: activeTab === "sheets" ? "var(--text)" : "var(--text-dim)",
-                cursor: "pointer",
-                borderBottom: activeTab === "sheets" ? "2px solid var(--accent)" : "2px solid transparent",
-                fontWeight: activeTab === "sheets" ? 600 : 400,
-              }}
-            >
-            数据源
-          </button>
-          <button
-            onClick={() => switchTab("preview")}
-            style={{
-              padding: "6px 16px",
-              fontSize: 12,
-              border: "none",
-              background: activeTab === "preview" ? "var(--bg-active)" : "transparent",
-              color: activeTab === "preview" ? "var(--text)" : "var(--text-dim)",
-              cursor: "pointer",
-              borderBottom: activeTab === "preview" ? "2px solid var(--accent)" : "2px solid transparent",
-              fontWeight: activeTab === "preview" ? 600 : 400,
-            }}
-          >
-            数据预览
-          </button>
+          <Tabs value={activeTab} onChange={(v: any) => switchTab(v)}>
+            <Tab value="sheets" label="数据源" />
+            <Tab value="preview" label="数据预览" />
+          </Tabs>
         </div>
 
         <div style={{ flex: 1 }} />

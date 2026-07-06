@@ -1,8 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { HTMLSelect, Spinner, Button, MenuItem } from "@blueprintjs/core"
-import { MultiSelect } from "@blueprintjs/select"
-import { IconNames } from "@blueprintjs/icons"
-import { Icon } from "@blueprintjs/core"
+import { Select, Spinner, Button, MenuItem, MultiSelect, Icon, IconNames } from "../../components/ui"
 import { useAuth, listSheets, loadTable } from "@sino-purchase/sheets-react"
 import { SPREADSHEET_ID } from "../../config/sheets"
 import { useAccountingStore } from "../../app/stores/accountingStore"
@@ -155,9 +152,7 @@ export default function SheetsDataTab({ batch, onBatchChange }: SheetsDataTabPro
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 8px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
-        <HTMLSelect value={selectedSheet} onChange={e => setSelectedSheet(e.target.value)}>
-          {sheets.map(s => <option key={s} value={s}>{s}</option>)}
-        </HTMLSelect>
+        <Select value={selectedSheet} options={sheets.map(s => ({ value: s, label: s }))} onChange={setSelectedSheet} />
         <div style={{ maxWidth: 200 }}>
           <MultiSelect
             items={batchOptions}
@@ -165,9 +160,9 @@ export default function SheetsDataTab({ batch, onBatchChange }: SheetsDataTabPro
             onItemSelect={v => { onBatchChange(batch.includes(v) ? batch.filter(x => x !== v) : [...batch, v]) }}
             tagRenderer={v => v}
             tagInputProps={{ onRemove: (v) => onBatchChange(batch.filter(x => x !== v)), placeholder: "批次" }}
-            itemRenderer={(v, { handleClick }) => (<MenuItem key={v} text={v} selected={batch.includes(v)} shouldDismissPopover={false} onClick={handleClick} icon={batch.includes(v) ? IconNames.TICK : IconNames.BLANK} />)}
+            itemRenderer={(v, { handleClick }) => (<MenuItem key={v} text={v} selected={batch.includes(v)} shouldDismissPopover={false} onClick={(e: any) => { e.stopPropagation(); handleClick() }} icon={batch.includes(v) ? IconNames.TICK : IconNames.BLANK} />)}
             popoverProps={{ matchTargetWidth: true }}
-            noResults={<MenuItem disabled text="无匹配" />}
+            noResults={<span style={{ fontSize: 12, color: "var(--text-dim)", padding: "6px 8px", display: "block" }}>无匹配</span>}
           />
         </div>
         <Button icon="database" text="导入数据源" intent="primary" onClick={handleImport} disabled={filteredData.length === 0} small />

@@ -2,7 +2,8 @@
 
 ## 技术栈
 - React 19 + Vite 8 + TypeScript 6
-- Blueprint 6 (`@blueprintjs/core`, `@blueprintjs/icons`, `@blueprintjs/table`)
+- MUI 9 (`@mui/material`, `@mui/icons-material`) — UI 组件库
+- Emotion (`@emotion/react`, `@emotion/styled`) — MUI 依赖
 - Monaco Editor (`@monaco-editor/react`)
 - CSV 解析: `papaparse`
 - Google Sheets API v4 (OAuth via GSI, 无官方 SDK, 直接 fetch)
@@ -82,17 +83,16 @@ sino-purchase-v2/
 ```
 
 ## 设计决策
-- **Provider 嵌套**: `SheetsProvider > DockLayout` (App.tsx); Portal 组件需 `PortalProvider > OverlaysProvider > HotkeysProvider` (BP6 推荐顺序)
-- **根元素类名**: 根 div 用 `app-root bp6-dark` 或 `app-root bp6-light`，`app-root` 用于 CSS 选择器限定（防止 portal div 的 `bp6-dark` 误匹配布局样式）
-- **颜色变量**: 所有颜色定义在 `:root` (暗色) / `:root.bp6-theme-light` (亮色) → Portal 组件 (Dialog/Drawer) 可通过 `var()` 访问
-- **暗色模式**: 根 div 加 `bp6-dark` 类 → BP6 内置暗色样式; PortalProvider 为 Portal 容器加 `bp6-dark`
-- **亮色模式**: `html` 加 `.bp6-theme-light` 类 (ThemeContext useEffect); PortalProvider 不加 `bp6-dark`, BP6 默认亮色样式
-- **Dialog/Drawer**: 用 `.bp6-dark .bp6-dialog` 全局选择器覆盖 (Portal 作用域问题)
+- **Provider 嵌套**: `ThemeProvider > SheetsProvider > DockLayout` (`main.tsx`)，MUI ThemeProvider 使用 `createTheme` 定义暗色主题
+- **根元素类名**: `app-root` 用于 CSS 选择器限定
+- **颜色变量**: 所有颜色定义在 `:root` (暗色) / `:root.theme-light` (亮色) → MUI 组件通过 `createTheme` + `sx` prop 访问
+- **暗色模式**: MUI ThemeProvider 定义 `palette.mode: 'dark'`；现有 ThemeContext 切换 `theme-light` class；MUI 组件继承 palette 颜色
+- **亮色模式**: `html` 加 `.theme-light` 类 (ThemeContext useEffect)
 - **状态管理**: Zustand stores 在 `app/stores/` 下按业务拆分 (plan/accounting/material/payment/docSettings)。planStore 中 `applyFilter()` 在每次 setter 内合并调用，避免两次 `set`
 - **页面架构**: `pages/` 为薄入口，组合 `app/stores/` + `modules/`。`modules/` 下按业务拆分组件和 hooks
 - **按钮焦点**: `button:focus { outline: none !important }` 移除蓝色外框
 - **拖拽缩放**: `useSidebarResize` 左栏 (手柄在右侧, `+clientX`); `useRightResize` 右栏 (手柄在左侧, `-clientX`)
-- **CSS 覆盖文件**: 所有 BP6 组件颜色覆盖集中在 `blueprintOverrides.css`，无作用域前缀，因 SPA 自然隔离
+- **CSS 覆盖文件**: MUI 组件颜色覆盖集中在 `main.tsx` 的 `createTheme` + `index.css` 中，额外覆盖在 `index.css` 末尾
 - **懒加载**: 5 个页面均用 `React.lazy` 分包，首屏不加载 Monaco (~600KB) 和 xlsx (~416KB)
 - **菜单栏默认**: 300px 宽，最小 120px，最大 600px；文件树 `text-overflow: ellipsis` 防换行
 - **标题栏高**: 26px
@@ -107,8 +107,8 @@ sino-purchase-v2/
 - **layout-dock 打印**: `@media print` 隐藏 chrome (tabs/headers/resize-handles) + `.layout-dock-left/center/bottom`，重置 dockview 内部布局为静态流，仅保留 `.layout-dock-right` 中的 printable 内容填满页面
 
 ## 已修复的问题
-1. `bp5-` → `bp6-` 前缀
-2. 对话框/抽屉背景透明的 Portal 作用域问题
+1. `bp5-` → `bp6-` 前缀（已废弃：现已迁移至 MUI v9）
+2. 对话框/抽屉背景透明的 Portal 作用域问题（已废弃：MUI Dialog 自带 Portal 支持）
 3. Slider 标尺密度 (`labelStepSize=10`)
 4. `<pre>` 不能放在 `<p>` 内
 5. 导航栏 active 指示器 `top/bottom` 改为 `1px`
@@ -123,13 +123,8 @@ sino-purchase-v2/
 14. `IconNames.SIDEBAR_LEFT`/`SIDEBAR_RIGHT` 不存在 — TS2339 错误，改用 `ADD_COLUMN_LEFT`/`REMOVE_COLUMN_LEFT` 和 `ADD_COLUMN_RIGHT`/`REMOVE_COLUMN_RIGHT`
 
 ## 备忘录
-- 所有 Blueprint 图标用 `<Icon icon={IconNames.XXX} />` (从 `@blueprintjs/icons` 导入)
-- `MultiSlider.Handle` 使用 `onChange` 属性 (不是 `onChangeBefore`)
-- `CompoundTag` 右侧内容用 `children` (不是 `rightContent`)
-- `OverlayToaster.create()` 返回 `Promise<Toaster>`, 需要用 `useRef` + `useEffect` 获取
-- `Breadcrumbs` 从 `@blueprintjs/core/lib/esm/components/breadcrumbs/breadcrumbs` 导入 (BP6.15 顶部 re-export 缺失)
-- `Tab` 用 `panel` 属性代替 `TabPanel` 组件
-- IconShowcase 自动分组: 按 `IconNames` 枚举名前缀归为 Actions/Arrows/Files/UI/Editor/Graph 等
+- 所有图标用 `<Icon icon={IconNames.XXX} />` (从 `./components/ui` 导入，底层使用 `@mui/icons-material`)
+- `components/ui/` 提供镜像 BP 兼容 API 的 MUI 组件（Button, Dialog, Popover, Menu, 表单控件等），业务代码无需改动 import 路径
 - 属性栏 (`PropertiesBar`) 通过 `AppLayout` 的 `propertiesPanel` prop 传入，可选中不传则不显示
 - 菜单栏内容 (`menu-content div, span`) 全局设为 `white-space: nowrap; overflow: hidden; text-overflow: ellipsis;`
 - 主应用 (`apps/sino-purchase-v2`) 引用 `@sino-purchase/layout-dock` + `@sino-purchase/sheets-react` + `@sino-purchase/doc-reimburse` + `@sino-purchase/print`
@@ -151,9 +146,9 @@ sino-purchase-v2/
 - **Zustand stores** (`app/stores/`): planStore (筛选/排序/分组 + localStorage 持久化), accountingStore (records CRUD + importDialog), docSettingsStore (打印设置), materialStore, paymentStore
 - planStore `applyFilter()` 在 `setFilterSetter` 闭包中合并调用，避免每个 filter 变化触发两次重渲染
 - accountingStore 通过 `useEffect` 将 `records` 同步到 `docSettingsStore.reimburseRecords` 供打印使用
-- `CashGrid` 使用 `@blueprintjs/table` 的 `Table2` + `Column`，按税务字段 HSL 着色，支持点击排序
+- `CashGrid` 使用原生 `<table>` + inline 编辑替换（原 `@blueprintjs/table` 的 `Table2`）
 - 导入流程: Excel 或剪贴板 → 解析为 CashRecord[] → ImportDialog 预览 → 确认 → 加入 Zustand store
-- `@sino-purchase/layout-dock` 是 dockview 编辑器应用框架布局库，提供 `DockLayout` 组件和 `useDock` hook。导出 `DockMenuItem`、`DockInput`、`DockPlaceholder`、`DockSection` 组件。使用 `themeAbyss`/`themeLight` 主题。peer deps 含 Blueprint + dockview
+- `@sino-purchase/layout-dock` 是 dockview 编辑器应用框架布局库，提供 `DockLayout` 组件和 `useDock` hook。导出 `DockMenuItem`、`DockInput`、`DockPlaceholder`、`DockSection` 组件。使用 `themeAbyss`/`themeLight` 主题。peer deps 仅 dockview + react + react-dom（已移除 Blueprint 依赖）
 - layout-dock Context API (`useDock()`): `openEditor(id)`, `closeEditor(id)`, `getApi()`, `setLeftVisible(v)`, `setRightVisible(v)`, `setBottomVisible(v)`, `leftVisible`, `rightVisible`, `bottomVisible`, `theme`, `setTheme(t)` (注意: `status`/`summary`/`setStatus`/`setSummary` 属于已废弃的 ui-dock)
 - layout-dock Props: `navigation[]`, `editors?` (含 `rightPanels` per-editor), `bottom?`, `left?`, `right?`, `bottomEdge?`, `defaultTheme?`, `rightDefault?`, `bottomDefault?`, `rightVisible?`, `onRightVisibleChange?`, `persistenceKey?`, `onReady?` (注意: `title`/`headerRight`/`properties`/`statusBar` 属于已废弃的 ui-dock)
 - layout-dock edge groups: left (导航面板, 300px), right (属性栏, 350px, 默认隐藏), bottom (底部面板, 200px, 默认隐藏)

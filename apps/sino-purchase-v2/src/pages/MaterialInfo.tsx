@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState } from "react"
-import { Button, Card, H3, InputGroup, HTMLTable } from "@blueprintjs/core"
+import { Button, Card, H3, InputGroup, HTMLTable } from "../components/ui"
 import { useMaterialStore } from "../app/stores/materialStore"
 
 export default function MaterialInfo() {

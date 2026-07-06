@@ -1,6 +1,5 @@
 import { Fragment, useMemo } from "react"
-import { NonIdealState, Icon } from "@blueprintjs/core"
-import { IconNames } from "@blueprintjs/icons"
+import { NonIdealState, Icon, IconNames } from "../../../components/ui"
 import { usePlanStore } from "../../../app/stores/planStore"
 import type { PurchaseTask, GroupBy } from "../types"
 import { TaskItem } from "./TaskItem"

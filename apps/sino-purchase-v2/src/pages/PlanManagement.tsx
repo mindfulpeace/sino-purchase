@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react"
-import { ButtonGroup, Button, ControlGroup, HTMLSelect, InputGroup } from "@blueprintjs/core"
+import { Button, ControlGroup, InputGroup, Select, Tabs, Tab, Stack, Box } from "../components/ui"
 import { useSheetData } from "@sino-purchase/sheets-react"
 import { usePlanStore } from "../app/stores/planStore"
 import { TaskList } from "../modules/plan/components/TaskList"
@@ -200,14 +200,12 @@ export default function PlanManagement() {
   }, [addTask])
 
   return (
-    <div className="plan-root">
+    <Stack className="plan-root">
       {/* Filter bar */}
-      <div className="plan-toolbar">
+      <Stack direction="row" className="plan-toolbar">
         <ControlGroup fill>
-          <span>
-            <StatusFilter />
-            <span style={{ paddingRight: 10 }}> </span>
-            <UrgencyFilter /></span>
+          <StatusFilter />
+          <UrgencyFilter />
           <SupplierFilter />
           <BookerFilter />
           <InputGroup
@@ -217,45 +215,36 @@ export default function PlanManagement() {
             style={{ minWidth: 80 }}
           />
         </ControlGroup>
-      </div>
+      </Stack>
 
       {/* Sort bar */}
-      <div className="plan-sortbar">
-        <ButtonGroup size="small">
+      <Stack direction="row" className="plan-sortbar">
+        <Tabs value={groupBy} onChange={(v: any) => setGroupBy(v as GroupBy)}>
           {GROUP_OPTIONS.map(o => (
-            <Button
-              key={o.value}
-              active={groupBy === o.value}
-              onClick={() => setGroupBy(o.value)}
-            >
-              {o.label}
-            </Button>
+            <Tab key={o.value} value={o.value} label={o.label} />
           ))}
-        </ButtonGroup>
-        <select
+        </Tabs>
+        <Select
           value={sortBy}
-          onChange={e => setSortBy(e.target.value as SortBy)}
-        >
-          {SORT_OPTIONS.filter(o => o.value !== GROUP_SORT_MAP[groupBy]).map(o => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-      </div>
+          options={SORT_OPTIONS.filter(o => o.value !== GROUP_SORT_MAP[groupBy]).map(o => ({ value: o.value, label: o.label }))}
+          onChange={v => setSortBy(v as SortBy)}
+        />
+      </Stack>
 
       {/* Scrollable task list */}
-      <div className="plan-scroll">
+      <Box className="plan-scroll">
         {loading ? (
-          <div className="plan-loading">
-            <div className="sk sk-hdr" />
-            <div className="sk sk-w92" />
-            <div className="sk sk-w78" />
-            <div className="sk sk-w62" />
-            <div className="sk sk-hdr" />
-            <div className="sk sk-w85" />
-            <div className="sk sk-w72" />
-            <div className="sk sk-w55" />
-            <div className="sk sk-w82" />
-          </div>
+          <Box className="plan-loading">
+            <Box className="sk sk-hdr" />
+            <Box className="sk sk-w92" />
+            <Box className="sk sk-w78" />
+            <Box className="sk sk-w62" />
+            <Box className="sk sk-hdr" />
+            <Box className="sk sk-w85" />
+            <Box className="sk sk-w72" />
+            <Box className="sk sk-w55" />
+            <Box className="sk sk-w82" />
+          </Box>
         ) : (
           <TaskList
             tasks={tasks}
@@ -267,11 +256,11 @@ export default function PlanManagement() {
             onDelete={handleDeleteDetail}
           />
         )}
-      </div>
+      </Box>
 
       {/* Batch edit detail */}
       {showBatchEdit && (
-        <div className="plan-batch">
+        <Box className="plan-batch">
           <TaskDetail
             initial={batchInitial}
             mode="batch"
@@ -279,25 +268,25 @@ export default function PlanManagement() {
             onSave={handleBatchSave}
             onCancel={closeBatchEdit}
           />
-        </div>
+        </Box>
       )}
 
       {/* Quick add bar */}
-      <div className="plan-addbar">
+      <Box className="plan-addbar">
         <AddNewTaskBar
           onAdd={handleAddFromBar}
           onOpenAdd={handleOpenAdd}
           onBatch={() => setShowBatch(true)}
         />
-      </div>
+      </Box>
 
       {/* Status bar extras (buttons when selected) */}
       {selectedIds.size > 0 && (
-        <div className="plan-selbar">
+        <Stack direction="row" className="plan-selbar">
           <Button small minimal onClick={copySelected}>复制</Button>
           <Button small minimal onClick={openBatchEdit}>编辑</Button>
           <Button small minimal onClick={clearSelection}>取消</Button>
-        </div>
+        </Stack>
       )}
 
       {/* Dialogs */}
@@ -310,6 +299,6 @@ export default function PlanManagement() {
         onConfirm={confirmBatchApplyLocal}
         onClose={() => setShowBatchConfirm(false)}
       />
-    </div>
+    </Stack>
   )
 }

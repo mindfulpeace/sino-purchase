@@ -1,6 +1,5 @@
 import type { ReactNode } from "react"
-import { Icon } from "@blueprintjs/core"
-import type { IconName } from "@blueprintjs/icons"
+import { Icon, type IconName } from "./ui"
 
 interface EmptyPlaceholderProps {
   icon?: IconName

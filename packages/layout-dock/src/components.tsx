@@ -1,15 +1,13 @@
 import type { ReactNode } from "react"
-import { Icon } from "@blueprintjs/core"
-import type { IconName } from "@blueprintjs/icons"
 
 export function DockMenuItem({ icon, label, onClick }: {
-  icon?: IconName
+  icon?: ReactNode
   label: string
   onClick?: () => void
 }) {
   return (
     <div className="dv-panel-item" onClick={onClick}>
-      {icon && <Icon icon={icon} size={14} />}
+      {icon}
       <span>{label}</span>
     </div>
   )
@@ -31,12 +29,12 @@ export function DockInput({ placeholder, value, onChange }: {
 }
 
 export function DockPlaceholder({ icon, title }: {
-  icon?: IconName
+  icon?: ReactNode
   title: string
 }) {
   return (
     <div className="dv-placeholder">
-      {icon && <Icon icon={icon} size={48} />}
+      {icon}
       <span>{title}</span>
     </div>
   )

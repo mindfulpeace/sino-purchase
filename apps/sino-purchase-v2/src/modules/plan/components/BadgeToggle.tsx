@@ -1,4 +1,4 @@
-import { ButtonGroup, Button } from "@blueprintjs/core"
+import { ToggleButtonGroup, ToggleButton } from "../../../components/ui"
 
 interface BadgeToggleProps<T> {
   values: T[]
@@ -11,17 +11,17 @@ interface BadgeToggleProps<T> {
 
 export function BadgeToggle<T extends string | number>({ values, selected, onChange, label, color, disabled }: BadgeToggleProps<T>) {
   return (
-    <ButtonGroup size="small">
+    <ToggleButtonGroup
+      exclusive
+      value={selected}
+      size="small"
+      onChange={(v) => { if (!disabled && v != null) onChange(v as T) }}
+    >
       {values.map(v => (
-        <Button
-          key={String(v)}
-          active={selected === v}
-          onClick={() => { if (!disabled) onChange(v) }}
-          style={color ? { background: color(v) } : undefined}
-        >
+        <ToggleButton key={String(v)} value={v} style={color ? { backgroundColor: color(v) } : undefined}>
           {label(v)}
-        </Button>
+        </ToggleButton>
       ))}
-    </ButtonGroup>
+    </ToggleButtonGroup>
   )
 }

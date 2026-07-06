@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Dialog, Button, TextArea, Text, Card } from "@blueprintjs/core"
+import { Dialog, Button, TextArea, Text, Card, DialogActions } from "../../../components/ui"
 import type { PurchaseTask, SupportedCurrency, TaskStatus, Urgency } from "../types"
 import { todayISO } from "../helpers"
 import "../plan.css"
@@ -74,10 +74,10 @@ export function BatchImportDialog({ isOpen, onClose, onImport }: Props) {
         <Text className="dim">已解析 <strong>{parsed.length}</strong> 条任务</Text>
         <Card style={{ maxHeight: 150, overflowY: "auto", padding: 4 }}>{parsed.map((t, i) => <PreviewTask key={i} task={t} />)}</Card>
       </>)}
-      <div className="flex-end">
+      <DialogActions>
         <Button minimal onClick={handleClose}>取消</Button>
         <Button intent="primary" onClick={handleImport} disabled={parsed.length === 0}>导入 ({parsed.length})</Button>
-      </div>
+      </DialogActions>
     </div>
   </Dialog>)
 }

@@ -1,6 +1,5 @@
 import { useCallback } from "react"
-import { Button, InputGroup, HTMLSelect, Switch } from "@blueprintjs/core"
-import { IconNames } from "@blueprintjs/icons"
+import { Button, InputGroup, Select, Switch, IconNames } from "../../components/ui"
 import { useDocSettingsStore } from "../../app/stores/docSettingsStore"
 import { PrintPreview } from "@sino-purchase/print"
 import PrintableReimburse from "./PrintableReimburse"
@@ -40,10 +39,16 @@ export default function AccountingSettings() {
     <div style={{ display: "flex", flexDirection: "column", gap: 8, height: "100%", overflow: "hidden", padding: 12 }}>
       <div className="no-print" style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
         <Switch checked={autoCompany} label="自动配置公司名称" onChange={(e) => setAutoCompany(e.currentTarget.checked)} />
-        <HTMLSelect value={isCustom ? "-1" : String(presetIndex)} onChange={e => handlePresetChange(e.target.value)} fill disabled={autoCompany}>
-          {PRESETS.map((p, i) => (<option key={i} value={String(i)}>{p.label}</option>))}
-          <option value="-1">自定义</option>
-        </HTMLSelect>
+        <Select
+          value={isCustom ? "-1" : String(presetIndex)}
+          options={[
+            ...PRESETS.map((p, i) => ({ value: String(i), label: p.label })),
+            { value: "-1", label: "自定义" },
+          ]}
+          onChange={handlePresetChange}
+          disabled={autoCompany}
+          style={{ width: "100%" }}
+        />
         <InputGroup placeholder="公司名(中文)" value={settings.companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={autoCompany} />
         <InputGroup placeholder="Company Name" value={settings.companyNameEn} onChange={(e) => setCompanyNameEn(e.target.value)} disabled={autoCompany} />
         <div style={{ display: "flex", gap: 8, width: "100%" }}>

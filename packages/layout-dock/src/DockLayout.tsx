@@ -486,7 +486,7 @@ export function DockLayout({
 
   return (
     <Ctx.Provider value={ctx}>
-      <div className={`dv-layout dockview-theme-${theme === "dark" ? "abyss" : "light"} ${theme === "dark" ? "bp6-dark" : "bp6-light"}`}>
+      <div className={`dv-layout dockview-theme-${theme === "dark" ? "abyss" : "light"}`}>
         <div className="dv-body">
           <DockviewReact components={components} onReady={handleReady} theme={dvTheme} />
         </div>

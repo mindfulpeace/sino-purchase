@@ -1,6 +1,6 @@
 import type { GroupBy } from "../types"
 import { STATUS_LABEL_CN } from "../types"
-import { Text } from "@blueprintjs/core"
+import { Text } from "../../../components/ui"
 
 interface Props {
   groupBy: GroupBy

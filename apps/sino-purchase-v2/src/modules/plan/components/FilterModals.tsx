@@ -1,80 +1,74 @@
 import { useMemo } from "react"
-import { Button, ButtonGroup, HTMLSelect } from "@blueprintjs/core"
+import { ToggleButtonGroup, ToggleButton, Select } from "../../../components/ui"
 import type { TaskStatus } from "../types"
 import { STATUS_BADGE } from "../types"
 import { usePlanStore } from "../../../app/stores/planStore"
 import { nameListOptions } from "../helpers"
 
-/* ── Status toggle buttons ── */
+/* ── Status toggle buttons (MUI ToggleButtonGroup, multiple) ── */
 
 const STATUS_ITEMS: TaskStatus[] = [1, 2, 3, 4, 5]
 
 export function StatusFilter() {
   const { statusFilter, setStatusFilter } = usePlanStore()
-  const toggle = (s: TaskStatus) => {
-    setStatusFilter(
-      statusFilter.includes(s)
-        ? statusFilter.filter(x => x !== s)
-        : [...statusFilter, s]
-    )
-  }
   return (
-    <ButtonGroup variant="outlined" size="small" className="plan-filter-group">
+    <ToggleButtonGroup
+      value={statusFilter}
+      size="small"
+      onChange={(v) => setStatusFilter(v as TaskStatus[])}
+    >
       {STATUS_ITEMS.map(s => (
-        <Button key={s} active={statusFilter.includes(s)} onClick={() => toggle(s)}>
-          {STATUS_BADGE[s]}
-        </Button>
+        <ToggleButton key={s} value={s}>{STATUS_BADGE[s]}</ToggleButton>
       ))}
-    </ButtonGroup>
+    </ToggleButtonGroup>
   )
 }
 
-/* ── Urgency toggle buttons ── */
+/* ── Urgency toggle buttons (MUI ToggleButtonGroup, multiple) ── */
 
 export function UrgencyFilter() {
   const { urgencyFilter, setUrgencyFilter } = usePlanStore()
-  const toggle = (u: number) => {
-    setUrgencyFilter(
-      urgencyFilter.includes(u)
-        ? urgencyFilter.filter(x => x !== u)
-        : [...urgencyFilter, u]
-    )
-  }
   return (
-    <ButtonGroup variant="outlined" size="small" className="plan-filter-group">
+    <ToggleButtonGroup
+      value={urgencyFilter}
+      size="small"
+      onChange={(v) => setUrgencyFilter(v as number[])}
+    >
       {[1, 2, 3, 4, 5].map(u => (
-        <Button key={u} active={urgencyFilter.includes(u)} onClick={() => toggle(u)}>
-          {u}
-        </Button>
+        <ToggleButton key={u} value={u}>{u}</ToggleButton>
       ))}
-    </ButtonGroup>
+    </ToggleButtonGroup>
   )
 }
 
-/* ── Supplier HTMLSelect (ControlGroup-compatible) ── */
+/* ── Supplier MUI Select ── */
 
 export function SupplierFilter() {
   const { supplierFilter, setSupplierFilter, allTasks } = usePlanStore()
   const opts = useMemo(() => nameListOptions(allTasks, "supplierId"), [allTasks])
 
   return (
-    <HTMLSelect value={supplierFilter} onChange={e => setSupplierFilter(e.target.value)} >
-      <option value="">商家</option>
-      {opts.map(s => <option key={s} value={s}>{s}</option>)}
-    </HTMLSelect>
+    <Select
+      value={supplierFilter}
+      placeholder="商家"
+      options={opts.map(s => ({ value: s, label: s }))}
+      onChange={setSupplierFilter}
+    />
   )
 }
 
-/* ── Booker HTMLSelect (ControlGroup-compatible) ── */
+/* ── Booker MUI Select ── */
 
 export function BookerFilter() {
   const { bookerFilter, setBookerFilter, allTasks } = usePlanStore()
   const opts = useMemo(() => nameListOptions(allTasks, "bookerId"), [allTasks])
 
   return (
-    <HTMLSelect value={bookerFilter} onChange={e => setBookerFilter(e.target.value)} >
-      <option value="">预定人</option>
-      {opts.map(s => <option key={s} value={s}>{s}</option>)}
-    </HTMLSelect>
+    <Select
+      value={bookerFilter}
+      placeholder="预定人"
+      options={opts.map(s => ({ value: s, label: s }))}
+      onChange={setBookerFilter}
+    />
   )
 }

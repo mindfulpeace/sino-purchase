@@ -1,5 +1,4 @@
-import { Button, Icon } from "@blueprintjs/core"
-import { IconNames } from "@blueprintjs/icons"
+import { Button, Icon, IconNames } from "./ui"
 import { useAuth } from "@sino-purchase/sheets-react"
 import { useDock } from "@sino-purchase/layout-dock"
 

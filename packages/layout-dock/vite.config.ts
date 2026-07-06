@@ -26,8 +26,6 @@ export default defineConfig({
         "react-dom",
         "react/jsx-runtime",
         "dockview",
-        "@blueprintjs/core",
-        "@blueprintjs/icons",
       ],
     },
   },

@@ -15,14 +15,36 @@ body {
 }
 
 button:focus { outline: none; }
+input:focus { outline: none; }
 
 :root { --text-dim: #858585; }
-:root.bp6-theme-light { --text-dim: #888888; }
+:root.theme-light { --text-dim: #888888; }
 
 @keyframes planPulse {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 0.7; }
 }
 
-/* Print rules (#print-portal-root, #root hiding, .no-print) are provided
-   by @sino-purchase/print package CSS. */
+/* MUI CssBaseline override: keep background transparent, let layout-dock handle it */
+.MuiCssBaseline-root {
+  background: transparent !important;
+}
+
+/* MUI Dialog: make footer area look like a footer */
+.ui-dialog-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  border-top: 1px solid var(--border, #3a3a5a);
+}
+
+.ui-dialog-footer-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* MUI circular progress color */
+.MuiCircularProgress-root {
+  color: var(--accent, #4a90d9) !important;
+}

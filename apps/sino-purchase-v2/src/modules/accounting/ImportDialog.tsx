@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { Dialog, Button, Classes, RadioGroup, Radio } from "@blueprintjs/core"
+import { Button, Dialog, RadioGroup, Radio, Classes, DialogActions } from "../../components/ui"
 import type { CashRecord } from "./types"
 import { formatAmount } from "./helpers"
 
@@ -63,16 +63,16 @@ export default function ImportDialog({ open, records, onConfirm, onCancel }: Imp
           </tbody>
         </table>
       </div>
-      <div className={Classes.DIALOG_FOOTER} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <DialogActions style={{ display: "flex", justifyContent: "space-between" }}>
         <RadioGroup inline selectedValue={mode} onChange={e => setMode(e.currentTarget.value as ImportMode)} style={{ margin: 0 }}>
           <Radio label="替换" value="replace" />
           <Radio label="追加" value="append" />
         </RadioGroup>
-        <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+        <div style={{ display: "flex", gap: 8 }}>
           <Button onClick={onCancel}>取消</Button>
           <Button onClick={() => onConfirm(edited, mode)} intent="primary">确认导入</Button>
         </div>
-      </div>
+      </DialogActions>
     </Dialog>
   )
 }

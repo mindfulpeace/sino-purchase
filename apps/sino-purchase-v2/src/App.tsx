@@ -1,6 +1,5 @@
 import { lazy, Suspense, useCallback } from "react"
-import { Icon } from "@blueprintjs/core"
-import { IconNames } from "@blueprintjs/icons"
+import { Icon, IconNames } from "./components/ui"
 import { DockLayout, useDock } from "@sino-purchase/layout-dock"
 import { SheetsProvider, useAuth } from "@sino-purchase/sheets-react"
 import { CLIENT_ID, SPREADSHEET_ID } from "./config/sheets"
