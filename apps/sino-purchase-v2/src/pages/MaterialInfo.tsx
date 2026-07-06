@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState } from "react"
-import { Button, Card, H3, InputGroup, HTMLTable } from "../components/ui"
+import { Button, Card, H3, InputGroup, HTMLTable, Box, Stack } from "../components/ui"
 import { useMaterialStore } from "../app/stores/materialStore"
 
 export default function MaterialInfo() {
@@ -14,10 +14,10 @@ export default function MaterialInfo() {
   )
 
   return (
-    <div style={{ padding: 24 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+    <Box sx={{ p: 3 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
         <H3>物料信息</H3>
-        <div style={{ display: "flex", gap: 12 }}>
+        <Stack direction="row" spacing={1.5}>
           <InputGroup
             placeholder="搜索物料..."
             value={search}
@@ -27,8 +27,8 @@ export default function MaterialInfo() {
           <Button intent="primary" icon="plus">
             新增物料
           </Button>
-        </div>
-      </div>
+        </Stack>
+      </Stack>
 
       <Card>
         <HTMLTable compact striped style={{ width: "100%" }}>
@@ -60,9 +60,9 @@ export default function MaterialInfo() {
         </HTMLTable>
       </Card>
 
-      <div style={{ marginTop: 24, color: "var(--text-dim)", fontSize: 14 }}>
+      <Box sx={{ mt: 3, color: "var(--text-dim)", fontSize: 14 }}>
         <p>💡 数据已持久化到 localStorage</p>
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }

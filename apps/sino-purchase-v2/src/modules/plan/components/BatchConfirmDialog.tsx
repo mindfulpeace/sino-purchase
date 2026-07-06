@@ -2,7 +2,6 @@ import { Dialog, Button, Text, DialogActions, Stack } from "../../../components/
 import type { PurchaseTask } from "../types"
 import { STATUS_BADGE } from "../types"
 import { currencySymbol } from "../types"
-import "../plan.css"
 
 interface Props { isOpen: boolean; changes: Partial<PurchaseTask>; count: number; onConfirm: () => void; onClose: () => void }
 

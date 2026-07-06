@@ -2,7 +2,6 @@ import { useState, useEffect } from "react"
 import { Dialog, Button, InputGroup, NumericInput, Icon, H4, DialogActions, IconNames, Stack, Text } from "../../../components/ui"
 import { usePlanStore } from "../../../app/stores/planStore"
 import { todayISO } from "../helpers"
-import "../plan.css"
 
 const STORAGE_KEY = "sino-exchange-rates"
 const FETCH_INTERVAL = 24 * 60 * 60 * 1000

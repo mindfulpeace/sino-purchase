@@ -174,6 +174,11 @@ interface PlanState {
 export const usePlanStore = create<PlanState>((set, get) => {
   const saved = loadFilter()
 
+  // 缓存 filter 结果：只有当 allTasks 或 filter 字段真正变化时才重算，
+  // 否则返回同一数组引用，避免下游 useMemo 无谓重算。
+  let cachedSig = ""
+  let cachedResult: PurchaseTask[] = []
+
   function applyFilter(): Partial<PlanState> {
     const s = get()
     const f: FilterState = {
@@ -189,7 +194,15 @@ export const usePlanStore = create<PlanState>((set, get) => {
       dateEndToday: s.dateEndToday,
     }
     saveFilter(f)
-    const filteredTasks = filterAndSortTasks(s.allTasks, f)
+    const sig = s.allTasks.length + "|" + JSON.stringify(f)
+    let filteredTasks: PurchaseTask[]
+    if (sig === cachedSig) {
+      filteredTasks = cachedResult
+    } else {
+      filteredTasks = filterAndSortTasks(s.allTasks, f)
+      cachedSig = sig
+      cachedResult = filteredTasks
+    }
     return { filteredTasks }
   }
 

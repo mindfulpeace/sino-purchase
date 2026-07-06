@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState } from "react"
-import { Button, Tooltip, Tabs, Tab } from "../components/ui"
+import { Button, Tooltip, Tabs, Tab, Box, Stack } from "../components/ui"
 import { useAccountingStore } from "../app/stores/accountingStore"
 import { useDocSettingsStore } from "../app/stores/docSettingsStore"
 import { useAuth } from "@sino-purchase/sheets-react"
@@ -71,18 +71,18 @@ export default function Accounting() {
   }, [setRecords, addRecords, hideImportDialog, switchTab])
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
-      <div className="no-print" style={{ display: "flex", alignItems: "center", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
-        <div style={{ display: "flex" }}>
+    <Stack sx={{ height: "100%", overflow: "hidden" }}>
+      <Box className="no-print" sx={{ display: "flex", alignItems: "center", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
+        <Box sx={{ display: "flex" }}>
           <Tabs value={activeTab} onChange={(v: any) => switchTab(v)}>
             <Tab value="sheets" label="数据源" />
             <Tab value="preview" label="数据预览" />
           </Tabs>
-        </div>
+        </Box>
 
-        <div style={{ flex: 1 }} />
+        <Box sx={{ flex: 1 }} />
 
-        <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "2px 8px" }}>
+        <Stack direction="row" alignItems="center" spacing={0.5} sx={{ p: "2px 8px" }}>
           <Tooltip content="从 Excel 导入">
             <Button icon="import" text="Excel" onClick={triggerImport} small />
           </Tooltip>
@@ -92,7 +92,7 @@ export default function Accounting() {
           <Tooltip content="导出为 Excel">
             <Button icon="export" text="导出" onClick={handleExport} small />
           </Tooltip>
-          <div style={{ width: 1, height: 16, background: "var(--border)", margin: "0 4px" }} />
+          <Box sx={{ width: 1, height: 16, background: "var(--border)", mx: "4px" }} />
           <span style={{ fontSize: 12, color: "var(--text-dim)", whiteSpace: "nowrap" }}>{summary}</span>
           <Tooltip content={propertiesVisible ? "关闭打印设置" : "打开打印设置"}>
             <Button
@@ -102,19 +102,19 @@ export default function Accounting() {
               small
             />
           </Tooltip>
-        </div>
+        </Stack>
 
         <input ref={inputRef} type="file" accept=".xlsx,.xls" onChange={handleExcel} style={{ display: "none" }} title="导入Excel文件" aria-label="导入Excel文件" />
-      </div>
+      </Box>
 
-      <div style={{ flex: 1, overflow: "auto" }}>
-        <div style={{ display: activeTab === "sheets" ? "flex" : "none", height: "100%" }}>
+      <Box sx={{ flex: 1, overflow: "auto" }}>
+        <Box sx={{ display: activeTab === "sheets" ? "flex" : "none", height: "100%" }}>
           <SheetsDataTab batch={sheetsBatch} onBatchChange={setSheetsBatch} />
-        </div>
-        <div style={{ display: activeTab === "preview" ? "flex" : "none", height: "100%" }}>
+        </Box>
+        <Box sx={{ display: activeTab === "preview" ? "flex" : "none", height: "100%" }}>
           <CashGrid records={records} />
-        </div>
-      </div>
+        </Box>
+      </Box>
 
       <ImportDialog
         open={importDialog.open}
@@ -122,6 +122,6 @@ export default function Accounting() {
         onConfirm={handleConfirmImport}
         onCancel={hideImportDialog}
       />
-    </div>
+    </Stack>
   )
 }

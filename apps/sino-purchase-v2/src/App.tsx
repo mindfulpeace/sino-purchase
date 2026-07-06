@@ -1,10 +1,11 @@
 import { lazy, Suspense, useCallback, useMemo } from "react"
-import { ThemeProvider as MuiThemeProvider, createTheme, type Theme } from "@mui/material/styles"
+import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
-import { Icon, IconNames } from "./components/ui"
+import { Icon, IconNames, Box } from "./components/ui"
 import { DockLayout, useDock } from "@sino-purchase/layout-dock"
 import { SheetsProvider, useAuth } from "@sino-purchase/sheets-react"
 import { useTheme } from "./theme/ThemeContext"
+import { buildMuiTheme } from "./theme/theme"
 import { CLIENT_ID, SPREADSHEET_ID } from "./config/sheets"
 import { useDocSettingsStore } from "./app/stores/docSettingsStore"
 import AccountingSettings from "./modules/accounting/AccountingSettings"
@@ -15,148 +16,56 @@ const Accounting = lazy(() => import("./pages/Accounting"))
 const Payments = lazy(() => import("./pages/Payments"))
 const SheetsEditor = lazy(() => import("./pages/SheetsEditor"))
 
-const fallback = <div className="dv-panel" style={{ color: "var(--text-dim)" }}>Loading…</div>
+const fallback = <Box className="dv-panel" style={{ color: "var(--text-dim)" }}>Loading…</Box>
 
-/** Build an MUI theme per color mode. Non-MUI surfaces (inline styles, dialogs
- *  using var(--bg-surface), dockview chrome) follow the CSS-variable system in
- *  index.css, toggled by the html.theme-light class driven by ThemeProvider. */
-function buildMuiTheme(mode: "dark" | "light"): Theme {
-  const dark = mode === "dark"
-  return createTheme({
-    palette: {
-      mode,
-      primary: { main: dark ? "#4a90d9" : "#2f6fb3" },
-      error: { main: dark ? "#cd4246" : "#c0322f" },
-      success: { main: dark ? "#238551" : "#1f7a48" },
-      warning: { main: dark ? "#d9822b" : "#b9701f" },
-      text: {
-        primary: dark ? "#e0e0e0" : "#1a1a2e",
-        secondary: dark ? "#858585" : "#5a5a72",
-      },
-      background: {
-        default: dark ? "#121224" : "#f4f5f7",
-        paper: dark ? "#1e1e3e" : "#ffffff",
-      },
-      divider: dark ? "#3a3a5a" : "#d8dce3",
-      action: { hover: dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" },
-    },
-    typography: { fontSize: 12, fontFamily: "inherit" },
-    shape: { borderRadius: 4 },
-    components: {
-      MuiButton: {
-        defaultProps: { size: "small" },
-        styleOverrides: {
-          root: {
-            fontSize: 13,
-            padding: "4px 12px",
-            lineHeight: "20px",
-          },
-          sizeSmall: {
-            fontSize: 12,
-            padding: "2px 8px",
-          },
-        },
-      },
-      MuiTextField: {
-        defaultProps: { size: "small" },
-        styleOverrides: {
-          root: {
-            fontSize: 12,
-            "& .MuiOutlinedInput-root": {
-              fontSize: 12,
-              fontFamily: "inherit",
-              "& fieldset": { borderColor: "var(--border, #3a3a5a)" },
-            },
-            "& .MuiInputBase-input": { padding: "2px 8px", height: 20 },
-          },
-        },
-      },
-      MuiSelect: {
-        styleOverrides: {
-          select: { fontSize: 12 },
-        },
-      },
-      MuiMenuItem: {
-        styleOverrides: {
-          root: { fontSize: 12 },
-        },
-      },
-      MuiDialog: {
-        styleOverrides: {
-          paper: {
-            background: "var(--bg-surface, #1e1e3e)",
-            border: "1px solid var(--border, #3a3a5a)",
-          },
-        },
-      },
-      MuiPopover: {
-        styleOverrides: {
-          paper: {
-            background: "var(--bg-surface, #1e1e3e)",
-            border: "1px solid var(--border, #3a3a5a)",
-          },
-        },
-      },
-      MuiChip: {
-        styleOverrides: {
-          root: { fontSize: 11 },
-          sizeSmall: { height: 18 },
-        },
-      },
-      MuiTooltip: {
-        styleOverrides: {
-          tooltip: { fontSize: 12 },
-        },
-      },
-    },
-  })
-}
+/** 主题与全局样式已下沉到 src/theme/theme.ts（buildMuiTheme）：设计令牌、全局 reset、
+ *  滚动条/focus、CSS 变量注入均在那里统一处理，这里只负责按模式取用。 */
 
 /* ── Navigation panels ── */
 
 function PlanNavPanel() {
   const { openEditor } = useDock()
   return (
-    <div className="dv-panel">
-      <div className="dv-panel-item" onClick={() => openEditor("plan")}>
+    <Box className="dv-panel">
+      <Box className="dv-panel-item" onClick={() => openEditor("plan")}>
         <Icon icon={IconNames.SHOPPING_CART} size={14} />
         <span>采购清单</span>
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }
 
 function MaterialNavPanel() {
   return (
-    <div className="dv-panel">
-      <div className="dv-panel-item" style={{ opacity: 0.5, cursor: "default" }}>
+    <Box className="dv-panel">
+      <Box className="dv-panel-item" style={{ opacity: 0.5, cursor: "default" }}>
         <Icon icon={IconNames.LAYERS} size={14} />
         <span>导航目录（开发中）</span>
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }
 
 function AccountingNavPanel() {
   const { openEditor } = useDock()
   return (
-    <div className="dv-panel">
-      <div className="dv-panel-item" onClick={() => openEditor("accounting")}>
+    <Box className="dv-panel">
+      <Box className="dv-panel-item" onClick={() => openEditor("accounting")}>
         <Icon icon={IconNames.DOLLAR} size={14} />
         <span>现金日记账</span>
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }
 
 function PaymentsNavPanel() {
   return (
-    <div className="dv-panel">
-      <div className="dv-panel-item" style={{ opacity: 0.5, cursor: "default" }}>
+    <Box className="dv-panel">
+      <Box className="dv-panel-item" style={{ opacity: 0.5, cursor: "default" }}>
         <Icon icon={IconNames.EXCHANGE} size={14} />
         <span>导航目录（开发中）</span>
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }
 
@@ -164,16 +73,16 @@ function SettingsNavPanel() {
   const { openEditor } = useDock()
   const { theme, toggle } = useTheme()
   return (
-    <div className="dv-panel">
-      <div className="dv-panel-item" onClick={() => openEditor("sheets-editor")}>
+    <Box className="dv-panel">
+      <Box className="dv-panel-item" onClick={() => openEditor("sheets-editor")}>
         <Icon icon={IconNames.GRID_VIEW} size={14} />
         <span>Google Sheets 数据编辑</span>
-      </div>
-      <div className="dv-panel-item" onClick={toggle} style={{ cursor: "pointer" }}>
+      </Box>
+      <Box className="dv-panel-item" onClick={toggle} style={{ cursor: "pointer" }}>
         <Icon icon={IconNames.THEME} size={14} />
         <span>切换为{theme === "dark" ? "亮色" : "暗色"}主题</span>
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }
 
@@ -182,26 +91,72 @@ function LoginNavPanel() {
 
   if (!loggedIn) {
     return (
-      <div className="dv-panel">
-        <div className="dv-panel-item" onClick={() => login()}>
+      <Box className="dv-panel">
+        <Box className="dv-panel-item" onClick={() => login()}>
           <Icon icon={IconNames.LOG_IN} size={14} />
           <span>登录 Google</span>
-        </div>
-      </div>
+        </Box>
+      </Box>
     )
   }
 
   return (
-    <div className="dv-panel">
-      <div className="dv-panel-item" style={{ cursor: "default" }}>
+    <Box className="dv-panel">
+      <Box className="dv-panel-item" style={{ cursor: "default" }}>
         <Icon icon={IconNames.PERSON} size={14} />
         <span>{user?.name ?? user?.email ?? "已登录"}</span>
-      </div>
-      <div className="dv-panel-item" onClick={() => logout()}>
-        <Icon icon={IconNames.LOG_OUT} size={14} />
-        <span>退出登录</span>
-      </div>
-    </div>
+      </Box>
+        <Box className="dv-panel-item" onClick={() => logout()}>
+          <Icon icon={IconNames.LOG_OUT} size={14} />
+          <span>退出登录</span>
+        </Box>
+    </Box>
+  )
+}
+
+/* ── 右侧占位面板（轻量说明，无独立状态） ── */
+
+function PlanRightPanel() {
+  return (
+    <Box style={{ display: "flex", flexDirection: "column", gap: "8px", padding: 12, overflow: "auto", height: "100%" }}>
+      <Box style={{ fontSize: 13, fontWeight: 600 }}>计划设置</Box>
+      <Box style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+        采购清单的筛选、分组与排序均在左侧工具栏完成。此面板预留给后续高级设置（如默认分组、批量模板、汇率策略）。
+      </Box>
+    </Box>
+  )
+}
+
+function MaterialRightPanel() {
+  return (
+    <Box style={{ display: "flex", flexDirection: "column", gap: "8px", padding: 12, overflow: "auto", height: "100%" }}>
+      <Box style={{ fontSize: 13, fontWeight: 600 }}>物料筛选</Box>
+      <Box style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+        物料信息模块开发中。此面板预留给分类筛选、价格区间与供应商维度统计。
+      </Box>
+    </Box>
+  )
+}
+
+function PaymentsRightPanel() {
+  return (
+    <Box style={{ display: "flex", flexDirection: "column", gap: "8px", padding: 12, overflow: "auto", height: "100%" }}>
+      <Box style={{ fontSize: 13, fontWeight: 600 }}>付款统计</Box>
+      <Box style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+        往来付款模块开发中。此面板预留给按供应商/状态的金额汇总与账期提醒。
+      </Box>
+    </Box>
+  )
+}
+
+function SheetsRightPanel() {
+  return (
+    <Box style={{ display: "flex", flexDirection: "column", gap: "8px", padding: 12, overflow: "auto", height: "100%" }}>
+      <Box style={{ fontSize: 13, fontWeight: 600 }}>表格说明</Box>
+      <Box style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+        此处嵌入的是与你 Google 账号绑定的表格。暗色模式下会自动反色以适配。修改会实时同步到云端。
+      </Box>
+    </Box>
   )
 }
 
@@ -228,8 +183,22 @@ function PlanAwareApp() {
         { id: "login", icon: <Icon icon={IconNames.PERSON} size={20} />, label: "登录", content: <LoginNavPanel /> },
       ]}
       editors={[
-        { id: "plan", label: "计划管理", content: <Suspense fallback={fallback}><PlanManagement /></Suspense> },
-        { id: "material", label: "物料信息", content: <Suspense fallback={fallback}><MaterialInfo /></Suspense> },
+        {
+          id: "plan",
+          label: "计划管理",
+          content: <Suspense fallback={fallback}><PlanManagement /></Suspense>,
+          rightPanels: [
+            { id: "plan-settings", label: "计划设置", content: <PlanRightPanel /> },
+          ],
+        },
+        {
+          id: "material",
+          label: "物料信息",
+          content: <Suspense fallback={fallback}><MaterialInfo /></Suspense>,
+          rightPanels: [
+            { id: "material-filter", label: "物料筛选", content: <MaterialRightPanel /> },
+          ],
+        },
         {
           id: "accounting",
           label: "记账报销",
@@ -238,8 +207,22 @@ function PlanAwareApp() {
             { id: "print-settings", label: "打印设置", content: <AccountingSettings /> },
           ],
         },
-        { id: "payments", label: "往来付款", content: <Suspense fallback={fallback}><Payments /></Suspense> },
-        { id: "sheets-editor", label: "Google Sheets", content: <Suspense fallback={fallback}><SheetsEditor /></Suspense> },
+        {
+          id: "payments",
+          label: "往来付款",
+          content: <Suspense fallback={fallback}><Payments /></Suspense>,
+          rightPanels: [
+            { id: "payments-stats", label: "付款统计", content: <PaymentsRightPanel /> },
+          ],
+        },
+        {
+          id: "sheets-editor",
+          label: "Google Sheets",
+          content: <Suspense fallback={fallback}><SheetsEditor /></Suspense>,
+          rightPanels: [
+            { id: "sheets-help", label: "表格说明", content: <SheetsRightPanel /> },
+          ],
+        },
       ]}
       right={{ size: 280, minSize: 200 }}
       rightVisible={propertiesVisible}

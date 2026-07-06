@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { Select, Spinner, Button, MenuItem, MultiSelect, Icon, IconNames } from "../../components/ui"
+import { Select, Spinner, Button, MenuItem, MultiSelect, Icon, IconNames, Box, Stack } from "../../components/ui"
 import { useAuth, listSheets, loadTable } from "@sino-purchase/sheets-react"
 import { SPREADSHEET_ID } from "../../config/sheets"
 import { useAccountingStore } from "../../app/stores/accountingStore"
@@ -120,14 +120,14 @@ export default function SheetsDataTab({ batch, onBatchChange }: SheetsDataTabPro
     const demoHeaders = ["日期", "描述", "金额", "税务处理", "类型", "批次", "备注"]
     const demoDisplay = ["date", "description", "amount", "tax", "type", "batch", "note"]
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 8px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
+      <Stack sx={{ height: "100%", width: "100%" }}>
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ p: "4px 8px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
           <span style={{ fontSize: 12, color: "var(--text-dim)" }}>Demo 数据（登录后可编辑 Google Sheets）</span>
           <Button icon="database" text="导入数据源" intent="primary" onClick={handleImport} disabled small />
-          <div style={{ flex: 1 }} />
+          <Box sx={{ flex: 1 }} />
           <span style={{ fontSize: 12, color: "var(--text-dim)" }}>{DEMO_RECORDS.length} 条 [Demo]</span>
-        </div>
-        <div style={{ flex: 1, overflow: "auto", minHeight: 0, width: "100%" }}>
+        </Stack>
+        <Box sx={{ flex: 1, overflow: "auto", minHeight: 0, width: "100%" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
             <thead>
               <tr style={{ borderBottom: "2px solid var(--border)", background: "var(--bg-hover)", position: "sticky", top: 0, zIndex: 1 }}>
@@ -144,16 +144,16 @@ export default function SheetsDataTab({ batch, onBatchChange }: SheetsDataTabPro
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
+        </Box>
+      </Stack>
     )
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 8px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
+    <Stack sx={{ height: "100%", width: "100%" }}>
+      <Stack direction="row" alignItems="center" spacing={1} sx={{ p: "4px 8px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
         <Select value={selectedSheet} options={sheets.map(s => ({ value: s, label: s }))} onChange={setSelectedSheet} />
-        <div style={{ maxWidth: 200 }}>
+        <Box sx={{ maxWidth: 200 }}>
           <MultiSelect
             items={batchOptions}
             selectedItems={batch}
@@ -164,15 +164,15 @@ export default function SheetsDataTab({ batch, onBatchChange }: SheetsDataTabPro
             popoverProps={{ matchTargetWidth: true }}
             noResults={<span style={{ fontSize: 12, color: "var(--text-dim)", padding: "6px 8px", display: "block" }}>无匹配</span>}
           />
-        </div>
+        </Box>
         <Button icon="database" text="导入数据源" intent="primary" onClick={handleImport} disabled={filteredData.length === 0} small />
-        <div style={{ flex: 1 }} />
+        <Box sx={{ flex: 1 }} />
         <span style={{ fontSize: 12, color: "var(--text-dim)" }}>{filteredData.length}/{data.length}</span>
         <a href={`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "var(--text-link)", textDecoration: "none" }}><Icon icon={IconNames.SHARE} /> 在 Google Sheets 中打开</a>
-      </div>
-      <div style={{ flex: 1, overflow: "auto", minHeight: 0, width: "100%" }}>
+      </Stack>
+      <Box sx={{ flex: 1, overflow: "auto", minHeight: 0, width: "100%" }}>
         {loading ? (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}><Spinner size={20} /></div>
+          <Stack justifyContent="center" alignItems="center" sx={{ height: "100%" }}><Spinner size={20} /></Stack>
         ) : filteredData.length === 0 ? (
           <EmptyPlaceholder icon={IconNames.SEARCH} title={data.length > 0 ? "无匹配数据" : "无数据"} />
         ) : (
@@ -193,7 +193,7 @@ export default function SheetsDataTab({ batch, onBatchChange }: SheetsDataTabPro
             </tbody>
           </table>
         )}
-      </div>
-    </div>
+      </Box>
+    </Stack>
   )
 }

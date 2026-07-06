@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Button, Card, H3, HTMLTable, Tag, InputGroup } from "../components/ui"
+import { Button, Card, H3, HTMLTable, Tag, InputGroup, Box, Stack } from "../components/ui"
 import type { Intent } from "../components/ui"
 import { usePaymentStore } from "../app/stores/paymentStore"
 
@@ -18,8 +18,8 @@ export default function Payments() {
   )
 
   return (
-    <div style={{ padding: 24 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+    <Box sx={{ p: 3 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
         <H3>往来付款</H3>
         <InputGroup
           placeholder="搜索供应商/单号..."
@@ -27,7 +27,7 @@ export default function Payments() {
           onChange={(e) => setSearch(e.target.value)}
           style={{ width: 240 }}
         />
-      </div>
+      </Stack>
 
       <Card>
         <HTMLTable compact striped style={{ width: "100%" }}>
@@ -77,9 +77,9 @@ export default function Payments() {
         </HTMLTable>
       </Card>
 
-      <div style={{ marginTop: 24, color: "var(--text-dim)", fontSize: 14 }}>
+      <Box sx={{ mt: 3, color: "var(--text-dim)", fontSize: 14 }}>
         <p>💡 数据已持久化到 localStorage</p>
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }

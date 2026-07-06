@@ -12,7 +12,6 @@ import { BatchConfirmDialog } from "../modules/plan/components/BatchConfirmDialo
 import type { PurchaseTask, GroupBy, SortBy } from "../modules/plan/types"
 import { TASK_HEADERS, NUMERIC_FIELDS, DATE_FIELDS } from "../modules/plan/types"
 import { DEMO_TASKS } from "../config/demo-data"
-import "../modules/plan/plan.css"
 
 const SHEET = "tasks"
 
@@ -91,11 +90,12 @@ export default function PlanManagement() {
   /* ── Detail editing ── */
 
   const handleRequestEdit = useCallback((id: string) => {
-    if (showBatchEdit) { setShowBatchEdit(false); return }
+    setShowBatchEdit(show => (show ? false : show))
     setIsAdding(false)
     setBatchEdit(false)
+    const { editingTaskId } = usePlanStore.getState()
     setEditingTaskId(editingTaskId === id ? null : id)
-  }, [editingTaskId, setIsAdding, setBatchEdit, setEditingTaskId, showBatchEdit])
+  }, [setShowBatchEdit, setIsAdding, setBatchEdit, setEditingTaskId])
 
   const handleOpenAdd = useCallback(() => {
     setIsAdding(true)
@@ -108,11 +108,13 @@ export default function PlanManagement() {
   }, [addTask])
 
   const handleSaveDetail = useCallback((data: Partial<PurchaseTask>) => {
-    if (editingTaskId) {
-      const { updateTask } = usePlanStore.getState()
-      updateTask(editingTaskId, data)
-    }
-  }, [editingTaskId])
+    const { editingTaskId, updateTask } = usePlanStore.getState()
+    // 折叠时保存：store 里的 editingTaskId 可能已切换/清空，优先用草稿自带的 id
+    const id = (data as Record<string, unknown>).id ?? editingTaskId
+    if (!id) return
+    const { id: _omit, ...rest } = data as Record<string, unknown>
+    updateTask(id as string, rest as Partial<PurchaseTask>)
+  }, [])
 
   const handleCancelDetail = useCallback(() => {
     setEditingTaskId(null)
@@ -123,6 +125,14 @@ export default function PlanManagement() {
     const { deleteTask } = usePlanStore.getState()
     deleteTask(id)
   }, [])
+
+  const handleBatchDelete = useCallback(() => {
+    const ids = [...selectedIds]
+    const { deleteTask } = usePlanStore.getState()
+    for (const id of ids) deleteTask(id)
+    setShowBatchEdit(false)
+    clearSelection()
+  }, [selectedIds, clearSelection, setShowBatchEdit])
 
   /* ── Batch edit ── */
 
@@ -267,6 +277,7 @@ export default function PlanManagement() {
             selectedCount={selectedIds.size}
             onSave={handleBatchSave}
             onCancel={closeBatchEdit}
+            onDelete={handleBatchDelete}
           />
         </Box>
       )}

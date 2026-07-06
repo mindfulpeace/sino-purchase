@@ -1,5 +1,5 @@
 import { useCallback } from "react"
-import { Button, ButtonGroup, Tooltip } from "../../components/ui"
+import { Button, ButtonGroup, Tooltip, Box } from "../../components/ui"
 import { useImportClipboard } from "./useImportClipboard"
 import { useImportExcel } from "./useImportExcel"
 import { exportExcel } from "./sheetjs"
@@ -53,7 +53,7 @@ export default function Toolbar({ records, showSheets, onSheetsToggle }: Toolbar
   }, [setPropertiesVisible])
 
   return (
-    <div className="no-print" style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderBottom: "1px solid var(--border)" }}>
+    <Box className="no-print" sx={{ display: "flex", alignItems: "center", gap: 0.5, p: "4px 8px", borderBottom: "1px solid var(--border)" }}>
       <ButtonGroup minimal>
         <Tooltip content={showSheets ? "关闭数据源" : "打开 Google Sheets 数据源"}>
           <Button icon="database" text="数据源" intent={showSheets ? "primary" : "none"} onClick={onSheetsToggle} />
@@ -69,7 +69,7 @@ export default function Toolbar({ records, showSheets, onSheetsToggle }: Toolbar
         </Tooltip>
       </ButtonGroup>
 
-      <div style={{ flex: 1 }} />
+      <Box sx={{ flex: 1 }} />
 
       <span style={{ fontSize: 12, color: "var(--text-dim)", marginRight: 8 }}>{summary}</span>
 
@@ -78,6 +78,6 @@ export default function Toolbar({ records, showSheets, onSheetsToggle }: Toolbar
       </Tooltip>
 
       <input ref={inputRef} type="file" accept=".xlsx,.xls" onChange={handleExcel} style={{ display: "none" }} title="导入Excel文件" aria-label="选择Excel文件进行导入" />
-    </div>
+    </Box>
   )
 }

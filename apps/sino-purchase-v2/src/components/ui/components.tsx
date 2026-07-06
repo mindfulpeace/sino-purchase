@@ -1,4 +1,4 @@
-import { type ReactNode, type CSSProperties, type MouseEvent, Children } from "react"
+import { type ReactNode, type CSSProperties, type MouseEvent, Children, forwardRef } from "react"
 import { iconToNode, type IconName } from "./icons"
 import MuiButton from "@mui/material/Button"
 import MuiTextField from "@mui/material/TextField"
@@ -13,6 +13,7 @@ import MuiTypography from "@mui/material/Typography"
 import MuiRadioGroup from "@mui/material/RadioGroup"
 import MuiRadio from "@mui/material/Radio"
 import MuiFormControl from "@mui/material/FormControl"
+import MuiInputLabel from "@mui/material/InputLabel"
 import MuiTable from "@mui/material/Table"
 import MuiCard from "@mui/material/Card"
 import MuiCardContent from "@mui/material/CardContent"
@@ -52,7 +53,7 @@ interface ButtonProps {
   children?: ReactNode
   icon?: IconName | ReactNode
   intent?: Intent
-  variant?: "minimal" | "outlined"
+  variant?: "minimal" | "outlined" | "contained"
   size?: "small"
   active?: boolean
   small?: boolean
@@ -75,7 +76,7 @@ export function Button({ children, icon, intent, variant, size, active, small, m
     <MuiButton
       startIcon={iconNode ? <>{iconNode}</> : undefined}
       color={intent ? (muiColor[intent] ?? "primary") : undefined}
-      variant={minimal || variant === "minimal" ? "text" : variant === "outlined" ? "outlined" : active ? "contained" : undefined}
+      variant={minimal || variant === "minimal" ? "text" : variant === "outlined" ? "outlined" : variant === "contained" || active ? "contained" : undefined}
       size={isSmall ? "small" : "medium"}
       disabled={disabled}
       fullWidth={fill}
@@ -121,9 +122,12 @@ export function ButtonGroup({ children, style, className, onClick }: ButtonGroup
    ================================================================ */
 
 interface InputGroupProps {
+  id?: string
   value?: string
+  label?: string
   placeholder?: string
   type?: string
+  variant?: "standard" | "outlined"
   disabled?: boolean
   readOnly?: boolean
   fill?: boolean
@@ -134,21 +138,31 @@ interface InputGroupProps {
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
-export function InputGroup({ value, placeholder, type, disabled, readOnly, fill, style, className, inputRef, onChange, onKeyDown }: InputGroupProps) {
+export function InputGroup({ id, value, label, placeholder, type, variant, disabled, readOnly, fill, style, className, inputRef, onChange, onKeyDown }: InputGroupProps) {
   return (
     <MuiTextField
+      id={id}
+      label={label}
       value={value ?? ""}
       placeholder={placeholder}
       type={type ?? "text"}
       disabled={disabled ?? readOnly}
       size="small"
+      variant={variant ?? "outlined"}
       onChange={onChange}
       onKeyDown={onKeyDown}
       inputRef={inputRef}
       className={className}
       fullWidth={fill}
-      slotProps={{ input: { sx: { fontSize: 12, fontFamily: "inherit", p: "2px 8px", height: 24 } as any } }}
-      sx={{ minWidth: 0, ...style as any }}
+      slotProps={{ input: {}, ...(type === "date" ? { inputLabel: { shrink: true } } : {}) }}
+      sx={{
+        minWidth: 0,
+        "& .MuiInputBase-root": { height: 24, padding: 0 } as any,
+        "& .MuiOutlinedInput-input": { padding: "2px 8px", height: 24 } as any,
+        "& .MuiInput-input": { padding: "2px 8px" } as any,
+        "& .MuiOutlinedInput-root": { padding: 0 } as any,
+        ...style as any,
+      }}
     />
   )
 }
@@ -158,8 +172,11 @@ export function InputGroup({ value, placeholder, type, disabled, readOnly, fill,
    ================================================================ */
 
 interface NumericInputProps {
+  id?: string
   value?: string | number
+  label?: string
   placeholder?: string
+  variant?: "standard" | "outlined"
   min?: number
   step?: number
   disabled?: boolean
@@ -168,7 +185,7 @@ interface NumericInputProps {
   onChange?: React.ChangeEventHandler<HTMLInputElement>
 }
 
-export function NumericInput({ value, placeholder, min, step, disabled, style, onValueChange, onChange }: NumericInputProps) {
+export function NumericInput({ id, value, label, placeholder, variant, min, step, disabled, style, onValueChange, onChange }: NumericInputProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onChange) { onChange(e); return }
     if (!onValueChange) return
@@ -177,20 +194,25 @@ export function NumericInput({ value, placeholder, min, step, disabled, style, o
   }
   return (
     <MuiTextField
+      id={id}
+      label={label}
       value={value ?? ""}
       placeholder={placeholder}
       type="number"
       disabled={disabled}
       size="small"
+      variant={variant ?? "outlined"}
       onChange={handleChange}
       slotProps={{
         htmlInput: { min, step },
-        input: {
-          sx: { fontSize: 12, fontFamily: "inherit", p: "2px 6px", height: 24, width: 60 } as any,
-        },
+        input: {},
       }}
       sx={{
         minWidth: 0,
+        "& .MuiInputBase-root": { height: 24, padding: 0 } as any,
+        "& .MuiOutlinedInput-input": { padding: "2px 6px", height: 24 } as any,
+        "& .MuiInput-input": { padding: "2px 6px" } as any,
+        "& .MuiOutlinedInput-root": { padding: 0 } as any,
         "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button": { display: "none" },
         "& input[type=number]": { MozAppearance: "textfield" },
         ...style as any,
@@ -428,8 +450,6 @@ export function Dialog({ isOpen, onClose, title, style, children }: DialogProps)
 
 export const Classes = {
   DIALOG_BODY: "ui-dialog-body",
-  DIALOG_FOOTER: "ui-dialog-footer",
-  DIALOG_FOOTER_ACTIONS: "ui-dialog-footer-actions",
 }
 
 /* ================================================================
@@ -602,10 +622,13 @@ interface SelectOption {
 }
 
 interface SelectProps {
+  id?: string
   value?: string
   options: SelectOption[]
   onChange?: (value: string) => void
   placeholder?: string
+  label?: string
+  variant?: "standard" | "outlined"
   disabled?: boolean
   style?: CSSProperties
   className?: string
@@ -613,10 +636,13 @@ interface SelectProps {
   onCreate?: () => void
 }
 
-export function Select({ value, options, onChange, placeholder, disabled, style, className, allowCreate, onCreate }: SelectProps) {
+export function Select({ id, value, options, onChange, placeholder, label, variant, disabled, style, className, allowCreate, onCreate }: SelectProps) {
   return (
-    <MuiFormControl size="small" className={className} sx={{ minWidth: 0, ...style as any }}>
+    <MuiFormControl size="small" className={className} variant={variant ?? "outlined"} sx={{ minWidth: 0, ...style as any }}>
+      {label && <MuiInputLabel shrink>{label}</MuiInputLabel>}
       <MuiSelect
+        id={id}
+        label={label}
         value={value ?? ""}
         displayEmpty
         disabled={disabled}
@@ -629,7 +655,9 @@ export function Select({ value, options, onChange, placeholder, disabled, style,
           fontSize: 12,
           fontFamily: "inherit",
           height: 24,
-          "& .MuiSelect-select": { py: 0.4, px: 1 },
+          "& .MuiInputBase-root": { height: 24, padding: 0 } as any, "& .MuiOutlinedInput-root": { padding: 0 } as any,
+          "& .MuiOutlinedInput-input": { padding: "2px 8px" } as any, "& .MuiSelect-select": { padding: "2px 8px" } as any,
+          "& .MuiInput-input": { padding: "2px 8px" } as any,
           "& fieldset": { borderColor: "var(--border, #3a3a5a)" },
         }}
       >
@@ -697,11 +725,12 @@ interface ToggleButtonProps {
   children?: ReactNode
   value: any
   style?: CSSProperties
+  title?: string
 }
 
-export function ToggleButton({ children, value, style }: ToggleButtonProps) {
+export function ToggleButton({ children, value, style, title }: ToggleButtonProps) {
   return (
-    <MuiToggleButton value={value} sx={style as any}>
+    <MuiToggleButton value={value} title={title} sx={style as any}>
       {children}
     </MuiToggleButton>
   )
@@ -739,19 +768,20 @@ export function Stack({ direction = "column", spacing, children, className, styl
   )
 }
 
-export function Box({ children, className, style, sx, onClick }: {
+export const Box = forwardRef<HTMLDivElement, {
   children?: ReactNode
   className?: string
   style?: CSSProperties
   sx?: any
   onClick?: (e: React.MouseEvent) => void
-}) {
+  [key: `data-${string}`]: any
+}>(function Box({ children, className, style, sx, onClick, ...rest }, ref) {
   return (
-    <MuiBox className={className} onClick={onClick} sx={{ ...style, ...sx } as any}>
+    <MuiBox ref={ref} className={className} onClick={onClick} sx={{ ...style, ...sx } as any} {...rest}>
       {children}
     </MuiBox>
   )
-}
+})
 
 /* ================================================================
    Checkbox (MUI-recommended)
@@ -841,8 +871,8 @@ export function AccordionSummary({ children, expandIcon, style, className }: {
   )
 }
 
-export function AccordionDetails({ children, style }: { children?: ReactNode; style?: CSSProperties }) {
-  return <MuiAccordionDetails sx={{ p: 0, ...style as any }}>{children}</MuiAccordionDetails>
+export function AccordionDetails({ children, style, className }: { children?: ReactNode; style?: CSSProperties; className?: string }) {
+  return <MuiAccordionDetails className={className} sx={{ p: 0, ...style as any }}>{children}</MuiAccordionDetails>
 }
 
 /* ================================================================

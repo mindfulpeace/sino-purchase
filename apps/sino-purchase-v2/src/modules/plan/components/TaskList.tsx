@@ -1,9 +1,8 @@
-import { Fragment, useMemo } from "react"
-import { NonIdealState, Icon, IconNames } from "../../../components/ui"
+import { useMemo } from "react"
+import { NonIdealState, Icon, IconNames, Box } from "../../../components/ui"
 import { usePlanStore } from "../../../app/stores/planStore"
 import type { PurchaseTask, GroupBy } from "../types"
 import { TaskItem } from "./TaskItem"
-import "../plan.css"
 
 interface Props {
   tasks: PurchaseTask[]
@@ -28,10 +27,16 @@ function dateHdr(d: string): string {
   return diff === 0 ? `${mm}-${dd} ${wd}` : `${mm}-${dd} ${wd} ${diff > 0 ? "+" : ""}${diff}`
 }
 
-export function TaskList({ tasks, groupBy, onRequestEdit, editingId, onSave, onCancel, onDelete }: Props) {
-  const { selectedIds, onToggleSelect } = usePlanStore()
+type Row =
+  | { kind: "header"; key: string; label: string }
+  | { kind: "task"; key: string; task: PurchaseTask }
 
-  const { groups, sortedKeys } = useMemo(() => {
+export function TaskList({ tasks, groupBy, onRequestEdit, editingId, onSave, onCancel, onDelete }: Props) {
+  // 只订阅这两个精确字段，避免整个 store 变更导致全列表重渲染
+  const selectedIds = usePlanStore(s => s.selectedIds)
+  const onToggleSelect = usePlanStore(s => s.onToggleSelect)
+
+  const rows = useMemo<Row[]>(() => {
     const g = new Map<string, PurchaseTask[]>()
     const getKey = (t: PurchaseTask): string => {
       switch (groupBy) {
@@ -68,44 +73,54 @@ export function TaskList({ tasks, groupBy, onRequestEdit, editingId, onSave, onC
     } else {
       keys = ["__all__"]
     }
-    return { groups: g, sortedKeys: keys }
+
+    const out: Row[] = []
+    for (const k of keys) {
+      const showHeader = groupBy !== "status" && groupBy !== "urgency" && k !== "__all__"
+      if (showHeader) {
+        const label =
+          groupBy === "plannedDate" ? (k === "__none__" ? "未计划" : dateHdr(k)) :
+          groupBy === "supplier" ? (k === "__none__" ? "无商家" : k) :
+          groupBy === "booker" ? (k === "__none__" ? "无预定人" : k) :
+          k
+        out.push({ kind: "header", key: `h-${k}`, label })
+      }
+      for (const task of g.get(k)!) {
+        out.push({ kind: "task", key: task.id, task })
+      }
+    }
+    return out
   }, [tasks, groupBy])
 
   if (tasks.length === 0) return <NonIdealState icon={<Icon icon={IconNames.SEARCH} size={20} />} title="无任务" />
 
-  function groupHeader(k: string): string {
-    switch (groupBy) {
-      case "plannedDate": return k === "__none__" ? "未计划" : dateHdr(k)
-      case "status": return `状态 ${k}`
-      case "urgency": return `紧急 ${k}`
-      case "supplier": return k === "__none__" ? "无商家" : k
-      case "booker": return k === "__none__" ? "无预定人" : k
-      default: return ""
-    }
-  }
-
   return (
-    <div>
-      {sortedKeys.map(k => (
-        <Fragment key={k}>
-          {(groupBy !== "status" && groupBy !== "urgency" && k !== "__all__") && (
-            <div className="date-hdr">{groupHeader(k)}</div>
-          )}
-          {groups.get(k)!.map(task => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              onRequestEdit={onRequestEdit}
-              isEditing={editingId === task.id}
-              selected={selectedIds.has(task.id)}
-              onToggleSelect={onToggleSelect}
-              onSave={onSave}
-              onCancel={onCancel}
-              onDelete={() => onDelete(task.id)}
-            />
-          ))}
-        </Fragment>
-      ))}
-    </div>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
+      <Box data-testid="task-scroller" sx={{ flex: 1, minHeight: 0, overflowY: "auto", fontSize: 12 }}>
+        {rows.map(row => row.kind === "header" ? (
+          <Box
+            key={row.key}
+            sx={{
+              color: "var(--dv-activegroup-visiblepanel-tab-color, rgba(255,255,255,0.4))",
+              fontSize: 11,
+              padding: "4px 0 1px",
+              borderTop: "1px solid var(--dv-separator-border, #2b2b4a)",
+            }}
+          >{row.label}</Box>
+        ) : (
+          <TaskItem
+            key={row.key}
+            task={row.task}
+            onRequestEdit={onRequestEdit}
+            isEditing={editingId === row.task.id}
+            selected={selectedIds.has(row.task.id)}
+            onToggleSelect={onToggleSelect}
+            onSave={onSave}
+            onCancel={onCancel}
+            onDelete={onDelete}
+          />
+        ))}
+      </Box>
+    </Box>
   )
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { Button, Dialog, RadioGroup, Radio, Classes, DialogActions } from "../../components/ui"
+import { Button, Dialog, RadioGroup, Radio, Classes, DialogActions, Box, Stack } from "../../components/ui"
 import type { CashRecord } from "./types"
 import { formatAmount } from "./helpers"
 
@@ -37,7 +37,7 @@ export default function ImportDialog({ open, records, onConfirm, onCancel }: Imp
 
   return (
     <Dialog isOpen={open} onClose={onCancel} title={`导入确认 — ${edited.length} 条记录，合计 ${formatAmount(total)}`} style={{ width: 750 }}>
-      <div className={Classes.DIALOG_BODY} style={{ maxHeight: 420, overflow: "auto", padding: 0 }}>
+      <Box className={Classes.DIALOG_BODY} sx={{ maxHeight: 420, overflow: "auto", p: 0 }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
           <thead>
             <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-hover)", position: "sticky", top: 0, zIndex: 1 }}>
@@ -62,16 +62,16 @@ export default function ImportDialog({ open, records, onConfirm, onCancel }: Imp
             ))}
           </tbody>
         </table>
-      </div>
+      </Box>
       <DialogActions style={{ display: "flex", justifyContent: "space-between" }}>
         <RadioGroup inline selectedValue={mode} onChange={e => setMode(e.currentTarget.value as ImportMode)} style={{ margin: 0 }}>
           <Radio label="替换" value="replace" />
           <Radio label="追加" value="append" />
         </RadioGroup>
-        <div style={{ display: "flex", gap: 8 }}>
+        <Stack direction="row" spacing={1}>
           <Button onClick={onCancel}>取消</Button>
           <Button onClick={() => onConfirm(edited, mode)} intent="primary">确认导入</Button>
-        </div>
+        </Stack>
       </DialogActions>
     </Dialog>
   )

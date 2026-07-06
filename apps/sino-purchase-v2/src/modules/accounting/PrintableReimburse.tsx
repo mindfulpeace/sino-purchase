@@ -1,6 +1,7 @@
 import { DocReimburse } from "@sino-purchase/doc-reimburse"
 import { PrintView, PrintPaper } from "@sino-purchase/print"
 import { useReimburseData } from "./useReimburseData"
+import { Box } from "../../components/ui"
 import type { CashRecord } from "./types"
 
 interface PrintableReimburseProps {
@@ -22,7 +23,7 @@ export default function PrintableReimburse({ records, applicant, companyName, co
   const { reimburseData } = useReimburseData(records)
 
   if (reimburseData.length === 0) {
-    return (<div style={{ padding: 24, color: "var(--text-dim)", textAlign: "center" }}>暂无批次数据，请先导入带批次的数据</div>)
+    return (<Box sx={{ p: 3, color: "var(--text-dim)", textAlign: "center" }}>暂无批次数据，请先导入带批次的数据</Box>)
   }
 
   return (
@@ -33,7 +34,7 @@ export default function PrintableReimburse({ records, applicant, companyName, co
           : { cn: companyName, en: companyNameEn }
         return (
           <PrintPaper key={index}>
-            <div style={{ color: "#999", marginBottom: 8, fontSize: 12 }}>{d.tax}{d.batch ? ` - ${d.batch}` : ""}</div>
+            <Box sx={{ color: "#999", mb: 1, fontSize: 12 }}>{d.tax}{d.batch ? ` - ${d.batch}` : ""}</Box>
             <DocReimburse date={d.date} items={d.items} applicant={applicant} companyName={company.cn} companyNameEn={company.en} />
           </PrintPaper>
         )

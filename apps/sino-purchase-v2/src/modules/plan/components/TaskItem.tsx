@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type MouseEvent } from "react"
+import { memo, useState, useRef, useEffect, type CSSProperties, type MouseEvent } from "react"
 import { Icon, Checkbox, Accordion, AccordionSummary, AccordionDetails, Box, IconNames } from "../../../components/ui"
 import Menu from "@mui/material/Menu"
 import MenuItem from "@mui/material/MenuItem"
@@ -7,7 +7,6 @@ import { STATUS_BADGE, STATUS_LABEL_CN, STATUS_COLORS, URGENCY_COLORS } from "..
 import { urgencyLabel } from "../helpers"
 import { usePlanStore } from "../../../app/stores/planStore"
 import { TaskDetail } from "./TaskDetail"
-import "../plan.css"
 
 interface Props {
   task: PurchaseTask
@@ -17,13 +16,28 @@ interface Props {
   onToggleSelect: (id: string) => void
   onSave: (data: Partial<PurchaseTask>) => void
   onCancel: () => void
-  onDelete: () => void
+  onDelete: (id: string) => void
 }
 
-function TaskBody({ task, onClick }: { task: PurchaseTask; onClick?: (e: MouseEvent<HTMLSpanElement>) => void }) {
+function TaskBody({ task, onClick }: { task: PurchaseTask; onClick?: (e: MouseEvent) => void }) {
   const ccy = task.currency === "USD" ? "$" : task.currency === "CNY" ? "¥" : "k"
   return (
-    <span className="task-body" onClick={onClick}>
+    <Box
+      onClick={onClick}
+      sx={{
+        flex: 1,
+        minWidth: 0,
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        color: "var(--dv-activegroup-visiblepanel-tab-color, rgba(255,255,255,0.5))",
+        "& .n": { color: "task.name" },
+        "& .qty": { color: "task.qty" },
+        "& .prc": { color: "task.prc" },
+        "& .sup": { color: "task.sup" },
+        "& .bok": { color: "task.bok" },
+      }}
+    >
       <span className="n">{task.name}</span>
       {task.brand && <span>(<span className="n">{task.brand}</span>)</span>}
       {task.spec && <span>-<span className="n">{task.spec}</span></span>}
@@ -31,16 +45,24 @@ function TaskBody({ task, onClick }: { task: PurchaseTask; onClick?: (e: MouseEv
       {(task.unitPrice ?? 0) > 0 && <span> <span className="prc">{ccy}{task.unitPrice}</span></span>}
       {task.supplierId && <span> @<span className="sup">{task.supplierId}</span></span>}
       {task.bookerId && <span> #<span className="bok">{task.bookerId}</span></span>}
-    </span>
+    </Box>
   )
 }
 
-export function TaskItem({ task, onRequestEdit, isEditing, selected, onToggleSelect, onSave, onCancel, onDelete }: Props) {
-  const { updateTask } = usePlanStore()
+export const TaskItem = memo(function TaskItem({ task, onRequestEdit, isEditing, selected, onToggleSelect, onSave, onCancel, onDelete }: Props) {
+  const updateTask = usePlanStore(s => s.updateTask)
   const [menu, setMenu] = useState<null | "status" | "urgency">(null)
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  // 每个任务独立持有"提交草稿"函数，避免切换任务时串味
+  const commitRef = useRef<() => void>(() => {})
+  const prevEditing = useRef(isEditing)
 
-  const cls = `task-row${selected ? " selected" : ""}${isEditing ? " open" : ""}`
+  // accordion 折叠（或切到别的任务）时自动保存草稿
+  useEffect(() => {
+    if (prevEditing.current && !isEditing) commitRef.current()
+    prevEditing.current = isEditing
+  }, [isEditing])
+
   const statuses: TaskStatus[] = [1, 2, 3, 4, 5]
 
   const openMenu = (which: "status" | "urgency") => (e: MouseEvent<HTMLElement>) => {
@@ -67,13 +89,26 @@ export function TaskItem({ task, onRequestEdit, isEditing, selected, onToggleSel
   return (
     <Accordion
       expanded={isEditing}
-      onChange={() => {}}
-      className={selected ? "task-acc-selected" : undefined}
+      onChange={(_, expanded) => { if (expanded) onRequestEdit(task.id); else onCancel() }}
     >
       <AccordionSummary
         expandIcon={<Icon icon={isEditing ? IconNames.CHEVRON_UP : IconNames.CHEVRON_DOWN} size={12} />}
       >
-        <div className={cls} style={{ width: "100%" }}>
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: "1px",
+            cursor: "pointer",
+            fontSize: 12,
+            lineHeight: 1.35,
+            py: "1px",
+            ...(selected && { background: "color-mix(in srgb, var(--dv-activegroup-visiblepanel-tab-color) 6%, transparent)" }),
+            ...(isEditing && { background: "color-mix(in srgb, var(--dv-activegroup-visiblepanel-tab-color) 10%, transparent)" }),
+          }}
+        >
           <span onClick={e => e.stopPropagation()}>
             <Checkbox checked={selected} onChange={() => onToggleSelect(task.id)} />
           </span>
@@ -85,35 +120,59 @@ export function TaskItem({ task, onRequestEdit, isEditing, selected, onToggleSel
               {urgencyLabel(task.urgency)}
             </span>
           </span>
-          <Menu anchorEl={anchorEl} open={menu !== null} onClose={closeMenu} anchorOrigin={{ vertical: "bottom", horizontal: "left" }} transformOrigin={{ vertical: "top", horizontal: "left" }} sx={{ mt: 0.5 }}>
-            {menu === "status" && statuses.map(s => (
-              <MenuItem key={s} selected={task.status === s} onClick={() => { updateTask(task.id, { status: s }); closeMenu() }}>
-                <Box sx={{ display: "inline-block", width: 10, height: 10, borderRadius: 2, mr: 1, border: "1px solid rgba(255,255,255,0.25)", backgroundColor: STATUS_COLORS[s] }} />
-                <span>{STATUS_BADGE[s]}</span>
-                <span style={{ opacity: 0.6, marginLeft: "auto" }}>{STATUS_LABEL_CN[s]}</span>
-              </MenuItem>
-            ))}
-            {menu === "urgency" && [5, 4, 3, 2, 1].map(u => (
-              <MenuItem key={u} selected={task.urgency === u} onClick={() => { updateTask(task.id, { urgency: u as 1 | 2 | 3 | 4 | 5 }); closeMenu() }}>
-                <Box sx={{ display: "inline-block", width: 10, height: 10, borderRadius: 2, mr: 1, border: "1px solid rgba(255,255,255,0.25)", backgroundColor: URGENCY_COLORS[u] }} />
-                <span>{urgencyLabel(u)}</span>
-                <span style={{ opacity: 0.6, marginLeft: "auto" }}>{u}/5</span>
-              </MenuItem>
-            ))}
-          </Menu>
+          {menu !== null && anchorEl && (
+            <Menu anchorEl={anchorEl} open onClose={closeMenu} anchorOrigin={{ vertical: "bottom", horizontal: "left" }} transformOrigin={{ vertical: "top", horizontal: "left" }} sx={{ mt: 0.5 }}>
+              {menu === "status" && statuses.map(s => (
+                <MenuItem key={s} selected={task.status === s} onClick={() => { updateTask(task.id, { status: s }); closeMenu() }}>
+                  <Box sx={{ display: "inline-block", width: 10, height: 10, borderRadius: 2, mr: 1, border: "1px solid rgba(255,255,255,0.25)", backgroundColor: STATUS_COLORS[s] }} />
+                  <span>{STATUS_BADGE[s]}</span>
+                  <span style={{ opacity: 0.6, marginLeft: "auto" }}>{STATUS_LABEL_CN[s]}</span>
+                </MenuItem>
+              ))}
+              {menu === "urgency" && [5, 4, 3, 2, 1].map(u => (
+                <MenuItem key={u} selected={task.urgency === u} onClick={() => { updateTask(task.id, { urgency: u as 1 | 2 | 3 | 4 | 5 }); closeMenu() }}>
+                  <Box sx={{ display: "inline-block", width: 10, height: 10, borderRadius: 2, mr: 1, border: "1px solid rgba(255,255,255,0.25)", backgroundColor: URGENCY_COLORS[u] }} />
+                  <span>{urgencyLabel(u)}</span>
+                  <span style={{ opacity: 0.6, marginLeft: "auto" }}>{u}/5</span>
+                </MenuItem>
+              ))}
+            </Menu>
+          )}
           <TaskBody task={task} onClick={e => { e.stopPropagation(); isEditing ? onCancel() : onRequestEdit(task.id) }} />
-          <span className="date">{task.plannedDate ? task.plannedDate.slice(5) : ""}</span>
-        </div>
+          <Box
+            sx={{
+              width: 50,
+              textAlign: "right",
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              color: "var(--dv-activegroup-visiblepanel-tab-color, rgba(255,255,255,0.4))",
+            }}
+          >
+            {task.plannedDate ? task.plannedDate.slice(5) : ""}
+          </Box>
+        </Box>
       </AccordionSummary>
-      <AccordionDetails>
-        <TaskDetail
-          initial={task}
-          mode="edit"
-          onSave={onSave}
-          onCancel={onCancel}
-          onDelete={onDelete}
-        />
+      <AccordionDetails
+        style={{
+          background: "color-mix(in srgb, var(--dv-group-view-background-color, #1b1b2e) 90%, white 10%)",
+          borderTop: "1px solid var(--dv-separator-border, #2b2b4a)",
+          marginTop: "2px",
+          padding: "4px 10px 4px",
+        }}
+      >
+        {isEditing && (
+          <TaskDetail
+            initial={task}
+            mode="edit"
+            onSave={onSave}
+            onCancel={onCancel}
+            onDelete={() => onDelete(task.id)}
+            registerCommit={(fn) => { commitRef.current = fn }}
+          />
+        )}
       </AccordionDetails>
     </Accordion>
   )
-}
+})

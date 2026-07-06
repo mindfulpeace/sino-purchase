@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useCallback, useMemo } from "react"
+import { Box, Stack } from "../../components/ui"
 import { useAccountingStore } from "../../app/stores/accountingStore"
 import type { CashRecord } from "./types"
 
@@ -24,18 +25,18 @@ export default function CashGrid({ records }: { records: CashRecord[] }) {
   }, [records, updateRecord])
 
   const rightTopMenu = (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 8px", borderBottom: "1px solid var(--border)" }}>
+    <Stack direction="row" alignItems="center" spacing={1} sx={{ p: "4px 8px", borderBottom: "1px solid var(--border)" }}>
       <span style={{ fontSize: 12, color: "var(--text-dim)" }}>{records.length} 条</span>
-      <div style={{ flex: 1 }} />
-    </div>
+      <Box sx={{ flex: 1 }} />
+    </Stack>
   )
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <Stack sx={{ height: "100%" }}>
       {rightTopMenu}
-      <div style={{ flex: 1, overflow: "auto", minHeight: 0 }}>
+      <Box sx={{ flex: 1, overflow: "auto", minHeight: 0 }}>
         {records.length === 0 ? (
-          <div style={{ padding: 24, textAlign: "center", color: "var(--text-dim)", fontSize: 14 }}>无数据，请导入</div>
+          <Box sx={{ p: 3, textAlign: "center", color: "var(--text-dim)", fontSize: 14 }}>无数据，请导入</Box>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
             <thead>
@@ -76,7 +77,7 @@ export default function CashGrid({ records }: { records: CashRecord[] }) {
             </tbody>
           </table>
         )}
-      </div>
-    </div>
+      </Box>
+    </Stack>
   )
 }

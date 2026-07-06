@@ -1,5 +1,5 @@
 import { useState, useRef } from "react"
-import { Button, ButtonGroup, InputGroup, Icon, IconNames } from "../../../components/ui"
+import { Button, ButtonGroup, InputGroup, Icon, IconNames, Box } from "../../../components/ui"
 import type { PurchaseTask } from "../types"
 import { todayISO } from "../helpers"
 
@@ -24,12 +24,12 @@ export function AddNewTaskBar({ onAdd, onOpenAdd, onBatch }: Props) {
   }
 
   return (
-    <div style={{ display: "flex", gap: 4, alignItems: "center", flex: 1 }}>
-      <InputGroup inputRef={inputRef} placeholder="品名 回车快速添加" value={text} onChange={e => setText(e.target.value)} onKeyDown={handleKeyDown} style={{ flex: 1 }} />
+    <Box style={{ display: "flex", gap: "4px", alignItems: "center", flex: 1 }}>
+      <InputGroup inputRef={inputRef} placeholder="品名 回车快速添加" variant="standard" value={text} onChange={e => setText(e.target.value)} onKeyDown={handleKeyDown} style={{ flex: 1 }} />
       <ButtonGroup size="small">
         <Button icon={<Icon icon={IconNames.NEW_OBJECT} />} onClick={onOpenAdd}>新任务</Button>
         <Button icon={<Icon icon={IconNames.IMPORT} />} onClick={onBatch}>批量</Button>
       </ButtonGroup>
-    </div>
+    </Box>
   )
 }

@@ -1,16 +1,15 @@
 import { useState, useEffect } from "react"
-import { Dialog, Button, TextArea, Text, Card, DialogActions, Stack } from "../../../components/ui"
+import { Dialog, Button, TextArea, Text, Card, DialogActions, Stack, Box } from "../../../components/ui"
 import type { PurchaseTask, SupportedCurrency, TaskStatus, Urgency } from "../types"
 import { todayISO } from "../helpers"
-import "../plan.css"
 
 function PreviewTask({ task }: { task: Partial<PurchaseTask> }) {
-  return (<div style={{ fontSize: 12, padding: "2px 0", borderBottom: "1px solid var(--border)", display: "flex", gap: 4 }}>
+  return (<Box style={{ fontSize: 12, padding: "2px 0", borderBottom: "1px solid var(--border)", display: "flex", gap: "4px" }}>
     <Text style={{ fontWeight: 600, margin: 0 }}>{task.name}</Text>
     {task.brand && <Text style={{ color: "var(--text-dim)", margin: 0 }}>({task.brand})</Text>}
     {task.spec && <Text style={{ color: "var(--text-dim)", margin: 0 }}>-{task.spec}</Text>}
     <Text style={{ margin: 0 }}> x{task.quantity ?? 1}{task.unit || ""}</Text>
-  </div>)
+  </Box>)
 }
 
 interface Props { isOpen: boolean; onClose: () => void; onImport: (tasks: Partial<PurchaseTask>[]) => void }
