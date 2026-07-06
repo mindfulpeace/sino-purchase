@@ -1,11 +1,10 @@
 import { useState, useMemo, useEffect } from "react"
 import { Button, InputGroup, NumericInput, HTMLSelect, Tag, Icon, Alert, Text } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { BadgeToggle } from "./BadgeToggle"
 import { usePlanStore } from "../../../app/stores/planStore"
-import type { PurchaseTask, TaskStatus, SupportedCurrency, TaxStatus } from "../types"
-import { STATUS_BADGE, STATUS_COLORS, URGENCY_COLORS, TAX_STATUS_OPTIONS } from "../types"
-import { nameListOptions, urgencyLabel, todayISO } from "../helpers"
+import type { PurchaseTask, SupportedCurrency, TaxStatus } from "../types"
+import { TAX_STATUS_OPTIONS } from "../types"
+import { nameListOptions, todayISO } from "../helpers"
 
 interface Props {
   initial: Partial<PurchaseTask>
@@ -29,11 +28,6 @@ export function TaskDetail({ initial, mode, onSave, onCancel, onDelete, selected
 
   const patch = (partial: Partial<PurchaseTask>) => setD(prev => ({ ...prev, ...partial }))
 
-  const handleStatusChange = (s: TaskStatus) => {
-    if (s === 5) patch({ status: s, receivedDate: todayISO() })
-    else patch({ status: s, receivedDate: d.status === 5 ? "" : d.receivedDate })
-  }
-
   const handleSave = () => { if (mode === "batch") onSave(d); else if (d.name?.trim()) onSave(d) }
   const handleSupplierChange = (v: string) => { if (v === "__new__") { const val = prompt("输入商家名称") || ""; if (val.trim()) patch({ supplierId: val.trim() }) } else patch({ supplierId: v }) }
   const handleBookerChange = (v: string) => { if (v === "__new__") { const val = prompt("输入预定人名称") || ""; if (val.trim()) patch({ bookerId: val.trim() }) } else patch({ bookerId: v }) }
@@ -41,12 +35,6 @@ export function TaskDetail({ initial, mode, onSave, onCancel, onDelete, selected
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 0 12px" }}>
       {readOnly && <Text style={{ fontSize: 11, textAlign: "center", padding: "2px 0", color: "var(--text-dim)" }}>只读 — 再次点击切换编辑</Text>}
-      <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
-        <Tag minimal>状态</Tag>
-        <BadgeToggle values={[1, 2, 3, 4, 5] as TaskStatus[]} selected={d.status ?? 1} onChange={handleStatusChange} label={s => STATUS_BADGE[s]} color={s => STATUS_COLORS[s]} disabled={readOnly} />
-        <Tag minimal>紧急</Tag>
-        <BadgeToggle values={[1, 2, 3, 4, 5]} selected={d.urgency ?? 1} onChange={n => patch({ urgency: n as 1 | 2 | 3 | 4 | 5 })} label={n => urgencyLabel(n)} color={n => URGENCY_COLORS[n]} disabled={readOnly} />
-      </div>
       <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
         <InputGroup placeholder="品名 *" value={d.name || ""} onChange={e => patch({ name: e.target.value })} style={{ flex: 1.5 }} readOnly={readOnly} />
         <InputGroup placeholder="品牌" value={d.brand || ""} onChange={e => patch({ brand: e.target.value })} style={{ flex: 1 }} readOnly={readOnly} />

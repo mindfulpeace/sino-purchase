@@ -2,8 +2,8 @@ import { useState, useEffect } from "react"
 import {
   initAuth, login as authLogin, logout as authLogout, isLoggedIn, onTokenChange,
   getCachedUser, getUserInfo,
-} from "./auth"
-import type { GoogleUserInfo } from "./auth"
+} from "@sino-purchase/sheets-core"
+import type { GoogleUserInfo } from "@sino-purchase/sheets-core"
 
 export function useAuth() {
   const [ready, setReady] = useState(false)

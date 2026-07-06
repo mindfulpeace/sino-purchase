@@ -1,4 +1,4 @@
-import { DocReimburse } from "@sino-purchase/doc"
+import { DocReimburse } from "@sino-purchase/doc-reimburse"
 import { PrintView, PrintPaper } from "@sino-purchase/print"
 import { useReimburseData } from "./useReimburseData"
 import type { CashRecord } from "./types"

@@ -1,7 +1,7 @@
 {
-  "name": "@sino-purchase/sheets-api",
+  "name": "@sino-purchase/doc-reimburse",
   "version": "0.0.1",
-  "private": false,
+  "private": true,
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -10,7 +10,8 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    }
+    },
+    "./style.css": "./dist/index.css"
   },
   "files": ["dist"],
   "scripts": {
@@ -21,6 +22,9 @@
   "peerDependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "@sino-purchase/doc-utils": "*"
   },
   "devDependencies": {
     "@types/react": "^19.2.14",

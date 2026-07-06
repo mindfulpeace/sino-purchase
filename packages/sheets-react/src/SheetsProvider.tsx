@@ -1,8 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react"
-import { configure } from "./config"
-import type { SheetsConfig } from "./types"
+import { configure, initAuth } from "@sino-purchase/sheets-core"
+import type { SheetsConfig } from "@sino-purchase/sheets-core"
 import { SyncProvider } from "./useSync"
-import { initAuth } from "./auth"
 
 const ConfigContext = createContext<SheetsConfig | null>(null)
 

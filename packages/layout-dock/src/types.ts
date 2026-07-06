@@ -1,3 +1,20 @@
+/**
+ * @sino-purchase/layout-dock
+ *
+ * 基于 dockview 的「编辑器应用框架」布局库。
+ * 提供 navigation（左侧导航）、editors（中部标签页）、rightPanels（每编辑器右侧面板）、
+ * bottom（底部面板）等业务语义，以及持久化（persistenceKey）、主题切换能力。
+ *
+ * 面板 id 约定（DockLayout 内部使用，消费者一般无需关心）：
+ *   nav-${id}      — 左侧导航面板
+ *   editor-${id}   — 中部编辑器面板
+ *   right-${id}    — 右侧属性面板（按编辑器切换）
+ *   bottom-panel   — 底部面板
+ *   left-edge / right-edge / bottom-edge — dockview edge group
+ *
+ * 注意：本包由 ui-dock 分叉演进，新增了持久化与 per-editor rightPanels；
+ * ui-dock 已标记 deprecated，后续计划将两者合并至此包。
+ */
 import type { ReactNode } from "react"
 
 /** 导航标签项（左侧 edge） */
@@ -60,4 +77,6 @@ export interface DockLayoutProps {
   onRightVisibleChange?: (v: boolean) => void
   /** dockview 就绪回调 */
   onReady?: (api: import("dockview").DockviewApi) => void
+  /** 持久化 key；设置后刷新页面会恢复之前打开的编辑器、可见性与主题 */
+  persistenceKey?: string
 }

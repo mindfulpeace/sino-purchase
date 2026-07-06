@@ -4,6 +4,6 @@ import react from "@vitejs/plugin-react"
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
-    exclude: ["@sino-purchase/sheets-api"],
+    exclude: ["@sino-purchase/sheets-react"],
   },
 })

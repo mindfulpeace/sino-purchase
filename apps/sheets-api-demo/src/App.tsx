@@ -1,5 +1,5 @@
 import { useState, useRef } from "react"
-import { SheetsProvider, useAuth, useSheetData, useSync } from "@sino-purchase/sheets-api"
+import { SheetsProvider, useAuth, useSheetData, useSync } from "@sino-purchase/sheets-react"
 
 const CLIENT_ID = "640615713474-kh9jd1nfaajmdvj7576edfb9a88dn2b3.apps.googleusercontent.com"
 const SPREADSHEET_ID = "1JYxdYOmIDu0EEDA8SJ-VHFhw578Fm8aXuMcuWwLGLJg"
@@ -34,7 +34,7 @@ function LoginGate({ children }: { children: React.ReactNode }) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", flexDirection: "column", gap: 16 }}>
         <h1 style={{ margin: 0, fontSize: 24 }}>Sheets API Demo</h1>
-        <p style={{ margin: 0, color: "#888", fontSize: 14 }}>测试 @sino-purchase/sheets-api 全部 CRUD 功能</p>
+        <p style={{ margin: 0, color: "#888", fontSize: 14 }}>测试 @sino-purchase/sheets-react 全部 CRUD 功能</p>
         <button onClick={login} style={{ padding: "10px 32px", fontSize: 16, cursor: "pointer", borderRadius: 6, border: "1px solid #555", background: "#2a2a4e", color: "#e0e0e0" }}>
           登录 Google
         </button>

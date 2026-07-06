@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { ButtonGroup, Button, Collapse, Icon, Popover, Menu, MenuItem } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import type { PurchaseTask, TaskStatus } from "../types"
@@ -35,35 +36,37 @@ function TaskBody({ task }: { task: PurchaseTask }) {
 
 export function TaskItem({ task, onRequestEdit, isEditing, selected, onToggleSelect, onSave, onCancel, onDelete }: Props) {
   const { updateTask } = usePlanStore()
+  const [statusOpen, setStatusOpen] = useState(false)
+  const [urgencyOpen, setUrgencyOpen] = useState(false)
 
   const cls = `task-row${selected ? " selected" : ""}${isEditing ? " open" : ""}`
 
   const statuses: TaskStatus[] = [1, 2, 3, 4, 5]
   const statusMenu = (
-    <Menu>
+    <Menu className="task-status-menu">
       {statuses.map(s => (
         <MenuItem
           key={s}
           active={task.status === s}
           text={STATUS_BADGE[s]}
           label={STATUS_LABEL_CN[s]}
-          style={{ background: STATUS_COLORS[s] }}
-          onClick={() => { updateTask(task.id, { status: s }) }}
+          icon={<span className="task-dot" style={{ backgroundColor: STATUS_COLORS[s] }} />}
+          onClick={() => { updateTask(task.id, { status: s }); setStatusOpen(false) }}
         />
       ))}
     </Menu>
   )
 
   const urgencyMenu = (
-    <Menu>
+    <Menu className="task-urgency-menu">
       {[5, 4, 3, 2, 1].map(u => (
         <MenuItem
           key={u}
           active={task.urgency === u}
           text={urgencyLabel(u)}
           label={`${u}/5`}
-          style={{ background: URGENCY_COLORS[u] }}
-          onClick={() => { updateTask(task.id, { urgency: u as 1 | 2 | 3 | 4 | 5 }) }}
+          icon={<span className="task-dot" style={{ backgroundColor: URGENCY_COLORS[u] }} />}
+          onClick={() => { updateTask(task.id, { urgency: u as 1 | 2 | 3 | 4 | 5 }); setUrgencyOpen(false) }}
         />
       ))}
     </Menu>
@@ -75,13 +78,25 @@ export function TaskItem({ task, onRequestEdit, isEditing, selected, onToggleSel
         <span className="cb-col" onClick={e => { e.stopPropagation(); onToggleSelect(task.id) }}>
           {selected ? "✓" : ""}
         </span>
-        <ButtonGroup size="small" style={{ flexShrink: 0 }}>
-          <Popover content={statusMenu} placement="bottom" minimal>
+        <ButtonGroup size="small" style={{ flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+          <Popover
+            content={statusMenu}
+            placement="bottom-start"
+            minimal
+            isOpen={statusOpen}
+            onInteraction={setStatusOpen}
+          >
             <Button minimal style={{ background: STATUS_COLORS[task.status] }} title={STATUS_LABEL_CN[task.status]}>
               {STATUS_BADGE[task.status]}
             </Button>
           </Popover>
-          <Popover content={urgencyMenu} placement="bottom" minimal>
+          <Popover
+            content={urgencyMenu}
+            placement="bottom-start"
+            minimal
+            isOpen={urgencyOpen}
+            onInteraction={setUrgencyOpen}
+          >
             <Button minimal style={{ background: URGENCY_COLORS[task.urgency] }} title={`紧急${task.urgency}/5`}>
               {urgencyLabel(task.urgency)}
             </Button>

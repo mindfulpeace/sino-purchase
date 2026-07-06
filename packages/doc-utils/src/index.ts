@@ -1,0 +1,1 @@
+export { amountToWord } from './format'

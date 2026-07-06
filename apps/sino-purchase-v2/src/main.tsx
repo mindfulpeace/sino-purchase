@@ -8,7 +8,7 @@ import "@blueprintjs/table/lib/css/table.css"
 
 import "dockview/dist/styles/dockview.css"
 import "@sino-purchase/layout-dock/style.css"
-import "@sino-purchase/doc/style.css"
+import "@sino-purchase/doc-reimburse/style.css"
 import "@sino-purchase/print/style.css"
 import "./index.css"
 import App from "./App.tsx"

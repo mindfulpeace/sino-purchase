@@ -1,6 +1,6 @@
-import { lazy, Suspense, useState } from "react"
+import { lazy, Suspense } from "react"
 import { Icon, Switch } from "@blueprintjs/core"
-import { IconNames } from "@blueprintjs/icons"
+import { IconNames, type IconName } from "@blueprintjs/icons"
 import {
   DockLayout,
   useDock,
@@ -13,7 +13,7 @@ const fallback = <div className="dv-panel" style={{ color: "var(--text-dim)" }}>
 
 /* ── Placeholder panel ── */
 
-function PlaceholderPanel({ icon, title }: { icon: string; title: string }) {
+function PlaceholderPanel({ icon, title }: { icon: IconName; title: string }) {
   return (
     <div className="dv-placeholder">
       <Icon icon={icon} size={48} />
@@ -65,7 +65,7 @@ function ExamplesPanel() {
   const { openEditor, setStatus, setSummary } = useDock()
   const items = [
     { id: "showcase", icon: IconNames.CUBE, label: "Blueprint Showcase" },
-    { id: "icons", icon: IconNames.PALETTE, label: "图标展示" },
+    { id: "icons", icon: IconNames.GRID, label: "图标展示" },
     { id: "monaco", icon: IconNames.EDIT, label: "Monaco Editor" },
   ]
   return (

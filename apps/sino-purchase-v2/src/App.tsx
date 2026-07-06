@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback } from "react"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { DockLayout, useDock } from "@sino-purchase/layout-dock"
-import { SheetsProvider, useAuth } from "@sino-purchase/sheets-api"
+import { SheetsProvider, useAuth } from "@sino-purchase/sheets-react"
 import { CLIENT_ID, SPREADSHEET_ID } from "./config/sheets"
 import { useDocSettingsStore } from "./app/stores/docSettingsStore"
 import AccountingSettings from "./modules/accounting/AccountingSettings"
@@ -140,6 +140,7 @@ function PlanAwareApp() {
       right={{ size: 280, minSize: 200 }}
       rightVisible={propertiesVisible}
       onRightVisibleChange={handleRightVisibleChange}
+      persistenceKey="sino-dock-state"
     />
   )
 }

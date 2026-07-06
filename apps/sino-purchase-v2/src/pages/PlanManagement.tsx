@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react"
 import { ButtonGroup, Button, ControlGroup, HTMLSelect, InputGroup } from "@blueprintjs/core"
-import { useSheetData } from "@sino-purchase/sheets-api"
+import { useSheetData } from "@sino-purchase/sheets-react"
 import { usePlanStore } from "../app/stores/planStore"
 import { TaskList } from "../modules/plan/components/TaskList"
 import { AddNewTaskBar } from "../modules/plan/components/AddNewTaskBar"
@@ -204,8 +204,10 @@ export default function PlanManagement() {
       {/* Filter bar */}
       <div className="plan-toolbar">
         <ControlGroup fill>
-          <StatusFilter />
-          <UrgencyFilter />
+          <span>
+            <StatusFilter />
+            <span style={{ paddingRight: 10 }}> </span>
+            <UrgencyFilter /></span>
           <SupplierFilter />
           <BookerFilter />
           <InputGroup
@@ -230,14 +232,14 @@ export default function PlanManagement() {
             </Button>
           ))}
         </ButtonGroup>
-        <HTMLSelect
+        <select
           value={sortBy}
           onChange={e => setSortBy(e.target.value as SortBy)}
         >
           {SORT_OPTIONS.filter(o => o.value !== GROUP_SORT_MAP[groupBy]).map(o => (
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
-        </HTMLSelect>
+        </select>
       </div>
 
       {/* Scrollable task list */}

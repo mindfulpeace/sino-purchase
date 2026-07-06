@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { Button, ButtonGroup } from "@blueprintjs/core"
+import { Button, ButtonGroup, HTMLSelect } from "@blueprintjs/core"
 import type { TaskStatus } from "../types"
 import { STATUS_BADGE } from "../types"
 import { usePlanStore } from "../../../app/stores/planStore"
@@ -51,48 +51,30 @@ export function UrgencyFilter() {
   )
 }
 
-/* ── Supplier native select + clear ── */
+/* ── Supplier HTMLSelect (ControlGroup-compatible) ── */
 
 export function SupplierFilter() {
   const { supplierFilter, setSupplierFilter, allTasks } = usePlanStore()
   const opts = useMemo(() => nameListOptions(allTasks, "supplierId"), [allTasks])
 
   return (
-    <div style={{ width: 200, display: "flex", gap: 2, alignItems: "stretch" }}>
-      <select
-        className="plan-native-select"
-        value={supplierFilter}
-        onChange={e => setSupplierFilter(e.target.value)}
-      >
-        <option value="">商家</option>
-        {opts.map(s => <option key={s} value={s}>{s}</option>)}
-      </select>
-      {supplierFilter && (
-        <Button icon="cross" small minimal onClick={() => setSupplierFilter("")} />
-      )}
-    </div>
+    <HTMLSelect value={supplierFilter} onChange={e => setSupplierFilter(e.target.value)} >
+      <option value="">商家</option>
+      {opts.map(s => <option key={s} value={s}>{s}</option>)}
+    </HTMLSelect>
   )
 }
 
-/* ── Booker native select + clear ── */
+/* ── Booker HTMLSelect (ControlGroup-compatible) ── */
 
 export function BookerFilter() {
   const { bookerFilter, setBookerFilter, allTasks } = usePlanStore()
   const opts = useMemo(() => nameListOptions(allTasks, "bookerId"), [allTasks])
 
   return (
-    <div style={{ width: 200, display: "flex", gap: 2, alignItems: "stretch" }}>
-      <select
-        className="plan-native-select"
-        value={bookerFilter}
-        onChange={e => setBookerFilter(e.target.value)}
-      >
-        <option value="">预定人</option>
-        {opts.map(s => <option key={s} value={s}>{s}</option>)}
-      </select>
-      {bookerFilter && (
-        <Button icon="cross" small minimal onClick={() => setBookerFilter("")} />
-      )}
-    </div>
+    <HTMLSelect value={bookerFilter} onChange={e => setBookerFilter(e.target.value)} >
+      <option value="">预定人</option>
+      {opts.map(s => <option key={s} value={s}>{s}</option>)}
+    </HTMLSelect>
   )
 }

@@ -22,7 +22,7 @@ export default defineConfig({
       fileName: "index",
     },
     rollupOptions: {
-      external: ["react", "react-dom", "react/jsx-runtime", "@sino-purchase/utils"],
+      external: ["react", "react-dom", "react/jsx-runtime", "@sino-purchase/sheets-core"],
     },
   },
 })

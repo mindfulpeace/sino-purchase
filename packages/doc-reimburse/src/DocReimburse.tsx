@@ -1,4 +1,4 @@
-import { amountToWord } from "@sino-purchase/utils"
+import { amountToWord } from "@sino-purchase/doc-utils"
 import type { DocReimburseProps } from "./types"
 
 const trItem = (id: number, detail?: string, amount?: number) => (

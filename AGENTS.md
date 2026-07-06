@@ -19,10 +19,13 @@
 | `npm run lint` | ESLint 检查 |
 | `npm run typecheck` | `tsc -b` 全项目类型检查 |
 | `npm run dev:desk` | 启动 desk-ui demo 应用 |
-| `npm run build:utils` | 单独构建 `@sino-purchase/utils` |
-| `npm run build:doc` | 单独构建 `@sino-purchase/doc` |
+| `npm run build:utils` | 单独构建 `@sino-purchase/utils` (deepClone) |
+| `npm run build:diff` | 单独构建 `@sino-purchase/diff` (calculateDiff/diffSql) |
+| `npm run build:doc-utils` | 单独构建 `@sino-purchase/doc-utils` (amountToWord) |
+| `npm run build:doc` | 单独构建 `@sino-purchase/doc-reimburse` (费用报销单) |
 | `npm run build:print` | 单独构建 `@sino-purchase/print` |
-| `npm run build:sheets` | 单独构建 `@sino-purchase/sheets-api` |
+| `npm run build:sheets-core` | 单独构建 `@sino-purchase/sheets-core` (auth/db/queue, 无 React) |
+| `npm run build:sheets-react` | 单独构建 `@sino-purchase/sheets-react` (React 绑定) |
 | `npm run build:dock` | 单独构建 `@sino-purchase/layout-dock` |
 
 ## 布局命名 (沟通名称 / 组件名 / CSS 类名)
@@ -43,18 +46,26 @@
 sino-purchase-v2/
 ├── package.json               # npm workspaces root (private)
 ├── packages/
-│   ├── desk-ui/               # @sino-purchase/desk-ui (布局库, 遗留, 新代码使用 layout-dock)
+│   ├── desk-ui/               # @sino-purchase/desk-ui (遗留布局库, DEPRECATED, 已由 layout-dock 替代)
 │   │   └── src/               # layout/ theme/ hooks/
-│   ├── utils/                 # @sino-purchase/utils (工具函数, 零依赖)
-│   │   └── src/               # clone/diff/diffSql/format
-│   ├── doc/                   # @sino-purchase/doc (费用报销单组件)
+│   ├── ui-dock/               # @sino-purchase/ui-dock (dockview 布局库 v1, DEPRECATED, 已由 layout-dock 替代)
+│   │   └── src/               # DockLayout/StatusBar/HeaderToggles (分叉前版本)
+│   ├── utils/                 # @sino-purchase/utils (通用工具, 零依赖, 仅 deepClone)
+│   │   └── src/               # clone
+│   ├── diff/                  # @sino-purchase/diff (数据差异计算, 零依赖)
+│   │   └── src/               # calculateDiff/diffSql
+│   ├── doc-utils/             # @sino-purchase/doc-utils (财务文档工具, 零依赖)
+│   │   └── src/               # amountToWord (中文大写金额)
+│   ├── doc-reimburse/         # @sino-purchase/doc-reimburse (费用报销单组件, 依赖 doc-utils)
 │   │   └── src/               # DocReimburse.tsx
 │   ├── print/                 # @sino-purchase/print (A4 打印组件)
 │   │   └── src/               # PrintView.tsx + PrintPaper.tsx
-│   ├── sheets-api/            # @sino-purchase/sheets-api (Google Sheets 数据层)
-│   │   └── src/               # auth/db/sync-queue/useAuth/useSheetData/useSync
-│   └── layout-dock/           # @sino-purchase/layout-dock (dockview 布局库)
-│       └── src/               # DockLayout/StatusBar/HeaderToggles + styles/
+│   ├── sheets-core/           # @sino-purchase/sheets-core (Google Sheets 逻辑层, 无 React)
+│   │   └── src/               # auth/db/sync-queue/config/types
+│   ├── sheets-react/          # @sino-purchase/sheets-react (React 绑定, 依赖 sheets-core)
+│   │   └── src/               # SheetsProvider/useAuth/useSheetData/useSync
+│   └── layout-dock/           # @sino-purchase/layout-dock (dockview 编辑器应用框架布局库)
+│       └── src/               # DockLayout/useDock/components + styles/
 ├── apps/
 │   ├── demo-ui/               # UI 库演示 (Component/Icon/Monaco/Csv showcase)
 │   └── sino-purchase-v2/      # 主应用
@@ -88,8 +99,7 @@ sino-purchase-v2/
 - **Vite base path**: `/` (根路径，适配 Cloudflare Pages 部署)
 - **layout-dock 主题**: 使用 `themeAbyss` (深蓝/紫) 作为暗色主题，`themeLight` 作为亮色主题。主题切换通过 `theme`/`setTheme` context 状态实现，`DockviewReact` 接收不同 theme 对象
 - **layout-dock tab 高度**: `--dv-tabs-and-actions-container-height: 24px` (两个主题均设)，从默认 35px 缩减
-- **layout-dock 标题栏**: `dv-titlebar-right` 区域用于消费者自定义按钮 (`headerRight` prop)；内置 `<HeaderToggles />` (Blueprint Icon, 左/下/右 edge 切换)
-- **layout-dock 状态栏**: 内置 22px 状态栏，通过 `useDock()` context 的 `status`(左) + `summary`(右) 让消费者自由设置
+- **layout-dock 定位**: 基于 dockview 的「编辑器应用框架」布局库（非纯布局引擎），内置 navigation/editors/rightPanels/bottom 业务语义 + persistenceKey 持久化。注意：`title`/`headerRight`/`statusBar`/`HeaderToggles` 属于已废弃的 ui-dock，layout-dock 当前不含这些；后续计划将 ui-dock 独有功能合并回 layout-dock
 - **layout-dock 面板文字**: `.dv-content-container` 使用 `opacity: 0.7` (暗色) / `0.85` (亮色)，标题 `opacity: 1.0`
 - **layout-dock 焦点轮廓**: `--dv-paneview-active-outline-color: transparent` 禁用面板聚焦蓝色轮廓
 - **layout-dock 编辑器 tab 按钮**: `.dv-tab .dv-default-tab-action { display: none }` 隐藏 float/maximize/minimize 按钮
@@ -122,34 +132,35 @@ sino-purchase-v2/
 - IconShowcase 自动分组: 按 `IconNames` 枚举名前缀归为 Actions/Arrows/Files/UI/Editor/Graph 等
 - 属性栏 (`PropertiesBar`) 通过 `AppLayout` 的 `propertiesPanel` prop 传入，可选中不传则不显示
 - 菜单栏内容 (`menu-content div, span`) 全局设为 `white-space: nowrap; overflow: hidden; text-overflow: ellipsis;`
-- 主应用 (`apps/sino-purchase-v2`) 引用 `@sino-purchase/layout-dock` + `@sino-purchase/sheets-api` + `@sino-purchase/utils/doc/print`
-- Demo app (`apps/demo-ui`) 通过 npm workspace 引用：`"@sino-purchase/layout-dock": "*"`
+- 主应用 (`apps/sino-purchase-v2`) 引用 `@sino-purchase/layout-dock` + `@sino-purchase/sheets-react` + `@sino-purchase/doc-reimburse` + `@sino-purchase/print`
+- Demo apps: `demo-ui` 引用 `@sino-purchase/ui-dock` (deprecated) + `@sino-purchase/desk-ui` (deprecated); `layout-dock-demo` 引用 `@sino-purchase/layout-dock`; `sheets-api-demo` 引用 `@sino-purchase/sheets-react`
 - `npm run dev` 启动主应用 dev server
 - `npm run dev:desk` 启动 desk-ui demo 应用
 - `npm run test` 运行 vitest 全部测试 (utils + desk-ui + main)
 - `npm run typecheck` 运行 tsc -b 全项目类型检查
 - `.github/workflows/ci.yml`: lint → typecheck → test → build
-- `vitest.config.ts` 通过 `test.projects` 指向 `packages/desk-ui` + `packages/utils` + `apps/sino-purchase-v2`
-- Google Sheets API 数据流: `useSheetData<T>` → `db.ts` (loadTable/insertRow/updateRow/deleteRow) → `auth.ts` (requestToken) → Google Sheets REST API v4
-- Sheets 离线队列: `sync-queue.ts` (localStorage) + `SyncProvider` → `processQueue()`
-- Sheets 认证: GSI OAuth 2.0 (https://accounts.google.com/gsi/client), token 存 localStorage, 5 分钟前静默刷新。`useAuth()` 返回 `{ ready, loggedIn, user, login, logout }`，`user` 为 `GoogleUserInfo` (name/email/picture)，登录后调用 Google userinfo API 获取并缓存到 localStorage；退出时清除 token + revoke Google token + 清除 userInfo 缓存
-- `sheets-api` 无 runtime 依赖, 纯 fetch, peer deps 仅 React
-- `@sino-purchase/utils` 零依赖，提供 `amountToWord`(中文大写金额)/`deepClone`/`calculateDiff`/`diffSql`
-- `@sino-purchase/doc` 提供 `DocReimburse` 费用报销单组件，纯 CSS (无 Emotion)，需导入 `style.css`
+- `vitest.config.ts` 通过 `test.projects` 指向 `packages/desk-ui` + `packages/utils` + `packages/diff` + `packages/doc-utils` + `apps/sino-purchase-v2`
+- **sheets-core/sheets-react 拆分**: 原 `sheets-api` 上帝包已拆为两层 — `sheets-core` (纯逻辑层: auth/db/sync-queue/config/types, 无 React, 浏览器环境) + `sheets-react` (React 绑定: SheetsProvider/useAuth/useSheetData/useSync, 依赖 sheets-core)。`sheets-react` 通过 `export *` re-export sheets-core 全部 API，消费者只需依赖 `@sino-purchase/sheets-react`
+- Google Sheets API 数据流: `useSheetData<T>` (sheets-react) → `db.ts` (sheets-core) → `auth.ts` (sheets-core, requestToken) → Google Sheets REST API v4
+- Sheets 离线队列: `sync-queue.ts` (sheets-core, localStorage) + `SyncProvider` (sheets-react) → `processQueue()` (sheets-core)
+- Sheets 认证: GSI OAuth 2.0, token 存 localStorage, 5 分钟前静默刷新。`useAuth()` 返回 `{ ready, loggedIn, user, login, logout }`，登录后调用 Google userinfo API 获取并缓存；退出时清除 token + revoke + 清除 userInfo 缓存
+- `sheets-core` 零 runtime 依赖 (纯 fetch + 浏览器 API); `sheets-react` peer deps 仅 React
+- **utils 拆分**: 原 `utils` 杂物间已拆为三个职责单一的包 — `@sino-purchase/utils` (仅 `deepClone`) + `@sino-purchase/diff` (`calculateDiff`/`diffSql`) + `@sino-purchase/doc-utils` (`amountToWord`)。三者均零依赖
+- `@sino-purchase/doc-reimburse` (原 `doc`, 已重命名) 提供 `DocReimburse` 费用报销单组件，依赖 `@sino-purchase/doc-utils`，纯 CSS (无 Emotion)，需导入 `style.css`
 - `@sino-purchase/print` 提供 `PrintView`(A4 打印容器) + `PrintPaper`(单页包装)，纯 CSS (无 Emotion)，需导入 `style.css`
 - **Zustand stores** (`app/stores/`): planStore (筛选/排序/分组 + localStorage 持久化), accountingStore (records CRUD + importDialog), docSettingsStore (打印设置), materialStore, paymentStore
 - planStore `applyFilter()` 在 `setFilterSetter` 闭包中合并调用，避免每个 filter 变化触发两次重渲染
 - accountingStore 通过 `useEffect` 将 `records` 同步到 `docSettingsStore.reimburseRecords` 供打印使用
 - `CashGrid` 使用 `@blueprintjs/table` 的 `Table2` + `Column`，按税务字段 HSL 着色，支持点击排序
 - 导入流程: Excel 或剪贴板 → 解析为 CashRecord[] → ImportDialog 预览 → 确认 → 加入 Zustand store
-- `@sino-purchase/layout-dock` 是 dockview 布局库，提供 `DockLayout` 组件和 `useDock` hook。导出 `StatusBar`、`DockMenuItem`、`DockInput`、`DockPlaceholder`、`DockSection` 组件。使用 `themeAbyss`/`themeLight` 主题。peer deps 含 Blueprint
-- layout-dock Context API (`useDock()`): `openEditor(id)`, `closeEditor(id)`, `getApi()`, `setLeftVisible(v)`, `setRightVisible(v)`, `setBottomVisible(v)`, `leftVisible`, `rightVisible`, `bottomVisible`, `status`, `summary`, `setStatus(msg)`, `setSummary(msg)`, `theme`, `setTheme(t)`
-- layout-dock Props: `title?`, `headerRight?` (ReactNode), `navigation[]`, `editors?`, `properties?`, `bottom?`, `left?`, `right?`, `bottomEdge?` (EdgeGroupConfig), `defaultTheme?`, `rightDefault?`, `bottomDefault?`, `statusBar?`, `onReady?`
+- `@sino-purchase/layout-dock` 是 dockview 编辑器应用框架布局库，提供 `DockLayout` 组件和 `useDock` hook。导出 `DockMenuItem`、`DockInput`、`DockPlaceholder`、`DockSection` 组件。使用 `themeAbyss`/`themeLight` 主题。peer deps 含 Blueprint + dockview
+- layout-dock Context API (`useDock()`): `openEditor(id)`, `closeEditor(id)`, `getApi()`, `setLeftVisible(v)`, `setRightVisible(v)`, `setBottomVisible(v)`, `leftVisible`, `rightVisible`, `bottomVisible`, `theme`, `setTheme(t)` (注意: `status`/`summary`/`setStatus`/`setSummary` 属于已废弃的 ui-dock)
+- layout-dock Props: `navigation[]`, `editors?` (含 `rightPanels` per-editor), `bottom?`, `left?`, `right?`, `bottomEdge?`, `defaultTheme?`, `rightDefault?`, `bottomDefault?`, `rightVisible?`, `onRightVisibleChange?`, `persistenceKey?`, `onReady?` (注意: `title`/`headerRight`/`properties`/`statusBar` 属于已废弃的 ui-dock)
 - layout-dock edge groups: left (导航面板, 300px), right (属性栏, 350px, 默认隐藏), bottom (底部面板, 200px, 默认隐藏)
 - dockview 主题切换需要传递不同 theme 对象给 `DockviewReact`，不能仅通过 CSS 类切换
 - `--dv-tabs-and-actions-container-height` 必须在每个主题类下单独设置（变量作用域不共享）
 - `IconNames.SIDEBAR_LEFT`/`SIDEBAR_RIGHT` 不存在 — 使用 `ADD_COLUMN_LEFT`/`REMOVE_COLUMN_LEFT` 和 `ADD_COLUMN_RIGHT`/`REMOVE_COLUMN_RIGHT`
-- `@sino-purchase/desk-ui` 为遗留布局库，新代码优先使用 `@sino-purchase/layout-dock`
+- `@sino-purchase/desk-ui` + `@sino-purchase/ui-dock` 均已标记 DEPRECATED (private:true)，新代码使用 `@sino-purchase/layout-dock`。ui-dock 与 layout-dock 为同一库的两个分叉（ui-dock 有 title/headerRight/statusBar/HeaderToggles，layout-dock 有 persistence/per-editor rightPanels），后续计划合并
 - Vite base 为 `/`，构建产物直接部署到 Cloudflare Pages
 - 左侧导航第 6 项为登录标签 (`LoginNavPanel`): 未登录时显示"登录 Google"按钮，已登录时显示 Google 用户名/邮箱 + "退出登录"按钮
 - Git remote: `https://mindfulpeace@github.com/mindfulpeace/sino-purchase.git`

@@ -1,7 +1,8 @@
 {
   "name": "@sino-purchase/desk-ui",
   "version": "0.0.1",
-  "private": false,
+  "private": true,
+  "deprecated": "已由 @sino-purchase/layout-dock 替代，不再维护",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

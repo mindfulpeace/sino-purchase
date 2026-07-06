@@ -44,6 +44,17 @@ export function useDock(): DockCtx {
   return ctx
 }
 
+/* ─── Persisted state (localStorage) ─── */
+
+interface PersistedDockState {
+  openEditors: string[]
+  activeEditor: string | null
+  leftVisible: boolean
+  bottomVisible: boolean
+  theme: "dark" | "light"
+  rightPanels: Record<string, string>
+}
+
 /* ─── Layout ─── */
 
 export function DockLayout({
@@ -59,6 +70,7 @@ export function DockLayout({
   rightVisible: rightVisibleProp,
   onRightVisibleChange,
   onReady,
+  persistenceKey,
 }: DockLayoutProps) {
   const apiRef = useRef<DockviewApi | null>(null)
   const editorsRef = useRef(editors)
@@ -69,13 +81,27 @@ export function DockLayout({
   // Unified right edge open/close intent — shared across all editors.
   // Only updated via setRightVisible() API, never by dockview internal events.
   const rightVisibleRef = useRef(rightDefault)
+  /** Tracks open editor IDs independently of dockview — survives dockview destroy. */
+  const openedEditorsRef = useRef<Set<string>>(new Set())
   const [leftVisible, setLeftVisible] = useState(true)
   const [_rightVisible, _setRightVisible] = useState(rightDefault)
   const [bottomVisible, setBottomVisible] = useState(bottomDefault)
   const [theme, setTheme] = useState<"dark" | "light">(defaultTheme)
+  /** Bumped on open/close to trigger saveState via useEffect (not dockview events). */
+  const [editorListVersion, setEditorListVersion] = useState(0)
+
+  /* ─── Refs mirroring state (read by saveState inside dockview event closures) ─── */
+  const leftVisibleRef = useRef(leftVisible)
+  const bottomVisibleRef = useRef(bottomVisible)
+  const themeRef = useRef(theme)
+  const activeEditorIdRef = useRef<string | null>(null)
+  leftVisibleRef.current = leftVisible
+  bottomVisibleRef.current = bottomVisible
+  themeRef.current = theme
 
   // support external control of rightVisible
   const rightVisible = rightVisibleProp !== undefined ? rightVisibleProp : _rightVisible
+  rightVisibleRef.current = rightVisible
   const setRightVisible = useCallback((v: boolean) => {
     rightVisibleRef.current = v
     if (onRightVisibleChange) {
@@ -86,6 +112,29 @@ export function DockLayout({
   }, [onRightVisibleChange])
 
   const dvTheme: DockviewTheme = theme === "dark" ? themeAbyss : themeLight
+
+  /* ─── Persistence: serialize dock state to localStorage ─── */
+  const saveState = useCallback(() => {
+    if (!persistenceKey) return
+    try {
+      const openEditors = Array.from(openedEditorsRef.current)
+      const rightPanels: Record<string, string> = {}
+      rightPanelStateRef.current.forEach((panelId, editorId) => {
+        rightPanels[editorId] = panelId
+      })
+      const state: PersistedDockState = {
+        openEditors,
+        activeEditor: activeEditorIdRef.current,
+        leftVisible: leftVisibleRef.current,
+        bottomVisible: bottomVisibleRef.current,
+        theme: themeRef.current,
+        rightPanels,
+      }
+      localStorage.setItem(persistenceKey, JSON.stringify(state))
+    } catch {
+      // localStorage unavailable or full — silently skip
+    }
+  }, [persistenceKey])
 
   /* ─── Right panel management ─── */
 
@@ -196,6 +245,8 @@ export function DockLayout({
         : { direction: "right" },
     })
     centerGroupRef.current = panel.group.id
+    openedEditorsRef.current.add(id)
+    setEditorListVersion((v) => v + 1)
   }, [])
 
   const closeEditor = useCallback((id: string) => {
@@ -299,7 +350,8 @@ export function DockLayout({
       api.onDidActivePanelChange((panel) => {
         if (panel?.id?.startsWith("editor-")) {
           const editorId = panel.id.replace("editor-", "")
-          if (editorId !== activeEditorId) {
+          if (editorId !== activeEditorIdRef.current) {
+            activeEditorIdRef.current = editorId
             setActiveEditorId(editorId)
           }
         } else if (panel?.id?.startsWith("right-")) {
@@ -309,12 +361,16 @@ export function DockLayout({
             rightPanelStateRef.current.set(editorId, panelId)
           }
         }
+        // saveState handled by useEffect on activeEditorId change
       })
 
       /* When an editor panel is closed: if no editor remains, clear right edge.
          Otherwise syncRightPanels handles cleanup via onDidActivePanelChange. */
       api.onDidRemovePanel((panel) => {
         if (panel.id.startsWith("editor-")) {
+          const closedEditorId = panel.id.replace("editor-", "")
+          openedEditorsRef.current.delete(closedEditorId)
+          rightPanelStateRef.current.delete(closedEditorId)
           const hasEditor = api.panels.some((p) => p.id.startsWith("editor-"))
           if (!hasEditor) {
             // Last editor closed — clear all right panels
@@ -322,17 +378,70 @@ export function DockLayout({
               (p) => p.id.startsWith("right-") && !p.id.startsWith("right-edge")
             )
             toRemove.forEach((p) => p.api.close())
+            activeEditorIdRef.current = null
             setActiveEditorId(null)
           }
           // If other editors remain, onDidActivePanelChange will trigger
           // syncRightPanels which removes old right panels and adds new ones.
+          // Bump version to trigger saveState via useEffect.
+          // During StrictMode unmount, React ignores setState so localStorage
+          // is not overwritten with empty state.
+          setEditorListVersion((v) => v + 1)
         }
+        // saveState handled by useEffect on editorListVersion/activeEditorId change
       })
+
+      /* Restore persisted dock state (editors, visibility, theme) */
+      if (persistenceKey) {
+        try {
+          const raw = localStorage.getItem(persistenceKey)
+          if (raw) {
+            const saved = JSON.parse(raw) as PersistedDockState
+
+            // Restore visibility & theme first (state + ref, so saveState reads correct values)
+            if (typeof saved.leftVisible === "boolean") {
+              setLeftVisible(saved.leftVisible)
+              leftVisibleRef.current = saved.leftVisible
+            }
+            if (typeof saved.bottomVisible === "boolean") {
+              setBottomVisible(saved.bottomVisible)
+              bottomVisibleRef.current = saved.bottomVisible
+            }
+            if (saved.theme === "dark" || saved.theme === "light") {
+              setTheme(saved.theme)
+              themeRef.current = saved.theme
+            }
+
+            // Restore right-panel active states (consumed by syncRightPanels effect)
+            if (saved.rightPanels) {
+              for (const [editorId, panelId] of Object.entries(saved.rightPanels)) {
+                rightPanelStateRef.current.set(editorId, panelId)
+              }
+            }
+
+            // Restore open editors (filter out ids no longer in config)
+            const validEditorIds = new Set((editorsRef.current ?? []).map((e) => e.id))
+            const validEditors = (saved.openEditors ?? []).filter((id) =>
+              validEditorIds.has(id),
+            )
+            validEditors.forEach((id) => openEditor(id))
+
+            // Restore active editor
+            if (saved.activeEditor && validEditorIds.has(saved.activeEditor)) {
+              api.getPanel(`editor-${saved.activeEditor}`)?.api.setActive()
+            }
+
+            saveState()
+          }
+        } catch {
+          // localStorage corrupted — silently skip, start fresh
+        }
+      }
 
       onReady?.(api)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [navigation, bottom, leftCfg, rightCfg, bottomCfg, rightDefault, bottomDefault, onReady],
+    [navigation, bottom, leftCfg, rightCfg, bottomCfg, rightDefault, bottomDefault, onReady, openEditor, saveState],
   )
 
   /* Sync right panels when active editor changes; clear when none */
@@ -353,6 +462,9 @@ export function DockLayout({
   /* sync visibility */
   useEffect(() => { apiRef.current?.setEdgeGroupVisible("left", leftVisible) }, [leftVisible])
   useEffect(() => { apiRef.current?.setEdgeGroupVisible("bottom", bottomVisible) }, [bottomVisible])
+
+  /* persist state when visibility/theme/editors/active change */
+  useEffect(() => { saveState() }, [leftVisible, bottomVisible, theme, activeEditorId, editorListVersion, saveState])
 
   /* context */
   const ctx = useMemo<DockCtx>(

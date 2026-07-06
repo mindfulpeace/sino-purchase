@@ -56,6 +56,22 @@
 /* ── Group header ── */
 .date-hdr { color: var(--dv-activegroup-visiblepanel-tab-color, rgba(255,255,255,0.4)); font-size: 11px; padding: 6px 0 2px; border-top: 1px solid var(--dv-separator-border, #2b2b4a); }
 
+/* ── Task status/urgency popover menus ── */
+.task-status-menu,
+.task-urgency-menu {
+  min-width: 110px;
+  padding: 2px;
+}
+.task-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 8px;
+  vertical-align: middle;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
 /* ── Utility ── */
 .flex { display: flex; gap: 4px; align-items: center; }
 .flex-end { display: flex; justify-content: flex-end; gap: 4px; }
