@@ -1,4 +1,4 @@
-import { memo, useState, useRef, useEffect, type CSSProperties, type MouseEvent } from "react"
+import { memo, useState, type CSSProperties, type MouseEvent } from "react"
 import { Icon, Checkbox, Accordion, AccordionSummary, AccordionDetails, Box, IconNames } from "../../../components/ui"
 import Menu from "@mui/material/Menu"
 import MenuItem from "@mui/material/MenuItem"
@@ -53,15 +53,6 @@ export const TaskItem = memo(function TaskItem({ task, onRequestEdit, isEditing,
   const updateTask = usePlanStore(s => s.updateTask)
   const [menu, setMenu] = useState<null | "status" | "urgency">(null)
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
-  // 每个任务独立持有"提交草稿"函数，避免切换任务时串味
-  const commitRef = useRef<() => void>(() => {})
-  const prevEditing = useRef(isEditing)
-
-  // accordion 折叠（或切到别的任务）时自动保存草稿
-  useEffect(() => {
-    if (prevEditing.current && !isEditing) commitRef.current()
-    prevEditing.current = isEditing
-  }, [isEditing])
 
   const statuses: TaskStatus[] = [1, 2, 3, 4, 5]
 
@@ -89,7 +80,10 @@ export const TaskItem = memo(function TaskItem({ task, onRequestEdit, isEditing,
   return (
     <Accordion
       expanded={isEditing}
-      onChange={(_, expanded) => { if (expanded) onRequestEdit(task.id); else onCancel() }}
+      // 展开/闭合只由 task-body 点击控制（见下方 TaskBody 的 onClick 显式调用
+      // onRequestEdit / onCancel）。把 Accordion 自身对 summary 的点击切换设为空操作，
+      // 避免点击日期区、箭头等其它区域时误触发，确保"只有 task-body 控制展开和闭合"。
+      onChange={() => {}}
     >
       <AccordionSummary
         expandIcon={<Icon icon={isEditing ? IconNames.CHEVRON_UP : IconNames.CHEVRON_DOWN} size={12} />}
@@ -156,7 +150,7 @@ export const TaskItem = memo(function TaskItem({ task, onRequestEdit, isEditing,
       </AccordionSummary>
       <AccordionDetails
         style={{
-          background: "color-mix(in srgb, var(--bg-surface) 94%, var(--border) 6%)",
+          background: "color-mix(in srgb, var(--bg-surface) 88%, var(--text-primary) 12%)",
           borderTop: "1px solid var(--dv-separator-border, var(--border))",
           marginTop: "2px",
           padding: "4px 10px 4px",
@@ -169,7 +163,6 @@ export const TaskItem = memo(function TaskItem({ task, onRequestEdit, isEditing,
             onSave={onSave}
             onCancel={onCancel}
             onDelete={() => onDelete(task.id)}
-            registerCommit={(fn) => { commitRef.current = fn }}
           />
         )}
       </AccordionDetails>

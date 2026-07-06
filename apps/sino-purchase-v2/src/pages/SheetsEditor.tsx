@@ -28,6 +28,15 @@ export default function SheetsEditor() {
     )
   }
 
+  if (!SPREADSHEET_ID) {
+    return (
+      <Stack justifyContent="center" alignItems="center" sx={{ height: "100%", flexDirection: "column", gap: 2, color: "var(--text-dim)" }}>
+        <Box sx={{ fontSize: 16 }}>未配置 Spreadsheet ID</Box>
+        <Box sx={{ fontSize: 13, textAlign: "center" }}>请在 .env 中设置 VITE_SPREADSHEET_ID 后重启开发服务器</Box>
+      </Stack>
+    )
+  }
+
   return (
     <Stack sx={{ height: "100%" }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ p: "6px 12px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>

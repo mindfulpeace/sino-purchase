@@ -15,10 +15,9 @@ interface Props {
   onDelete?: () => void
   selectedCount?: number
   readOnly?: boolean
-  registerCommit?: (fn: () => void) => void
 }
 
-export function TaskDetail({ initial, mode, onSave, onCancel, onDelete, selectedCount, readOnly, registerCommit }: Props) {
+export function TaskDetail({ initial, mode, onSave, onCancel, onDelete, selectedCount, readOnly }: Props) {
   const allTasks = usePlanStore(s => s.allTasks)
   const [d, setD] = useState<Partial<PurchaseTask>>({ ...initial })
   const [confirmDel, setConfirmDel] = useState(false)
@@ -32,16 +31,18 @@ export function TaskDetail({ initial, mode, onSave, onCancel, onDelete, selected
   // Sync when switching tasks
   useEffect(() => { setD({ ...initial }); setConfirmDel(false); deletedRef.current = false; discardRef.current = false }, [initial.name, initial.id])
 
-  // 注册"提交当前草稿"：折叠/切到别的任务时由父组件调用（删除或"放弃保存"时跳过）
+  // 卸载时（折叠 / 切到别的任务 / 直接关）自动保存草稿。
+  // 用 effect cleanup 而非父组件调用，确保保存发生在 TaskDetail 还挂载、草稿最新时，
+  // 避免条件渲染卸载后父组件 useEffect 读取已失效 ref 的时序问题。
   useEffect(() => {
-    registerCommit?.(() => {
+    return () => {
       if (deletedRef.current || discardRef.current || mode !== "edit") return
       const cur = draftRef.current
       if (!cur.name?.trim()) return
       const changed = (Object.keys(cur) as (keyof PurchaseTask)[]).some(k => cur[k] !== (initial as Record<string, unknown>)[k])
       if (changed) onSaveRef.current({ ...cur, id: (initial as Record<string, unknown>).id } as Partial<PurchaseTask>)
-    })
-  }, [registerCommit, mode, initial])
+    }
+  }, [mode, initial])
 
   const supplierOpts = useMemo(() => nameListOptions(allTasks, "supplierId", d.supplierId), [allTasks, d.supplierId])
   const bookerOpts = useMemo(() => nameListOptions(allTasks, "bookerId", d.bookerId), [allTasks, d.bookerId])
@@ -120,7 +121,9 @@ export function TaskDetail({ initial, mode, onSave, onCancel, onDelete, selected
           )}
           {!readOnly && onDelete && (
             <>
-              <Button small intent="danger" variant="contained" title="删除" icon={<DeleteIcon style={{ fontSize: 15 }} />} onClick={() => setConfirmDel(true)} style={{ minWidth: 28, padding: "2px 4px" }} />
+              <Button small intent="danger" variant="contained" title="删除" onClick={() => setConfirmDel(true)} style={{ minWidth: 28, padding: "2px 4px" }}>
+                <DeleteIcon style={{ fontSize: 15 }} />
+              </Button>
               <Alert
                 isOpen={confirmDel}
                 onClose={() => setConfirmDel(false)}
@@ -139,10 +142,14 @@ export function TaskDetail({ initial, mode, onSave, onCancel, onDelete, selected
           )}
           {/* 取消 / 放弃保存：窄图标按钮，置于删除右侧 */}
           {!readOnly && (mode === "add" || mode === "batch") && (
-            <Button small variant="outlined" title="取消" icon={<CloseIcon style={{ fontSize: 15 }} />} onClick={onCancel} style={{ minWidth: 28, padding: "2px 4px", color: "var(--text-dim, #858585)", borderColor: "var(--border, #3a3a5a)" }} />
+            <Button small variant="outlined" title="取消" onClick={onCancel} style={{ minWidth: 28, padding: "2px 4px", color: "var(--text-dim, #858585)", borderColor: "var(--border, #3a3a5a)" }}>
+              <CloseIcon style={{ fontSize: 15 }} />
+            </Button>
           )}
           {!readOnly && mode === "edit" && (
-            <Button small variant="outlined" title="放弃保存" icon={<CloseIcon style={{ fontSize: 15 }} />} onClick={() => { discardRef.current = true; onCancel() }} style={{ minWidth: 28, padding: "2px 4px", color: "var(--text-dim, #858585)", borderColor: "var(--border, #3a3a5a)" }} />
+            <Button small variant="outlined" title="放弃保存" onClick={() => { discardRef.current = true; onCancel() }} style={{ minWidth: 28, padding: "2px 4px", color: "var(--text-dim, #858585)", borderColor: "var(--border, #3a3a5a)" }}>
+              <CloseIcon style={{ fontSize: 15 }} />
+            </Button>
           )}
         </Box>
       </Box>

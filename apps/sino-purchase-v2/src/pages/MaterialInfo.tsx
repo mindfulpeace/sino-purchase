@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState } from "react"
 import { Button, Card, H3, InputGroup, HTMLTable, Box, Stack } from "../components/ui"
 import { useMaterialStore } from "../app/stores/materialStore"

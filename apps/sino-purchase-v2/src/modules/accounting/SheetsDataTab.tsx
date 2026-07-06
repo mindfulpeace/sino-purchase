@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from "react"
+import { useState, useEffect, useMemo, useCallback, useRef } from "react"
+import { useVirtualizer } from "@tanstack/react-virtual"
 import { Select, Spinner, Button, MenuItem, MultiSelect, Icon, IconNames, Box, Stack } from "../../components/ui"
 import { useAuth, listSheets, loadTable } from "@sino-purchase/sheets-react"
 import { SPREADSHEET_ID } from "../../config/sheets"
@@ -66,6 +67,18 @@ export default function SheetsDataTab({ batch, onBatchChange }: SheetsDataTabPro
     if (batch.length === 0 || !batchKey) return data
     return data.filter(r => batch.includes(String(r[batchKey] ?? "")))
   }, [data, batch, batchKey])
+
+  // 审计 P1-6：行虚拟化，避免大表一次性渲染全部 DOM
+  const tableParentRef = useRef<HTMLDivElement>(null)
+  const tableVirtualizer = useVirtualizer({
+    count: filteredData.length,
+    getScrollElement: () => tableParentRef.current,
+    estimateSize: () => 29,
+    overscan: 10,
+  })
+  const tableItems = tableVirtualizer.getVirtualItems()
+  const tablePaddingTop = tableItems.length > 0 ? tableItems[0].start : 0
+  const tablePaddingBottom = tableItems.length > 0 ? tableVirtualizer.getTotalSize() - tableItems[tableItems.length - 1].end : 0
 
   useEffect(() => {
     if (!loggedIn) return
@@ -168,9 +181,11 @@ export default function SheetsDataTab({ batch, onBatchChange }: SheetsDataTabPro
         <Button icon="database" text="导入数据源" intent="primary" onClick={handleImport} disabled={filteredData.length === 0} small />
         <Box sx={{ flex: 1 }} />
         <span style={{ fontSize: 12, color: "var(--text-dim)" }}>{filteredData.length}/{data.length}</span>
-        <a href={`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "var(--text-link)", textDecoration: "none" }}><Icon icon={IconNames.SHARE} /> 在 Google Sheets 中打开</a>
+        {SPREADSHEET_ID && (
+          <a href={`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "var(--text-link)", textDecoration: "none" }}><Icon icon={IconNames.SHARE} /> 在 Google Sheets 中打开</a>
+        )}
       </Stack>
-      <Box sx={{ flex: 1, overflow: "auto", minHeight: 0, width: "100%" }}>
+      <Box ref={tableParentRef} sx={{ flex: 1, overflow: "auto", minHeight: 0, width: "100%" }}>
         {loading ? (
           <Stack justifyContent="center" alignItems="center" sx={{ height: "100%" }}><Spinner size={20} /></Stack>
         ) : filteredData.length === 0 ? (
@@ -184,12 +199,32 @@ export default function SheetsDataTab({ batch, onBatchChange }: SheetsDataTabPro
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((row, i) => (
-                <tr key={String(row.id ?? i)} style={{ borderBottom: "1px solid var(--border)" }}>
-                  <td style={{ padding: "2px 8px", textAlign: "center", color: "var(--text-dim)", fontSize: 11 }}>{i + 1}</td>
-                  {displayHeaders.map(h => (<td key={h} style={{ padding: "2px 8px", whiteSpace: "nowrap" }}>{String(row[h] ?? "")}</td>))}
+              {tablePaddingTop > 0 && (
+                <tr aria-hidden style={{ height: tablePaddingTop }}>
+                  <td colSpan={displayHeaders.length + 1} style={{ padding: 0, border: "none" }} />
                 </tr>
-              ))}
+              )}
+              {tableItems.map(vi => {
+                const row = filteredData[vi.index]
+                if (!row) return null
+                const i = vi.index
+                return (
+                  <tr
+                    key={String(row.id ?? i)}
+                    data-index={vi.index}
+                    ref={tableVirtualizer.measureElement}
+                    style={{ borderBottom: "1px solid var(--border)" }}
+                  >
+                    <td style={{ padding: "2px 8px", textAlign: "center", color: "var(--text-dim)", fontSize: 11 }}>{i + 1}</td>
+                    {displayHeaders.map(h => (<td key={h} style={{ padding: "2px 8px", whiteSpace: "nowrap" }}>{String(row[h] ?? "")}</td>))}
+                  </tr>
+                )
+              })}
+              {tablePaddingBottom > 0 && (
+                <tr aria-hidden style={{ height: tablePaddingBottom }}>
+                  <td colSpan={displayHeaders.length + 1} style={{ padding: 0, border: "none" }} />
+                </tr>
+              )}
             </tbody>
           </table>
         )}

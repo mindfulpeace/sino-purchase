@@ -11,6 +11,7 @@ export type { GoogleUserInfo } from "./auth"
 
 export {
   loadTable, insertRow, updateRow, deleteRow, processQueue, findRow, listSheets,
+  isRetryableStatus, SheetsApiError,
 } from "./db"
 
-export { enqueue, queueLen, loadQueue, CHANGE_EVENT } from "./sync-queue"
+export { enqueue, queueLen, loadQueue, CHANGE_EVENT, SYNC_ERROR_EVENT } from "./sync-queue"

@@ -52,11 +52,11 @@ export default function AccountingSettings() {
         <InputGroup placeholder="公司名(中文)" value={settings.companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={autoCompany} />
         <InputGroup placeholder="公司名(英文)" value={settings.companyNameEn} onChange={(e) => setCompanyNameEn(e.target.value)} disabled={autoCompany} />
         <Stack direction="row" spacing={1} sx={{ width: "100%" }}>
-          <Box sx={{ flex: 0.7 }}>
+          <Box sx={{ flex: 1 }}>
             <InputGroup placeholder="申请人" value={settings.applicant} onChange={(e) => setApplicant(e.target.value)} />
           </Box>
-          <Box sx={{ flex: 0.3 }}>
-            <Button icon={IconNames.PRINT} text="打印" intent="primary" onClick={handlePrint} fill />
+          <Box sx={{ flex: 1 }}>
+            <Button icon={IconNames.PRINT} text="打印" intent="primary" variant="contained" onClick={handlePrint} fill />
           </Box>
         </Stack>
       </Box>

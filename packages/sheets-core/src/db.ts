@@ -1,16 +1,44 @@
 import { getConfig } from "./config"
 import { clearToken, requestToken } from "./auth"
 import type { SyncOp } from "./types"
-import { queueLen, loadQueue, saveRemaining } from "./sync-queue"
+import { queueLen, loadQueue, saveRemaining, SYNC_ERROR_EVENT } from "./sync-queue"
 
 const BASE = "https://sheets.googleapis.com/v4/spreadsheets"
+const SHEET_META_TTL = 60_000
+const REQUEST_TIMEOUT = 15_000
 
-export async function processQueue(): Promise<void> {
+/** 携带 HTTP 状态的 API 错误，便于队列按错误类型分流（审计 P0-4） */
+export class SheetsApiError extends Error {
+  status: number
+  constructor(status: number, message: string) {
+    super(message)
+    this.name = "SheetsApiError"
+    this.status = status
+  }
+}
+
+/**
+ * 判断某次失败是否值得重试：
+ *  - 0     = 网络中断 / 超时 / 请求被 abort（无 HTTP 响应）→ 重试
+ *  - 429   = 限流 → 重试（调用方应配合退避）
+ *  - >=500 = 服务端错误 → 重试
+ *  - 401   = 令牌失效且本应用无 refresh token，只能由用户重新登录修复
+ *            → 视为永久失败，丢弃出队并提示登录，避免无限重排
+ *  - 其余 4xx（400/403/404/412...）= 永久业务错误 → 丢弃，不再重试
+ */
+export function isRetryableStatus(status: number): boolean {
+  if (status === 0) return true
+  if (status === 429 || status >= 500) return true
+  return false
+}
+
+export async function processQueue(): Promise<{ retried: number; failed: number }> {
   const len = queueLen()
-  if (len === 0) return
+  if (len === 0) return { retried: 0, failed: 0 }
   const q = loadQueue()
-  if (q.length === 0) return
+  if (q.length === 0) return { retried: 0, failed: 0 }
   const remaining: SyncOp[] = []
+  const failed: SyncOp[] = []
   for (const op of q) {
     try {
       if (op.op === "insert" && op.data) {
@@ -19,48 +47,89 @@ export async function processQueue(): Promise<void> {
         await updateRow(op.sheet, op.rowIndex, op.data, op.headers)
       } else if (op.op === "delete" && op.rowIndex) {
         await deleteRow(op.sheet, op.rowIndex)
+      } else {
+        // 队列项结构不完整，无法执行 → 视为失败丢弃
+        failed.push(op)
       }
-    } catch {
-      remaining.push(op)
+    } catch (e) {
+      const status = e instanceof SheetsApiError ? e.status : 0
+      if (isRetryableStatus(status)) remaining.push(op)
+      else failed.push(op)
     }
   }
+  // 永久失败的写操作被丢弃（避免无限重排到 1000 条上限挤占配额）
   saveRemaining(remaining)
+  if (failed.length > 0) {
+    try {
+      window.dispatchEvent(new CustomEvent(SYNC_ERROR_EVENT, { detail: { count: failed.length } }))
+    } catch { /* ignore */ }
+  }
+  return { retried: remaining.length, failed: failed.length }
 }
 
-async function fetchWithAuth<T = unknown>(url: string, opts: RequestInit = {}): Promise<T> {
-  let token = await requestToken()
-  let res = await fetch(url, {
-    ...opts,
-    headers: { ...opts.headers, Authorization: `Bearer ${token}` },
-  })
-  if (res.status === 401) {
-    token = await requestToken()
-    if (!token) { clearToken(); throw new Error("unauthorized") }
-    res = await fetch(url, {
+async function fetchWithAuth<T = unknown>(url: string, opts: RequestInit = {}, timeoutMs = REQUEST_TIMEOUT): Promise<T> {
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs)
+  const doFetch = (token: string): Promise<Response> =>
+    fetch(url, {
       ...opts,
+      signal: ctrl.signal,
       headers: { ...opts.headers, Authorization: `Bearer ${token}` },
     })
-    if (!res.ok) { clearToken(); throw new Error("unauthorized") }
+  try {
+    let token = await requestToken()
+    if (!token) { clearToken(); throw new Error("unauthorized") }
+    let res = await doFetch(token)
+    if (res.status === 401) {
+      // 无 refresh token，401 无法自愈：清理令牌并抛错，由上层提示重新登录
+      clearToken()
+      throw new SheetsApiError(401, "unauthorized")
+    }
+    if (!res.ok) throw new SheetsApiError(res.status, `Sheets API error: ${res.status}`)
+    return (await res.json()) as T
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") {
+      throw new Error(`Sheets API request timeout after ${timeoutMs}ms`)
+    }
+    throw e
+  } finally {
+    clearTimeout(timer)
   }
-  if (!res.ok) throw new Error(`Sheets API error: ${res.status}`)
-  return res.json()
 }
 
 const sheetIdCache = new Map<string, number>()
+let sheetMetaLoadedAt = 0
+const headerCache = new Map<string, string[]>()
 
-async function refreshSheetCache(): Promise<void> {
+async function refreshSheetCache(force = false): Promise<void> {
+  const now = Date.now()
+  // 缓存带 TTL，避免每次 loadTable 都拉全表元数据（审计 P1-7）
+  if (!force && sheetMetaLoadedAt && now - sheetMetaLoadedAt < SHEET_META_TTL) return
   const { spreadsheetId } = getConfig()
   const info = await fetchWithAuth<{ sheets?: Array<{ properties: { title: string; sheetId: number } }> }>(
-    `${BASE}/${spreadsheetId}`
+    `${BASE}/${spreadsheetId}`,
   )
+  sheetIdCache.clear()
   for (const s of info.sheets || []) {
     sheetIdCache.set(s.properties.title, s.properties.sheetId)
   }
+  sheetMetaLoadedAt = now
 }
 
 async function getSheetId(name: string): Promise<number> {
-  if (!sheetIdCache.has(name)) await refreshSheetCache()
+  if (!sheetIdCache.has(name)) await refreshSheetCache(true)
   return sheetIdCache.get(name) ?? 0
+}
+
+async function getHeaders(sheetName: string): Promise<string[]> {
+  if (headerCache.has(sheetName)) return headerCache.get(sheetName)!
+  const { spreadsheetId } = getConfig()
+  const res = await fetchWithAuth<{ values?: string[][] }>(
+    `${BASE}/${spreadsheetId}/values/${sheetName}!1:1`,
+  )
+  const h = (res.values?.[0]) || []
+  if (h.length) headerCache.set(sheetName, h)
+  return h
 }
 
 function rowKey(offset: number): string {
@@ -82,30 +151,31 @@ function normalizeDate(val: string): string {
 
 async function ensureSheet(sheetName: string, headers: string[]): Promise<void> {
   const { spreadsheetId } = getConfig()
-  await refreshSheetCache()
+  if (!sheetIdCache.has(sheetName)) await refreshSheetCache(true)
   if (sheetIdCache.has(sheetName)) return
   await fetchWithAuth(`${BASE}/${spreadsheetId}:batchUpdate`, {
     method: "POST",
     body: JSON.stringify({ requests: [{ addSheet: { properties: { title: sheetName } } }] }),
   })
-  await refreshSheetCache()
+  await refreshSheetCache(true)
   if (headers.length > 0) {
     await fetchWithAuth(
       `${BASE}/${spreadsheetId}/values/${sheetName}!A1:${rowKey(headers.length - 1)}1?valueInputOption=USER_ENTERED`,
       { method: "PUT", body: JSON.stringify({ values: [headers] }) },
     )
+    headerCache.set(sheetName, headers)
   }
 }
 
 export async function listSheets(): Promise<string[]> {
-  await refreshSheetCache()
+  if (sheetIdCache.size === 0) await refreshSheetCache(true)
   return Array.from(sheetIdCache.keys())
 }
 
 export async function findRow(sheetName: string, uuid: string): Promise<number | null> {
   const { spreadsheetId } = getConfig()
   const res = await fetchWithAuth<{ values?: string[][] }>(
-    `${BASE}/${spreadsheetId}/values/${sheetName}!A:A`
+    `${BASE}/${spreadsheetId}/values/${sheetName}!A:A`,
   )
   const rows = res.values || []
   for (let i = 1; i < rows.length; i++) {
@@ -117,6 +187,8 @@ export async function findRow(sheetName: string, uuid: string): Promise<number |
 export interface LoadTableResult<T> {
   data: T[]
   rowMap: Map<string, number>
+  /** 云端真实表头（按读取顺序），写回时应以此为准，避免与本地 headers 顺序不一致导致错位 */
+  rowHeaders: string[]
 }
 
 export async function loadTable<T extends Record<string, unknown>>(
@@ -131,9 +203,10 @@ export async function loadTable<T extends Record<string, unknown>>(
     `${BASE}/${spreadsheetId}/values/${sheetName}!1:10000`
   )
   const rows: string[][] = res.values || []
-  if (rows.length < 2) return { data: [], rowMap: new Map() }
+  if (rows.length < 2) return { data: [], rowMap: new Map(), rowHeaders: [] }
 
   const rowHeaders = rows[0]
+  if (!headerCache.has(sheetName)) headerCache.set(sheetName, rowHeaders)
   const rowMap = new Map<string, number>()
   const seenIds = new Set<string>()
 
@@ -157,24 +230,30 @@ export async function loadTable<T extends Record<string, unknown>>(
     return obj as T
   })
 
-  return { data, rowMap }
+  return { data, rowMap, rowHeaders: rowHeaders }
 }
 
-export async function insertRow(sheetName: string, values: Record<string, unknown>): Promise<void> {
+/**
+ * 追加一行。返回新写入的行号（1-based），供上层维护 id→行号 映射，
+ * 从而规避每次写操作都用 findRow 全列扫描（审计 P0-3 / P1-7）。
+ */
+export async function insertRow(sheetName: string, values: Record<string, unknown>, headersArg?: string[]): Promise<number> {
   const { spreadsheetId } = getConfig()
-  const res = await fetchWithAuth<{ values?: string[][] }>(
-    `${BASE}/${spreadsheetId}/values/${sheetName}!1:1`
-  )
-  const headers: string[] = (res.values?.[0]) || []
-  if (headers.length === 0) return
+  const headers = (headersArg && headersArg.length > 0) ? headersArg : await getHeaders(sheetName)
+  if (headers.length === 0) return 0
   const row = headers.map(h => {
     const v = values[h]
     return v === undefined || v === null ? "" : String(v)
   })
-  await fetchWithAuth(
+  const res = await fetchWithAuth<{ updates?: { updatedRange?: string } }>(
     `${BASE}/${spreadsheetId}/values/${sheetName}!A:Z:append?valueInputOption=USER_ENTERED`,
     { method: "POST", body: JSON.stringify({ values: [row] }) },
   )
+  const range = res.updates?.updatedRange || ""
+  const m = range.match(/!([A-Z]+\d+):/i) ?? range.match(/!([A-Z]+\d+)$/i)
+  const rowNum = m ? parseInt(m[1].replace(/[A-Z]/g, ""), 10) : 0
+  if (rowNum) headerCache.set(sheetName, headers)
+  return rowNum
 }
 
 export async function updateRow(
@@ -184,19 +263,27 @@ export async function updateRow(
   _headers: string[],
 ): Promise<void> {
   const { spreadsheetId } = getConfig()
-  const res = await fetchWithAuth<{ values?: string[][] }>(
-    `${BASE}/${spreadsheetId}/values/${sheetName}!1:1`
-  )
-  const headers: string[] = (res.values?.[0]) || _headers
+  // 优先使用调用方传入的 headers（应为云端真实表头），缺失时回退缓存
+  const headers = _headers.length > 0 ? _headers : await getHeaders(sheetName)
+  if (headers.length === 0) return
   const col = rowKey(headers.length - 1)
   const row = headers.map(h => {
     const v = values[h]
     return v === undefined || v === null ? "" : String(v)
   })
-  await fetchWithAuth(
-    `${BASE}/${spreadsheetId}/values/${sheetName}!A${rowIndex}:${col}${rowIndex}?valueInputOption=USER_ENTERED`,
-    { method: "PUT", body: JSON.stringify({ values: [row] }) },
-  )
+  // 写失败立即重试一次，自愈瞬时网络/限流错误，避免改动滞留离线队列后刷新丢失
+  try {
+    await fetchWithAuth(
+      `${BASE}/${spreadsheetId}/values/${sheetName}!A${rowIndex}:${col}${rowIndex}?valueInputOption=USER_ENTERED`,
+      { method: "PUT", body: JSON.stringify({ values: [row] }) },
+    )
+  } catch (e) {
+    if (e instanceof SheetsApiError && !isRetryableStatus(e.status)) throw e
+    await fetchWithAuth(
+      `${BASE}/${spreadsheetId}/values/${sheetName}!A${rowIndex}:${col}${rowIndex}?valueInputOption=USER_ENTERED`,
+      { method: "PUT", body: JSON.stringify({ values: [row] }) },
+    )
+  }
 }
 
 export async function deleteRow(sheetName: string, rowIndex: number): Promise<void> {

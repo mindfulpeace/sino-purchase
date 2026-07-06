@@ -5,17 +5,19 @@
   "type": "module",
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/*",
+    "!packages/desk-ui",
+    "!packages/ui-dock",
+    "!apps/demo-ui",
+    "!apps/layout-dock-demo",
+    "!apps/sheets-api-demo"
   ],
   "scripts": {
     "dev": "npm run dev -w apps/sino-purchase-v2",
-    "dev:desk": "npm run dev -w apps/demo-ui",
-    "dev:sheets": "npm run dev -w apps/sheets-api-demo",
     "build": "npm run build:packages && npm run build:main",
     "build:packages": "npm run build:utils && npm run build:diff && npm run build:doc-utils && npm run build:sheets-core && npm run build:sheets-react && npm run build:doc && npm run build:print && npm run build:dock",
     "build:dock": "npm run build -w packages/layout-dock",
     "build:main": "npm run build -w apps/sino-purchase-v2",
-    "build:ui": "npm run build -w packages/desk-ui",
     "build:utils": "npm run build -w packages/utils",
     "build:diff": "npm run build -w packages/diff",
     "build:doc-utils": "npm run build -w packages/doc-utils",
@@ -23,7 +25,6 @@
     "build:print": "npm run build -w packages/print",
     "build:sheets-core": "npm run build -w packages/sheets-core",
     "build:sheets-react": "npm run build -w packages/sheets-react",
-    "build:desk": "npm run build -w apps/demo-ui",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",

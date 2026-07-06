@@ -1,7 +1,5 @@
 import { getConfig } from "./config"
 
-const TOKEN_KEY = "sino-purchase-google-token"
-const EXPIRES_KEY = "sino-purchase-google-expires"
 const USER_KEY = "sino-purchase-google-user"
 
 export interface GoogleUserInfo {
@@ -18,15 +16,31 @@ type TokenResponse = { access_token: string; expires_in: number; scope: string; 
 type Callback = (token: string) => void
 
 let tokenClient: google.accounts.oauth2.TokenClient | null = null
-let accessToken = localStorage.getItem(TOKEN_KEY) || ""
-let expiresAt = Number(localStorage.getItem(EXPIRES_KEY) || 0)
+
+// SECURITY (审计 P0-1): OAuth 访问令牌只保存在内存中，绝不写入 localStorage。
+// 明文落盘会让任何 XSS 直接窃取令牌。配套措施：
+//   1) index.html 中的严格 Content-Security-Policy 阻断未授权脚本注入（消除 XSS 向量）；
+//   2) userinfo 仅为非敏感资料，可缓存；令牌本身不持久化。
+// 真正的根治方案是后端代理持有令牌（httpOnly cookie 会话），留作后续演进。
+let accessToken = ""
+let expiresAt = 0
+let userInfo: GoogleUserInfo | null = null
 let listeners: Callback[] = []
 
-if (accessToken && Date.now() >= expiresAt) {
-  accessToken = ""
-  expiresAt = 0
-  localStorage.removeItem(TOKEN_KEY)
-  localStorage.removeItem(EXPIRES_KEY)
+export function onTokenChange(cb: Callback): () => void {
+  listeners.push(cb)
+  if (accessToken) cb(accessToken)
+  return () => { listeners = listeners.filter(l => l !== cb) }
+}
+
+function notify(): void {
+  listeners.forEach(l => { try { l(accessToken) } catch { /* ignore */ } })
+}
+
+function setToken(token: string, expiresIn: number): void {
+  accessToken = token
+  expiresAt = Date.now() + expiresIn * 1000
+  notify()
 }
 
 function loadGis(): Promise<void> {
@@ -38,29 +52,6 @@ function loadGis(): Promise<void> {
     s.onerror = () => reject(new Error("Failed to load GSI script"))
     document.head.appendChild(s)
   })
-}
-
-export function onTokenChange(cb: Callback): () => void {
-  listeners.push(cb)
-  if (accessToken) cb(accessToken)
-  return () => { listeners = listeners.filter(l => l !== cb) }
-}
-
-function broadcast(): void {
-  if (accessToken) {
-    localStorage.setItem(TOKEN_KEY, accessToken)
-    localStorage.setItem(EXPIRES_KEY, String(expiresAt))
-  } else {
-    localStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(EXPIRES_KEY)
-  }
-  listeners.forEach(l => { try { l(accessToken) } catch { /* ignore */ } })
-}
-
-function setToken(token: string, expiresIn: number): void {
-  accessToken = token
-  expiresAt = Date.now() + expiresIn * 1000
-  broadcast()
 }
 
 let initPromise: Promise<void> | null = null
@@ -76,10 +67,17 @@ export function initAuth(): Promise<void> {
       client_id: clientId,
       scope: scope || "https://www.googleapis.com/auth/spreadsheets",
       callback: (resp: TokenResponse) => {
-        setToken(resp.access_token, resp.expires_in)
+        if (resp.access_token) setToken(resp.access_token, resp.expires_in)
       },
       error_callback: () => {},
     })
+    // 尝试静默重认证以恢复会话（仅当浏览器仍保有有效 Google 会话时成功）；
+    // 失败则保持演示模式，不弹出、不阻塞。
+    try {
+      await requestAccessToken({ prompt: "none" })
+    } catch {
+      /* 未登录 / 无授权 —— 保持演示模式 */
+    }
   })()
   return initPromise
 }
@@ -88,8 +86,12 @@ export function requestAccessToken(options?: { prompt?: string }): Promise<Token
   return new Promise((resolve, reject) => {
     if (!tokenClient) return reject(new Error("Auth not initialized"))
     tokenClient.callback = (resp: TokenResponse) => {
-      setToken(resp.access_token, resp.expires_in)
-      resolve(resp)
+      if (resp.access_token) {
+        setToken(resp.access_token, resp.expires_in)
+        resolve(resp)
+      } else {
+        reject(new Error("Login failed"))
+      }
     }
     tokenClient.requestAccessToken(options)
   })
@@ -128,8 +130,8 @@ export function logout(): void {
   const t = accessToken
   accessToken = ""
   expiresAt = 0
-  localStorage.removeItem(USER_KEY)
-  broadcast()
+  userInfo = null
+  notify()
   if (t) google.accounts.oauth2.revoke(t, () => {}, () => {})
 }
 
@@ -137,9 +139,10 @@ export function getToken(): string { return accessToken }
 export function isLoggedIn(): boolean { return !!accessToken }
 
 export function getCachedUser(): GoogleUserInfo | null {
+  if (userInfo) return userInfo
   try {
     const raw = localStorage.getItem(USER_KEY)
-    return raw ? JSON.parse(raw) : null
+    return raw ? (JSON.parse(raw) as GoogleUserInfo) : null
   } catch { return null }
 }
 
@@ -148,21 +151,23 @@ export async function getUserInfo(): Promise<GoogleUserInfo> {
   if (!token) throw new Error("未登录")
 
   // Try cache first
+  if (userInfo) return userInfo
   const cached = getCachedUser()
-  if (cached) return cached
+  if (cached) { userInfo = cached; return cached }
 
   const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
     headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) throw new Error("获取用户信息失败")
   const info: GoogleUserInfo = await res.json()
-  localStorage.setItem(USER_KEY, JSON.stringify(info))
+  userInfo = info
+  try { localStorage.setItem(USER_KEY, JSON.stringify(info)) } catch { /* ignore */ }
   return info
 }
 
 export function clearToken(): void {
   accessToken = ""
   expiresAt = 0
-  localStorage.removeItem(USER_KEY)
-  broadcast()
+  userInfo = null
+  notify()
 }

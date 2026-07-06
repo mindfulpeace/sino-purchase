@@ -103,6 +103,9 @@ interface PlanState {
   // Data (来自 sheets-api, 通过 setAllTasks 注入)
   allTasks: PurchaseTask[]
   loading: boolean
+  /** 数据版本号：每次 allTasks 内容变化 +1，用作过滤缓存签名的一部分，
+   * 避免"更新单条任务（length 不变）时 applyFilter 命中旧缓存导致 UI 不刷新"。 */
+  dataVersion: number
   setAllTasks: (tasks: PurchaseTask[]) => void
   setLoading: (loading: boolean) => void
 
@@ -194,7 +197,9 @@ export const usePlanStore = create<PlanState>((set, get) => {
       dateEndToday: s.dateEndToday,
     }
     saveFilter(f)
-    const sig = s.allTasks.length + "|" + JSON.stringify(f)
+    // 用 dataVersion（数据内容变化）而非 allTasks.length（仅数量变化）作为缓存签名，
+    // 否则"更新单条任务字段但数组长度不变"时命中旧缓存，UI 不刷新。
+    const sig = s.dataVersion + "|" + JSON.stringify(f)
     let filteredTasks: PurchaseTask[]
     if (sig === cachedSig) {
       filteredTasks = cachedResult
@@ -217,8 +222,9 @@ export const usePlanStore = create<PlanState>((set, get) => {
     // Data
     allTasks: [],
     loading: false,
+    dataVersion: 0,
     setAllTasks: (allTasks) => {
-      set({ allTasks })
+      set({ allTasks, dataVersion: get().dataVersion + 1 })
       set(applyFilter())
       set(computeStats(allTasks))
     },

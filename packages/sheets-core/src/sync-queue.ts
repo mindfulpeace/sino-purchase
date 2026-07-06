@@ -1,6 +1,8 @@
 import type { SyncOp } from "./types"
 
 export const CHANGE_EVENT = "sino-sync-change"
+/** 永久失败的写操作被丢弃时广播（detail: { count: number }），供 UI 提示用户 */
+export const SYNC_ERROR_EVENT = "sino-sync-error"
 
 const QUEUE_KEY = "sino-sync-queue"
 

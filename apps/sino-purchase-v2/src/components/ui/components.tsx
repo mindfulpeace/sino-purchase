@@ -213,8 +213,6 @@ export function NumericInput({ id, value, label, placeholder, variant, min, step
         "& .MuiOutlinedInput-input": { padding: "2px 6px", height: 24 } as any,
         "& .MuiInput-input": { padding: "2px 6px" } as any,
         "& .MuiOutlinedInput-root": { padding: 0 } as any,
-        "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button": { display: "none" },
-        "& input[type=number]": { MozAppearance: "textfield" },
         ...style as any,
       }}
     />

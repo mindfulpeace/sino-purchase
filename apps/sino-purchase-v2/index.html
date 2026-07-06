@@ -2,6 +2,9 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
+    <!-- 审计 P0-1：严格 CSP 阻断未授权脚本注入（消除 XSS 窃取内存中令牌的向量）。
+         注意：Emotion/MUI 运行时注入 <style>，故 style-src 需 'unsafe-inline'。 -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://*.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.googleusercontent.com https://lh3.googleusercontent.com; font-src 'self' data:; connect-src 'self' https://sheets.googleapis.com https://www.googleapis.com https://accounts.google.com; frame-src 'self' https://docs.google.com https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>sino-purchase-v2</title>

@@ -1,7 +1,6 @@
 {
   "files": [],
   "references": [
-    { "path": "./packages/desk-ui/tsconfig.json" },
     { "path": "./packages/utils/tsconfig.json" },
     { "path": "./packages/diff/tsconfig.json" },
     { "path": "./packages/doc-utils/tsconfig.json" },
@@ -10,7 +9,6 @@
     { "path": "./packages/doc-reimburse/tsconfig.json" },
     { "path": "./packages/print/tsconfig.json" },
     { "path": "./packages/layout-dock/tsconfig.json" },
-    { "path": "./apps/sino-purchase-v2/tsconfig.json" },
-    { "path": "./apps/demo-ui/tsconfig.json" }
+    { "path": "./apps/sino-purchase-v2/tsconfig.json" }
   ]
 }
