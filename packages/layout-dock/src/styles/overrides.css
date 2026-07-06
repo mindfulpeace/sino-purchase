@@ -176,77 +176,8 @@
   opacity: 0.7;
 }
 
-/* ── Print: hide all layout-dock chrome, keep printable content area visible ── */
-
-@media print {
-  /* Hide layout chrome only, never hide content containers that may host printable content */
-  .dv-tabs-and-actions-container,
-  .dv-pane-header,
-  .dv-resize-handle-left,
-  .dv-resize-handle-right,
-  .dv-resize-handle-top,
-  .dv-resize-handle-bottom {
-    display: none !important;
-  }
-
-  /* Hide non-printable dock areas */
-  .layout-dock-left,
-  .layout-dock-center,
-  .layout-dock-bottom,
-  .dv-groupview:not(.dv-groupview-edge) {
-    display: none !important;
-  }
-
-  /* Reset dockview internal layout so the printable right panel can flow naturally */
-  .dv-layout,
-  .dv-body,
-  .dv-dockview,
-  .dv-root-wrapper,
-  .dv-grid-view,
-  .dv-branch-node,
-  .dv-split-view-container,
-  .dv-view-container,
-  .dv-view,
-  .dv-groupview,
-  .dv-groupview.dv-groupview-edge,
-  .dv-groupview > .dv-content-container,
-  .dv-pane-container,
-  .dv-pane {
-    position: static !important;
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    overflow: visible !important;
-    transform: none !important;
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: auto !important;
-    flex: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-
-  /* The printable right panel fills the page */
-  .dv-groupview.dv-groupview-edge:has(.layout-dock-right) {
-    width: 100% !important;
-    height: auto !important;
-  }
-
-  .layout-dock-right,
-  .layout-dock-right > div {
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
-  }
-
-  /* Hide any view that doesn't contain the printable right panel */
-  .dv-view:not(:has(.layout-dock-right)) {
-    display: none !important;
-  }
-}
+/* ── Print: handled by @sino-purchase/print portal strategy ──
+   The print package hides #root (display:none) and shows #print-portal-root
+   (a body-level portal) on @media print, so all dockview chrome is already
+   hidden. The previous dockview-internal @media print reset here was dead code
+   that conflicted with the portal approach and has been removed. */

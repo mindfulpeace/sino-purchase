@@ -65,6 +65,7 @@ export function DockLayout({
   right: rightCfg,
   bottomEdge: bottomCfg,
   defaultTheme = "dark",
+  theme: themeProp,
   rightDefault = true,
   bottomDefault = false,
   rightVisible: rightVisibleProp,
@@ -86,7 +87,16 @@ export function DockLayout({
   const [leftVisible, setLeftVisible] = useState(true)
   const [_rightVisible, _setRightVisible] = useState(rightDefault)
   const [bottomVisible, setBottomVisible] = useState(bottomDefault)
-  const [theme, setTheme] = useState<"dark" | "light">(defaultTheme)
+  const [themeState, setThemeState] = useState<"dark" | "light">(defaultTheme)
+  // Controlled theme (when the `theme` prop is supplied) takes precedence over
+  // internal state, so the app-level ThemeProvider can drive dockview theming.
+  const theme = themeProp !== undefined ? themeProp : themeState
+  const setTheme = useCallback(
+    (t: "dark" | "light") => {
+      if (themeProp === undefined) setThemeState(t)
+    },
+    [themeProp],
+  )
   /** Bumped on open/close to trigger saveState via useEffect (not dockview events). */
   const [editorListVersion, setEditorListVersion] = useState(0)
 
@@ -407,7 +417,7 @@ export function DockLayout({
               setBottomVisible(saved.bottomVisible)
               bottomVisibleRef.current = saved.bottomVisible
             }
-            if (saved.theme === "dark" || saved.theme === "light") {
+            if (themeProp === undefined && (saved.theme === "dark" || saved.theme === "light")) {
               setTheme(saved.theme)
               themeRef.current = saved.theme
             }

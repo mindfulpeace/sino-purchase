@@ -67,6 +67,8 @@ export interface DockLayoutProps {
   bottomEdge?: EdgeGroupConfig
   /** 默认主题 */
   defaultTheme?: "dark" | "light"
+  /** 受控主题：传入后由外部（如应用级 ThemeProvider）驱动，内部不再自管理 */
+  theme?: "dark" | "light"
   /** 右侧面板默认可见 (默认 true) */
   rightDefault?: boolean
   /** 底部面板默认可见 */

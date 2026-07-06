@@ -25,6 +25,7 @@ import Close from "@mui/icons-material/CloseOutlined"
 import Storage from "@mui/icons-material/StorageOutlined"
 import ContentPaste from "@mui/icons-material/ContentPasteOutlined"
 import FileUpload from "@mui/icons-material/FileUploadOutlined"
+import Brightness4 from "@mui/icons-material/Brightness4Outlined"
 import type { SvgIconProps } from "@mui/material/SvgIcon"
 
 const muiIcons: Record<string, React.ComponentType<SvgIconProps>> = {
@@ -55,6 +56,7 @@ const muiIcons: Record<string, React.ComponentType<SvgIconProps>> = {
   DATABASE: Storage,
   CLIPBOARD: ContentPaste,
   EXPORT: FileUpload,
+  THEME: Brightness4,
 }
 
 export type IconName = keyof typeof muiIcons

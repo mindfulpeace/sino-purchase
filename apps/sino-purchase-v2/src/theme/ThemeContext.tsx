@@ -7,12 +7,32 @@ interface ThemeContextValue {
   toggle: () => void
 }
 
+const STORAGE_KEY = "sino-purchase-theme"
+
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark")
+function readInitial(): Theme {
+  try {
+    return localStorage.getItem(STORAGE_KEY) === "light" ? "light" : "dark"
+  } catch {
+    return "dark"
+  }
+}
 
-  const toggle = useCallback(() => setTheme((t) => (t === "dark" ? "light" : "dark")), [])
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState<Theme>(readInitial)
+
+  const toggle = useCallback(() => {
+    setTheme((t) => {
+      const next: Theme = t === "dark" ? "light" : "dark"
+      try {
+        localStorage.setItem(STORAGE_KEY, next)
+      } catch {
+        /* ignore */
+      }
+      return next
+    })
+  }, [])
 
   useEffect(() => {
     document.documentElement.classList.toggle("theme-light", theme === "light")

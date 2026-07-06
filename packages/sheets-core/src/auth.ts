@@ -63,17 +63,25 @@ function setToken(token: string, expiresIn: number): void {
   broadcast()
 }
 
-export async function initAuth(): Promise<void> {
-  const { clientId, scope } = getConfig()
-  await loadGis()
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: clientId,
-    scope: scope || "https://www.googleapis.com/auth/spreadsheets",
-    callback: (resp: TokenResponse) => {
-      setToken(resp.access_token, resp.expires_in)
-    },
-    error_callback: () => {},
-  })
+let initPromise: Promise<void> | null = null
+
+export function initAuth(): Promise<void> {
+  // De-dupe: SheetsProvider and useAuth both call this (and StrictMode double-invokes),
+  // so guard with a module-level promise to avoid re-creating the token client.
+  if (initPromise) return initPromise
+  initPromise = (async () => {
+    const { clientId, scope } = getConfig()
+    await loadGis()
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: scope || "https://www.googleapis.com/auth/spreadsheets",
+      callback: (resp: TokenResponse) => {
+        setToken(resp.access_token, resp.expires_in)
+      },
+      error_callback: () => {},
+    })
+  })()
+  return initPromise
 }
 
 export function requestAccessToken(options?: { prompt?: string }): Promise<TokenResponse> {
@@ -89,8 +97,11 @@ export function requestAccessToken(options?: { prompt?: string }): Promise<Token
 
 export async function requestToken(): Promise<string> {
   if (!accessToken || !expiresAt) return ""
-  if (Date.now() < expiresAt - 300000) return accessToken
-  return accessToken
+  if (Date.now() < expiresAt) return accessToken
+  // GSI tokens have no refresh token and expire after ~1h. Returning the (now
+  // invalid) token would cause silent 401 loops in fetchWithAuth; returning ""
+  // lets the caller surface a re-login prompt instead.
+  return ""
 }
 
 export function login(): Promise<string> {

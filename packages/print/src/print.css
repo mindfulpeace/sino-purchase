@@ -79,6 +79,12 @@
     padding: 0.45em;
   }
 
+  /* Keep a single reimbursement row / signature row from splitting across pages */
+  .print-view .doc-reimburse tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
   .print-view h1,
   .print-view h2,
   .print-view h3,
