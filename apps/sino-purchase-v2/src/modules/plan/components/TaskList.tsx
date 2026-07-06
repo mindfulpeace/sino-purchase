@@ -101,10 +101,10 @@ export function TaskList({ tasks, groupBy, onRequestEdit, editingId, onSave, onC
           <Box
             key={row.key}
             sx={{
-              color: "var(--dv-activegroup-visiblepanel-tab-color, rgba(255,255,255,0.4))",
+              color: "var(--dv-activegroup-visiblepanel-tab-color, var(--text-dim))",
               fontSize: 11,
               padding: "4px 0 1px",
-              borderTop: "1px solid var(--dv-separator-border, #2b2b4a)",
+              borderTop: "1px solid var(--dv-separator-border, var(--border))",
             }}
           >{row.label}</Box>
         ) : (

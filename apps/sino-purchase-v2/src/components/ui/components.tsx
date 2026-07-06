@@ -895,8 +895,8 @@ export function Tabs({ value, onChange, children, style, variant }: TabsProps) {
       variant={variant}
       sx={{
         minHeight: 0,
-        "& .MuiTab-root": { minHeight: 0, py: 0.5, fontSize: 12, textTransform: "none", color: "var(--text-dim, #858585)" },
-        "& .MuiTab-root.Mui-selected": { color: "var(--text, #e6e6e6)" },
+        "& .MuiTab-root": { minHeight: 0, py: 0.5, fontSize: 12, textTransform: "none", color: "var(--text-dim, #858585)", fontWeight: 400 },
+        "& .MuiTab-root.Mui-selected": { color: "var(--text-primary, #e6e6e6)", fontWeight: 600 },
         "& .MuiTabs-indicator": { backgroundColor: "var(--accent, #4a90d9)" },
         ...style as any,
       }}
@@ -934,7 +934,7 @@ export function Skeleton({ width, height, variant, animation, className, style, 
       className={className}
       sx={{
         borderRadius: 2,
-        bgcolor: "var(--dv-separator-border, #2b2b4a)",
+        bgcolor: "var(--dv-separator-border, var(--border))",
         ...style,
         ...sx,
       } as any}

@@ -40,22 +40,28 @@ export const designTokens = {
   },
 } as const
 
-/** 任务列表语义色（跨模块复用的高亮配色），下沉到主题后可用 sx={{ color: "task.qty" }} 引用。 */
-export const taskColors = {
-  name: "#ffffff",
-  qty: "#9ac4bb",
-  prc: "#d2bba4",
-  sup: "#c8b9d8",
-  bok: "#cbbc88",
-} as const
+/** 任务列表语义色（跨模块复用的高亮配色），下沉到主题后可用 sx={{ color: "task.qty" }} 引用。随主题给出深/浅两套，保证亮色下可读。 */
+export interface TaskSemanticColors {
+  name: string
+  qty: string
+  prc: string
+  sup: string
+  bok: string
+}
+
+export function taskColors(dark: boolean): TaskSemanticColors {
+  return dark
+    ? { name: "#ffffff", qty: "#9ac4bb", prc: "#d2bba4", sup: "#c8b9d8", bok: "#cbbc88" }
+    : { name: "#1a1a2e", qty: "#2e7d6b", prc: "#9a6b2f", sup: "#6a4f8a", bok: "#8a7a2a" }
+}
 
 // MUI 调色板增强：让 palette.task.* 成为一等公民
 declare module "@mui/material/styles" {
   interface Palette {
-    task: typeof taskColors
+    task: TaskSemanticColors
   }
   interface PaletteOptions {
-    task?: typeof taskColors
+    task?: TaskSemanticColors
   }
 }
 
@@ -109,7 +115,18 @@ function buildMuiTheme(mode: ColorMode): Theme {
     MuiButton: {
       defaultProps: { size: "small" },
       styleOverrides: {
-        root: { fontSize: 13, padding: "4px 12px", lineHeight: "20px" },
+        root: {
+          fontSize: 13,
+          padding: "4px 12px",
+          lineHeight: "20px",
+          boxShadow: "none",
+          justifyContent: "center",
+          "&:hover": { boxShadow: "none" },
+          "&:active": { boxShadow: "none" },
+          "&:focusVisible": { boxShadow: "none" },
+        },
+        // contained 变体默认带阴影，显式去掉（含 hover/active）
+        contained: { boxShadow: "none", "&:hover": { boxShadow: "none" }, "&:active": { boxShadow: "none" } },
         sizeSmall: { fontSize: 12, padding: "2px 8px" },
       },
     },
@@ -148,6 +165,38 @@ function buildMuiTheme(mode: ColorMode): Theme {
     MuiChip: { styleOverrides: { root: { fontSize: 11 }, sizeSmall: { height: 18 } } },
     MuiTooltip: { styleOverrides: { tooltip: { fontSize: 12 } } },
     MuiCircularProgress: { defaultProps: { color: "primary" } },
+    // Alert：亮色下默认背景太淡，加语义底色保证可读
+    MuiAlert: {
+      styleOverrides: {
+        root: {
+          "&.MuiAlert-standardError": {
+            background: dark ? "rgba(205,66,70,0.12)" : "rgba(192,50,47,0.08)",
+            color: dark ? "#f5c6cb" : "#842029",
+          },
+          "&.MuiAlert-standardWarning": {
+            background: dark ? "rgba(217,130,43,0.12)" : "rgba(185,112,31,0.08)",
+            color: dark ? "#f5e1b4" : "#664d03",
+          },
+          "&.MuiAlert-standardInfo": {
+            background: dark ? "rgba(74,144,217,0.12)" : "rgba(47,111,179,0.08)",
+            color: dark ? "#c5ddf5" : "#184a7a",
+          },
+          "&.MuiAlert-standardSuccess": {
+            background: dark ? "rgba(35,133,81,0.12)" : "rgba(31,122,72,0.08)",
+            color: dark ? "#b7e3cd" : "#255c34",
+          },
+        },
+      },
+    },
+    // 表头：亮色加微妙区分
+    MuiTableCell: {
+      styleOverrides: {
+        head: {
+          fontWeight: 600,
+          backgroundColor: dark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
+        },
+      },
+    },
   }
 
   return createTheme({
@@ -161,7 +210,7 @@ function buildMuiTheme(mode: ColorMode): Theme {
       background: { default: t.bgApp, paper: t.bgSurface },
       divider: t.divider,
       action: { hover: t.bgHover },
-      task: taskColors,
+      task: taskColors(dark),
     },
     typography: { fontSize: 12, fontFamily: "inherit" },
     shape: { borderRadius: 4 },

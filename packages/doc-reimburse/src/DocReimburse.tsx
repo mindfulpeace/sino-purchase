@@ -32,7 +32,7 @@ const DocReimburse = ({ date, items, applicant = "任金涛", companyName = "中
   const [y, m, d] = date?.split("-") || []
 
   return (
-    <div className="doc-reimburse">
+    <div className="doc-reimburse" style={{ color: "#000" }}>
       <h1 style={{ fontSize: 20 }}>
         {companyName}<br />
         {companyNameEn}

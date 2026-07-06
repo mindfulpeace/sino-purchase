@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react"
 import { Button, InputGroup, NumericInput, Select, Alert, Text, Box, ToggleButtonGroup, ToggleButton } from "../../../components/ui"
 import DeleteIcon from "@mui/icons-material/Delete"
+import CloseIcon from "@mui/icons-material/Close"
 import { usePlanStore } from "../../../app/stores/planStore"
 import type { PurchaseTask, SupportedCurrency, TaxStatus, TaskStatus, Urgency } from "../types"
 import { TAX_STATUS_OPTIONS, ALL_STATUSES, STATUS_LABEL_CN } from "../types"
@@ -25,15 +26,16 @@ export function TaskDetail({ initial, mode, onSave, onCancel, onDelete, selected
   const draftRef = useRef(d)
   const onSaveRef = useRef(onSave)
   const deletedRef = useRef(false)
+  const discardRef = useRef(false)
   useEffect(() => { draftRef.current = d }, [d])
   useEffect(() => { onSaveRef.current = onSave }, [onSave])
   // Sync when switching tasks
-  useEffect(() => { setD({ ...initial }); setConfirmDel(false); deletedRef.current = false }, [initial.name, initial.id])
+  useEffect(() => { setD({ ...initial }); setConfirmDel(false); deletedRef.current = false; discardRef.current = false }, [initial.name, initial.id])
 
-  // 注册"提交当前草稿"：折叠/切到别的任务时由父组件调用（删除时跳过）
+  // 注册"提交当前草稿"：折叠/切到别的任务时由父组件调用（删除或"放弃保存"时跳过）
   useEffect(() => {
     registerCommit?.(() => {
-      if (deletedRef.current || mode !== "edit") return
+      if (deletedRef.current || discardRef.current || mode !== "edit") return
       const cur = draftRef.current
       if (!cur.name?.trim()) return
       const changed = (Object.keys(cur) as (keyof PurchaseTask)[]).some(k => cur[k] !== (initial as Record<string, unknown>)[k])
@@ -111,16 +113,14 @@ export function TaskDetail({ initial, mode, onSave, onCancel, onDelete, selected
         <InputGroup id="plannedDate" label="计划日期" variant="standard" type="date" value={d.plannedDate || ""} onChange={e => patch({ plannedDate: e.target.value })} disabled={readOnly} style={{ width: 116, flexShrink: 0 }} />
         <InputGroup id="receivedDate" label="收货日期" variant="standard" type="date" value={d.receivedDate || ""} onChange={e => patch({ receivedDate: e.target.value })} disabled={readOnly} style={{ width: 116, flexShrink: 0 }} />
         <InputGroup id="reimbDate" label="报销日期" variant="standard" type="date" value={d.reimbursementDate || ""} onChange={e => patch({ reimbursementDate: e.target.value })} disabled={readOnly} style={{ width: 116, flexShrink: 0 }} />
-        <Box style={{ marginLeft: "auto", display: "flex", gap: "8px", alignItems: "flex-end" }}>
+        <Box style={{ marginLeft: "auto", display: "flex", gap: "6px", alignItems: "flex-end" }}>
           {!readOnly && mode === "add" && <Button small intent="primary" onClick={handleSave}>添加</Button>}
           {!readOnly && mode === "batch" && selectedCount !== undefined && (
             <Button small variant="contained" intent="success" disabled={!batchDirty} onClick={handleSave}>应用 ({selectedCount})</Button>
           )}
           {!readOnly && onDelete && (
             <>
-              <Button intent="danger" variant="contained" title="删除" onClick={() => setConfirmDel(true)}>
-                <DeleteIcon style={{ fontSize: 15 }} />
-              </Button>
+              <Button small intent="danger" variant="contained" title="删除" icon={<DeleteIcon style={{ fontSize: 15 }} />} onClick={() => setConfirmDel(true)} style={{ minWidth: 28, padding: "2px 4px" }} />
               <Alert
                 isOpen={confirmDel}
                 onClose={() => setConfirmDel(false)}
@@ -137,8 +137,12 @@ export function TaskDetail({ initial, mode, onSave, onCancel, onDelete, selected
               </Alert>
             </>
           )}
+          {/* 取消 / 放弃保存：窄图标按钮，置于删除右侧 */}
           {!readOnly && (mode === "add" || mode === "batch") && (
-            <Button small variant="outlined" style={{ color: "var(--text-dim, #858585)", borderColor: "var(--border, #3a3a5a)" }} onClick={onCancel}>取消</Button>
+            <Button small variant="outlined" title="取消" icon={<CloseIcon style={{ fontSize: 15 }} />} onClick={onCancel} style={{ minWidth: 28, padding: "2px 4px", color: "var(--text-dim, #858585)", borderColor: "var(--border, #3a3a5a)" }} />
+          )}
+          {!readOnly && mode === "edit" && (
+            <Button small variant="outlined" title="放弃保存" icon={<CloseIcon style={{ fontSize: 15 }} />} onClick={() => { discardRef.current = true; onCancel() }} style={{ minWidth: 28, padding: "2px 4px", color: "var(--text-dim, #858585)", borderColor: "var(--border, #3a3a5a)" }} />
           )}
         </Box>
       </Box>

@@ -98,7 +98,7 @@ sino-purchase-v2/
 - **标题栏高**: 26px
 - **Vite base path**: `/` (根路径，适配 Cloudflare Pages 部署)
 - **layout-dock 主题**: 使用 `themeAbyss` (深蓝/紫) 作为暗色主题，`themeLight` 作为亮色主题。主题切换通过 `theme`/`setTheme` context 状态实现，`DockviewReact` 接收不同 theme 对象
-- **layout-dock tab 高度**: `--dv-tabs-and-actions-container-height: 24px` (两个主题均设)，从默认 35px 缩减
+- **layout-dock tab 高度**: `--dv-tabs-and-actions-container-height: 28px` (两个主题均设)，从默认 35px 缩减
 - **layout-dock 定位**: 基于 dockview 的「编辑器应用框架」布局库（非纯布局引擎），内置 navigation/editors/rightPanels/bottom 业务语义 + persistenceKey 持久化。注意：`title`/`headerRight`/`statusBar`/`HeaderToggles` 属于已废弃的 ui-dock，layout-dock 当前不含这些；后续计划将 ui-dock 独有功能合并回 layout-dock
 - **layout-dock 面板文字**: `.dv-content-container` 使用 `opacity: 0.7` (暗色) / `0.85` (亮色)，标题 `opacity: 1.0`
 - **layout-dock 焦点轮廓**: `--dv-paneview-active-outline-color: transparent` 禁用面板聚焦蓝色轮廓

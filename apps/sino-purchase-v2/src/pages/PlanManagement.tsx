@@ -283,7 +283,7 @@ export default function PlanManagement() {
       )}
 
       {/* Quick add bar */}
-      <Box className="plan-addbar" sx={{ flexShrink: 0, display: "flex", gap: 1, alignItems: "center", p: "4px 3px", borderTop: "1px solid var(--dv-separator-border, #2b2b4a)" }}>
+      <Box className="plan-addbar" sx={{ flexShrink: 0, display: "flex", gap: 1, alignItems: "center", p: "4px 3px", borderTop: "1px solid var(--dv-separator-border, var(--border))" }}>
         <AddNewTaskBar
           onAdd={handleAddFromBar}
           onOpenAdd={handleOpenAdd}

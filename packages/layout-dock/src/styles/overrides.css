@@ -11,6 +11,16 @@
   overflow: hidden;
 }
 
+/* ── Tab height ── */
+
+.dockview-theme-abyss {
+  --dv-tabs-and-actions-container-height: 28px;
+}
+
+.dockview-theme-light {
+  --dv-tabs-and-actions-container-height: 28px;
+}
+
 /* ── Edge groups ── */
 
 /* Hide close button on locked edge group tabs */

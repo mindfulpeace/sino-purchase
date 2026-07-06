@@ -2,10 +2,12 @@
   font-family: "SimSun", serif, Arial, sans-serif;
   font-size: 13px;
   line-height: 1.5;
+  color: #000;
 }
 
 .doc-reimburse * {
   box-sizing: border-box;
+  color: inherit;
 }
 
 .doc-reimburse h1,

@@ -30,7 +30,7 @@ function TaskBody({ task, onClick }: { task: PurchaseTask; onClick?: (e: MouseEv
         whiteSpace: "nowrap",
         overflow: "hidden",
         textOverflow: "ellipsis",
-        color: "var(--dv-activegroup-visiblepanel-tab-color, rgba(255,255,255,0.5))",
+        color: "var(--dv-activegroup-visiblepanel-tab-color, var(--text-primary))",
         "& .n": { color: "task.name" },
         "& .qty": { color: "task.qty" },
         "& .prc": { color: "task.prc" },
@@ -105,8 +105,8 @@ export const TaskItem = memo(function TaskItem({ task, onRequestEdit, isEditing,
             fontSize: 12,
             lineHeight: 1.35,
             py: "1px",
-            ...(selected && { background: "color-mix(in srgb, var(--dv-activegroup-visiblepanel-tab-color) 6%, transparent)" }),
-            ...(isEditing && { background: "color-mix(in srgb, var(--dv-activegroup-visiblepanel-tab-color) 10%, transparent)" }),
+            ...(selected && { background: "color-mix(in srgb, var(--accent) 6%, transparent)" }),
+            ...(isEditing && { background: "color-mix(in srgb, var(--accent) 10%, transparent)" }),
           }}
         >
           <span onClick={e => e.stopPropagation()}>
@@ -147,7 +147,7 @@ export const TaskItem = memo(function TaskItem({ task, onRequestEdit, isEditing,
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
-              color: "var(--dv-activegroup-visiblepanel-tab-color, rgba(255,255,255,0.4))",
+              color: "var(--dv-activegroup-visiblepanel-tab-color, var(--text-dim))",
             }}
           >
             {task.plannedDate ? task.plannedDate.slice(5) : ""}
@@ -156,8 +156,8 @@ export const TaskItem = memo(function TaskItem({ task, onRequestEdit, isEditing,
       </AccordionSummary>
       <AccordionDetails
         style={{
-          background: "color-mix(in srgb, var(--dv-group-view-background-color, #1b1b2e) 90%, white 10%)",
-          borderTop: "1px solid var(--dv-separator-border, #2b2b4a)",
+          background: "color-mix(in srgb, var(--bg-surface) 94%, var(--border) 6%)",
+          borderTop: "1px solid var(--dv-separator-border, var(--border))",
           marginTop: "2px",
           padding: "4px 10px 4px",
         }}
