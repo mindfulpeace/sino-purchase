@@ -1,4 +1,4 @@
-import { useRef, type ReactNode, type CSSProperties, type MouseEvent, Children } from "react"
+import { type ReactNode, type CSSProperties, type MouseEvent, Children } from "react"
 import { iconToNode, type IconName } from "./icons"
 import MuiButton from "@mui/material/Button"
 import MuiTextField from "@mui/material/TextField"
@@ -23,7 +23,6 @@ import MuiDialogTitle from "@mui/material/DialogTitle"
 import MuiDialogContent from "@mui/material/DialogContent"
 import MuiDialogActions from "@mui/material/DialogActions"
 import MuiCollapse from "@mui/material/Collapse"
-import MuiPopover from "@mui/material/Popover"
 import MuiAutocomplete from "@mui/material/Autocomplete"
 import MuiMenuList from "@mui/material/MenuList"
 import MuiToggleButtonGroup from "@mui/material/ToggleButtonGroup"
@@ -34,6 +33,7 @@ import MuiAccordionSummary from "@mui/material/AccordionSummary"
 import MuiAccordionDetails from "@mui/material/AccordionDetails"
 import MuiTabs from "@mui/material/Tabs"
 import MuiTab from "@mui/material/Tab"
+import MuiSkeleton from "@mui/material/Skeleton"
 
 type Intent = "primary" | "danger" | "success" | "warning" | "none"
 
@@ -196,34 +196,6 @@ export function NumericInput({ value, placeholder, min, step, disabled, style, o
         ...style as any,
       }}
     />
-  )
-}
-
-/* ================================================================
-   HTMLSelect
-   ================================================================ */
-
-interface HTMLSelectProps {
-  value?: string
-  disabled?: boolean
-  fill?: boolean
-  style?: CSSProperties
-  children?: ReactNode
-  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void
-}
-
-export function HTMLSelect({ value, disabled, fill, style, children, onChange }: HTMLSelectProps) {
-  return (
-    <MuiSelect
-      value={value ?? ""}
-      disabled={disabled}
-      size="small"
-      onChange={onChange as any}
-      fullWidth={fill}
-      sx={{ fontSize: 12, fontFamily: "inherit", height: 24, "& .MuiSelect-select": { py: 0.4, px: 1 }, ...style as any }}
-    >
-      {children}
-    </MuiSelect>
   )
 }
 
@@ -509,51 +481,8 @@ export function Collapse({ isOpen, keepChildrenMounted, children }: { isOpen: bo
 }
 
 /* ================================================================
-   Popover
+   MenuItem (MUI MenuItem wrapper; BP-style text/icon API)
    ================================================================ */
-
-interface PopoverProps {
-  content: ReactNode
-  placement?: "bottom-start" | "bottom" | "top-start" | "top"
-  minimal?: boolean
-  isOpen: boolean
-  onInteraction: (open: boolean) => void
-  children: ReactNode
-}
-
-export function Popover({ content, placement, isOpen, onInteraction, children }: PopoverProps) {
-  const anchorRef = useRef<HTMLDivElement>(null)
-
-  return (
-    <>
-      <div
-        ref={anchorRef}
-        onClick={(e) => { e.stopPropagation(); onInteraction(!isOpen) }}
-        style={{ display: "inline-flex" }}
-      >
-        {children}
-      </div>
-      <MuiPopover
-        open={isOpen}
-        anchorEl={anchorRef.current}
-        onClose={() => onInteraction(false)}
-        anchorOrigin={{ vertical: placement?.startsWith("top") ? "top" : "bottom", horizontal: "left" }}
-        transformOrigin={{ vertical: placement?.startsWith("top") ? "bottom" : "top", horizontal: "left" }}
-        sx={{ mt: 0.5 }}
-      >
-        {content}
-      </MuiPopover>
-    </>
-  )
-}
-
-/* ================================================================
-   Menu / MenuItem
-   ================================================================ */
-
-export function Menu({ className, children, style }: { className?: string; children?: ReactNode; style?: CSSProperties }) {
-  return <MuiMenuList className={className} sx={{ py: 0.5, ...style as any }}>{children}</MuiMenuList>
-}
 
 interface MenuItemProps {
   active?: boolean
@@ -779,78 +708,22 @@ export function ToggleButton({ children, value, style }: ToggleButtonProps) {
 }
 
 /* ================================================================
-   MenuBar (MUI ToggleButtonGroup; single-char segmented buttons)
-   ================================================================ */
-
-interface MenuBarOption {
-  value: string | number
-  label: string
-  color?: string
-  title?: string
-}
-
-interface MenuBarProps {
-  value?: string | number
-  options: MenuBarOption[]
-  onChange?: (value: string | number) => void
-  size?: number
-  style?: CSSProperties
-}
-
-export function MenuBar({ value, options, onChange, size = 18, style }: MenuBarProps) {
-  return (
-    <MuiToggleButtonGroup
-      exclusive
-      size="small"
-      value={value ?? false}
-      onChange={(_, v) => { if (v !== null && v !== false) onChange?.(v) }}
-      sx={{
-        p: 0,
-        gap: 0,
-        flexShrink: 0,
-        "& .MuiToggleButton-root": {
-          border: "1px solid var(--border, #3a3a5a)",
-          borderRadius: 0,
-          minWidth: size,
-          width: size,
-          height: size,
-          p: 0,
-          m: 0,
-          fontSize: 11,
-          lineHeight: 1,
-          color: "var(--text-dim, #858585)",
-          "&.Mui-selected": { color: "#fff" },
-        },
-        ...style as any,
-      }}
-    >
-      {options.map(o => (
-        <MuiToggleButton
-          key={String(o.value)}
-          value={o.value}
-          title={o.title}
-          sx={o.color ? { "&.Mui-selected": { backgroundColor: o.color, borderColor: o.color, color: "#fff" } } : undefined}
-        >
-          {o.label}
-        </MuiToggleButton>
-      ))}
-    </MuiToggleButtonGroup>
-  )
-}
-
-/* ================================================================
    Stack / Box (MUI-recommended layout primitives)
    - Stack: flex flow (row/column) with `direction`/`spacing`
    - Box: generic styled container (replaces raw <div>)
    className is preserved so existing CSS layout rules still apply.
    ================================================================ */
 
-export function Stack({ direction = "column", spacing, children, className, style, onClick }: {
+export function Stack({ direction = "column", spacing, children, className, style, sx, alignItems, justifyContent, flexWrap, onClick }: {
   direction?: "row" | "column" | "row-reverse" | "column-reverse"
   spacing?: number
   children?: ReactNode
   className?: string
   style?: CSSProperties
+  sx?: any
+  alignItems?: "flex-start" | "center" | "flex-end" | "stretch" | "baseline"
+  justifyContent?: "flex-start" | "center" | "flex-end" | "space-between" | "space-around" | "space-evenly"
+  flexWrap?: "nowrap" | "wrap" | "wrap-reverse"
   onClick?: (e: React.MouseEvent) => void
 }) {
   return (
@@ -859,21 +732,22 @@ export function Stack({ direction = "column", spacing, children, className, styl
       spacing={spacing}
       className={className}
       onClick={onClick}
-      sx={{ ...style as any }}
+      sx={{ ...style, alignItems, justifyContent, flexWrap, ...sx } as any}
     >
       {children}
     </MuiStack>
   )
 }
 
-export function Box({ children, className, style, onClick }: {
+export function Box({ children, className, style, sx, onClick }: {
   children?: ReactNode
   className?: string
   style?: CSSProperties
+  sx?: any
   onClick?: (e: React.MouseEvent) => void
 }) {
   return (
-    <MuiBox className={className} onClick={onClick} sx={{ ...style as any }}>
+    <MuiBox className={className} onClick={onClick} sx={{ ...style, ...sx } as any}>
       {children}
     </MuiBox>
   )
@@ -1005,6 +879,37 @@ export function Tabs({ value, onChange, children, style, variant }: TabsProps) {
 export function Tab(props: any) {
   const { value, label, icon, ...rest } = props
   return <MuiTab value={value} label={label} icon={icon} {...rest} />
+}
+
+/* ================================================================
+   Skeleton (MUI-recommended loading placeholder)
+   - replaces the old .sk*.css placeholder bars
+   ================================================================ */
+
+export function Skeleton({ width, height, variant, animation, className, style, sx }: {
+  width?: number | string
+  height?: number | string
+  variant?: "text" | "rectangular" | "rounded" | "circular"
+  animation?: "pulse" | "wave" | false
+  className?: string
+  style?: CSSProperties
+  sx?: any
+}) {
+  return (
+    <MuiSkeleton
+      width={width}
+      height={height}
+      variant={variant ?? "rounded"}
+      animation={animation ?? "pulse"}
+      className={className}
+      sx={{
+        borderRadius: 2,
+        bgcolor: "var(--dv-separator-border, #2b2b4a)",
+        ...style,
+        ...sx,
+      } as any}
+    />
+  )
 }
 
 export const UI_STYLES = ""

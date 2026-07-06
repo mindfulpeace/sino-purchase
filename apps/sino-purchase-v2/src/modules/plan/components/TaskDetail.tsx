@@ -33,30 +33,28 @@ export function TaskDetail({ initial, mode, onSave, onCancel, onDelete, selected
   const handleBookerCreate = () => { const val = prompt("输入预定人名称"); if (val && val.trim()) patch({ bookerId: val.trim() }) }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 0 12px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 4, padding: "0 0 12px" }}>
       {readOnly && <Text style={{ fontSize: 11, textAlign: "center", padding: "2px 0", color: "var(--text-dim)" }}>只读 — 再次点击切换编辑</Text>}
-      <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-        <InputGroup placeholder="品名 *" value={d.name || ""} onChange={e => patch({ name: e.target.value })} style={{ flex: 1.5 }} readOnly={readOnly} />
-        <InputGroup placeholder="品牌" value={d.brand || ""} onChange={e => patch({ brand: e.target.value })} style={{ flex: 1 }} readOnly={readOnly} />
-      </div>
-      <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-        <InputGroup placeholder="规格" value={d.spec || ""} onChange={e => patch({ spec: e.target.value })} style={{ flex: 1 }} readOnly={readOnly} />
-        <NumericInput placeholder="数量" min={0} value={d.quantity ?? 1} onValueChange={v => patch({ quantity: v })} style={{ width: 70 }} disabled={readOnly} />
-        <InputGroup placeholder="单位" value={d.unit || ""} onChange={e => patch({ unit: e.target.value })} style={{ width: 60 }} readOnly={readOnly} />
-      </div>
+      {/* Row 1: 物品与价格 */}
       <div style={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap" }}>
-        <Select value={d.currency || "ZMW"} options={[{ value: "ZMW", label: "k" }, { value: "USD", label: "$" }, { value: "CNY", label: "¥" }]} onChange={v => patch({ currency: v as SupportedCurrency })} disabled={readOnly} style={{ width: 60 }} />
-        <NumericInput placeholder="单价" min={0} step={0.01} value={d.unitPrice ?? 0} onValueChange={v => patch({ unitPrice: v })} style={{ width: 80 }} disabled={readOnly} />
-        <Select value={d.taxStatus || "可抵扣"} options={TAX_STATUS_OPTIONS.map(o => ({ value: o.value, label: o.label }))} onChange={v => patch({ taxStatus: v as TaxStatus })} disabled={readOnly} style={{ width: 80 }} />
-        <Tag minimal>@</Tag>
-        <Select value={d.supplierId || ""} placeholder="--" options={supplierOpts.map(id => ({ value: id, label: id }))} allowCreate onCreate={handleSupplierCreate} onChange={v => patch({ supplierId: v })} disabled={readOnly} style={{ flex: 1, minWidth: 60 }} />
-        <Tag minimal>#</Tag>
-        <Select value={d.bookerId || ""} placeholder="--" options={bookerOpts.map(id => ({ value: id, label: id }))} allowCreate onCreate={handleBookerCreate} onChange={v => patch({ bookerId: v })} disabled={readOnly} style={{ flex: 1, minWidth: 60 }} />
+        <InputGroup placeholder="品名 *" value={d.name || ""} onChange={e => patch({ name: e.target.value })} style={{ flex: 2, minWidth: 110 }} readOnly={readOnly} />
+        <InputGroup placeholder="品牌" value={d.brand || ""} onChange={e => patch({ brand: e.target.value })} style={{ flex: 1, minWidth: 56 }} readOnly={readOnly} />
+        <InputGroup placeholder="规格" value={d.spec || ""} onChange={e => patch({ spec: e.target.value })} style={{ flex: 1, minWidth: 64 }} readOnly={readOnly} />
+        <NumericInput placeholder="数量" min={0} value={d.quantity ?? 1} onValueChange={v => patch({ quantity: v })} style={{ width: 64 }} disabled={readOnly} />
+        <InputGroup placeholder="单位" value={d.unit || ""} onChange={e => patch({ unit: e.target.value })} style={{ width: 52 }} readOnly={readOnly} />
+        <Select value={d.currency || "ZMW"} options={[{ value: "ZMW", label: "k" }, { value: "USD", label: "$" }, { value: "CNY", label: "¥" }]} onChange={v => patch({ currency: v as SupportedCurrency })} disabled={readOnly} style={{ width: 56 }} />
+        <NumericInput placeholder="单价" min={0} step={0.01} value={d.unitPrice ?? 0} onValueChange={v => patch({ unitPrice: v })} style={{ width: 78 }} disabled={readOnly} />
+        <Select value={d.taxStatus || "可抵扣"} options={TAX_STATUS_OPTIONS.map(o => ({ value: o.value, label: o.label }))} onChange={v => patch({ taxStatus: v as TaxStatus })} disabled={readOnly} style={{ width: 76 }} />
       </div>
-      <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-        <InputGroup type="date" value={d.plannedDate || ""} onChange={e => patch({ plannedDate: e.target.value })} disabled={readOnly} style={{ width: 90 }} />
-        <InputGroup type="date" value={d.receivedDate || ""} onChange={e => patch({ receivedDate: e.target.value })} disabled={readOnly} style={{ width: 90 }} />
-        <InputGroup type="date" value={d.reimbursementDate || ""} onChange={e => patch({ reimbursementDate: e.target.value })} disabled={readOnly} style={{ width: 90 }} />
+      {/* Row 2: 关联方 / 日期 / 操作 */}
+      <div style={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap" }}>
+        <Tag minimal>@</Tag>
+        <Select value={d.supplierId || ""} placeholder="--" options={supplierOpts.map(id => ({ value: id, label: id }))} allowCreate onCreate={handleSupplierCreate} onChange={v => patch({ supplierId: v })} disabled={readOnly} style={{ flex: 1, minWidth: 70 }} />
+        <Tag minimal>#</Tag>
+        <Select value={d.bookerId || ""} placeholder="--" options={bookerOpts.map(id => ({ value: id, label: id }))} allowCreate onCreate={handleBookerCreate} onChange={v => patch({ bookerId: v })} disabled={readOnly} style={{ flex: 1, minWidth: 70 }} />
+        <InputGroup type="date" value={d.plannedDate || ""} onChange={e => patch({ plannedDate: e.target.value })} disabled={readOnly} style={{ width: 86 }} />
+        <InputGroup type="date" value={d.receivedDate || ""} onChange={e => patch({ receivedDate: e.target.value })} disabled={readOnly} style={{ width: 86 }} />
+        <InputGroup type="date" value={d.reimbursementDate || ""} onChange={e => patch({ reimbursementDate: e.target.value })} disabled={readOnly} style={{ width: 86 }} />
         <div style={{ marginLeft: "auto", display: "flex", gap: 4 }}>
           {!readOnly && mode === "edit" && onDelete && (<><Button small intent="danger" onClick={() => setConfirmDel(true)}><Icon icon={IconNames.TRASH} size={12} /></Button><Alert isOpen={confirmDel} onClose={() => setConfirmDel(false)} cancelButtonText="取消" confirmButtonText="确认" intent="danger" canEscapeKeyCancel canOutsideClickCancel onConfirm={() => { onDelete(); setConfirmDel(false) }}>确认删除？</Alert></>)}
           {!readOnly && mode === "add" && <Button small intent="primary" onClick={handleSave}>添加</Button>}

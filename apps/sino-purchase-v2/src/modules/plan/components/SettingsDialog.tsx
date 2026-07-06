@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Dialog, Button, InputGroup, NumericInput, Icon, H4, DialogActions, IconNames } from "../../../components/ui"
+import { Dialog, Button, InputGroup, NumericInput, Icon, H4, DialogActions, IconNames, Stack, Text } from "../../../components/ui"
 import { usePlanStore } from "../../../app/stores/planStore"
 import { todayISO } from "../helpers"
 import "../plan.css"
@@ -47,39 +47,39 @@ export function SettingsDialog({ isOpen, onClose }: Props) {
   const formatTS = (ts: number) => { if (!ts) return "从未"; const d = new Date(ts); return `${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}` }
 
   return (<Dialog isOpen={isOpen} onClose={onClose} title="设置" style={{ width: 420 }}>
-    <div className="col-gap" style={{ padding: 12 }}>
-      <H4 className="dim">汇率</H4>
-      <div className="flex-wrap">
+    <Stack spacing={1} sx={{ p: 1.5 }}>
+      <H4 style={{ color: "var(--text-dim)" }}>汇率</H4>
+      <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexWrap: "wrap" }}>
         <span>$ 1 = k</span><NumericInput value={editUSD} onValueChange={v => setEditUSD(String(v))} style={{ width: 70 }} />
         <span>¥ 1 = k</span><NumericInput value={editCNY} onValueChange={v => setEditCNY(String(v))} style={{ width: 70 }} />
         <Button small minimal onClick={() => { setEditUSD(rates.rates.USD.toFixed(2)); setEditCNY(rates.rates.CNY.toFixed(2)) }}>重置</Button>
-      </div>
-      <div className="flex dim-sm">
-        <span>更新于 {formatTS(rates.timestamp)}</span>
+      </Stack>
+      <Stack direction="row" spacing={0.5} alignItems="center">
+        <Text style={{ color: "var(--text-dim)", fontSize: 12 }}>更新于 {formatTS(rates.timestamp)}</Text>
         <Button small minimal icon={<Icon icon={IconNames.REFRESH} />} onClick={handleRefresh} disabled={loading}>刷新</Button>
         <Button small intent="primary" onClick={handleSaveRates}>保存</Button>
-      </div>
-      <H4 className="dim" style={{ marginTop: 8 }}>日期区间 {dateStart && dateEnd ? `(${Math.round((new Date(dateEnd).getTime() - new Date(dateStart).getTime()) / 86400000) + 1})` : ""}</H4>
-      <div className="flex-wrap">{[-5, -4, -3, -2, -1, 0].map(offset => { const d = new Date(); d.setMonth(d.getMonth() + offset); return (<Button key={offset} small minimal onClick={() => { const r = monthRange(offset); setDateStart(r.start); if (!dateEndToday) setDateEnd(r.end) }}>{d.getMonth() + 1}月</Button>) })}</div>
-      <div className="flex">
-        <span className="dim-sm">开始</span>
+      </Stack>
+      <H4 style={{ color: "var(--text-dim)", marginTop: 8 }}>日期区间 {dateStart && dateEnd ? `(${Math.round((new Date(dateEnd).getTime() - new Date(dateStart).getTime()) / 86400000) + 1})` : ""}</H4>
+      <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexWrap: "wrap" }}>{[-5, -4, -3, -2, -1, 0].map(offset => { const d = new Date(); d.setMonth(d.getMonth() + offset); return (<Button key={offset} small minimal onClick={() => { const r = monthRange(offset); setDateStart(r.start); if (!dateEndToday) setDateEnd(r.end) }}>{d.getMonth() + 1}月</Button>) })}</Stack>
+      <Stack direction="row" spacing={0.5} alignItems="center">
+        <Text style={{ color: "var(--text-dim)", fontSize: 12 }}>开始</Text>
         <InputGroup type="date" value={dateStart} onChange={e => setDateStart(e.target.value)} style={{ width: 150 }} />
         <Button small minimal onClick={() => { const y = new Date().getFullYear(); setDateStart(`${y}-01-01`) }}>年初</Button>
         <Button small minimal onClick={() => { const d = new Date(); setDateStart(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`) }}>月初</Button>
         <Button small minimal onClick={() => setDateStart(thisMonday())}>周一</Button>
-      </div>
-      <div className="flex">
-        <span className="dim-sm">结束</span>
+      </Stack>
+      <Stack direction="row" spacing={0.5} alignItems="center">
+        <Text style={{ color: "var(--text-dim)", fontSize: 12 }}>结束</Text>
         <InputGroup type="date" value={dateEnd} disabled={dateEndToday} onChange={e => { setDateEndToday(false); setDateEnd(e.target.value) }} style={{ width: 150 }} />
         <Button small minimal active={dateEndToday} onClick={() => setDateEndToday(!dateEndToday)}>至今</Button>
         <Button small minimal onClick={() => daysBack(7)}>7天</Button>
         <Button small minimal onClick={() => daysBack(30)}>30天</Button>
         <Button small minimal onClick={() => daysBack(90)}>90天</Button>
-      </div>
+      </Stack>
       <DialogActions>
         <Button onClick={() => { reload(); onClose() }}>刷新 & 关闭</Button>
         <Button intent="primary" onClick={onClose}>关闭</Button>
       </DialogActions>
-    </div>
+    </Stack>
   </Dialog>)
 }

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react"
-import { Button, ControlGroup, InputGroup, Select, Tabs, Tab, Stack, Box } from "../components/ui"
+import { Button, ControlGroup, InputGroup, Select, Tabs, Tab, Stack, Box, Skeleton } from "../components/ui"
 import { useSheetData } from "@sino-purchase/sheets-react"
 import { usePlanStore } from "../app/stores/planStore"
 import { TaskList } from "../modules/plan/components/TaskList"
@@ -200,9 +200,9 @@ export default function PlanManagement() {
   }, [addTask])
 
   return (
-    <Stack className="plan-root">
+    <Stack className="plan-root" sx={{ height: "100%" }}>
       {/* Filter bar */}
-      <Stack direction="row" className="plan-toolbar">
+      <Stack direction="row" className="plan-toolbar" sx={{ flexShrink: 0, flexWrap: "wrap", gap: "2px", alignItems: "center", p: "4px 3px 0" }}>
         <ControlGroup fill>
           <StatusFilter />
           <UrgencyFilter />
@@ -212,13 +212,13 @@ export default function PlanManagement() {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="搜索品名/品牌/规格/商家/预定人"
-            style={{ minWidth: 80 }}
+            style={{ minWidth: 80, flex: 1 }}
           />
         </ControlGroup>
       </Stack>
 
       {/* Sort bar */}
-      <Stack direction="row" className="plan-sortbar">
+      <Stack direction="row" className="plan-sortbar" sx={{ flexShrink: 0, justifyContent: "space-between", alignItems: "center", gap: "2px", p: "2px 3px 0" }}>
         <Tabs value={groupBy} onChange={(v: any) => setGroupBy(v as GroupBy)}>
           {GROUP_OPTIONS.map(o => (
             <Tab key={o.value} value={o.value} label={o.label} />
@@ -232,18 +232,18 @@ export default function PlanManagement() {
       </Stack>
 
       {/* Scrollable task list */}
-      <Box className="plan-scroll">
+      <Box className="plan-scroll" sx={{ flex: 1, minHeight: 0, overflowY: "auto", p: "0 3px 3px" }}>
         {loading ? (
-          <Box className="plan-loading">
-            <Box className="sk sk-hdr" />
-            <Box className="sk sk-w92" />
-            <Box className="sk sk-w78" />
-            <Box className="sk sk-w62" />
-            <Box className="sk sk-hdr" />
-            <Box className="sk sk-w85" />
-            <Box className="sk sk-w72" />
-            <Box className="sk sk-w55" />
-            <Box className="sk sk-w82" />
+          <Box className="plan-loading" sx={{ p: 1 }}>
+            <Skeleton width={80} height={14} sx={{ mb: 0.5 }} />
+            <Skeleton width="92%" height={16} sx={{ mb: 0.25 }} />
+            <Skeleton width="78%" height={16} sx={{ mb: 0.25 }} />
+            <Skeleton width="62%" height={16} sx={{ mb: 0.5 }} />
+            <Skeleton width={80} height={14} sx={{ mb: 0.5 }} />
+            <Skeleton width="85%" height={16} sx={{ mb: 0.25 }} />
+            <Skeleton width="72%" height={16} sx={{ mb: 0.25 }} />
+            <Skeleton width="55%" height={16} sx={{ mb: 0.25 }} />
+            <Skeleton width="82%" height={16} />
           </Box>
         ) : (
           <TaskList
@@ -272,7 +272,7 @@ export default function PlanManagement() {
       )}
 
       {/* Quick add bar */}
-      <Box className="plan-addbar">
+      <Box className="plan-addbar" sx={{ flexShrink: 0, display: "flex", gap: 1, alignItems: "center", p: "4px 3px", borderTop: "1px solid var(--dv-separator-border, #2b2b4a)" }}>
         <AddNewTaskBar
           onAdd={handleAddFromBar}
           onOpenAdd={handleOpenAdd}

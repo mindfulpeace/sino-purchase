@@ -20,11 +20,6 @@ input:focus { outline: none; }
 :root { --text-dim: #858585; }
 :root.theme-light { --text-dim: #888888; }
 
-@keyframes planPulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.7; }
-}
-
 /* MUI CssBaseline override: keep background transparent, let layout-dock handle it */
 .MuiCssBaseline-root {
   background: transparent !important;

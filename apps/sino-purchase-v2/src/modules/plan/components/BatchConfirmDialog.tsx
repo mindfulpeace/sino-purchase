@@ -1,4 +1,4 @@
-import { Dialog, Button, Text, DialogActions } from "../../../components/ui"
+import { Dialog, Button, Text, DialogActions, Stack } from "../../../components/ui"
 import type { PurchaseTask } from "../types"
 import { STATUS_BADGE } from "../types"
 import { currencySymbol } from "../types"
@@ -18,13 +18,13 @@ export function BatchConfirmDialog({ isOpen, changes, count, onConfirm, onClose 
   const entries = Object.entries(changes).filter(([, v]) => v !== undefined && v !== null && v !== "")
   if (!entries.length) return null
   return (<Dialog isOpen={isOpen} onClose={onClose} title="批量修改" style={{ width: 320 }}>
-    <div className="col-gap" style={{ padding: 12 }}>
-      {entries.map(([k, v]) => (<Text key={k} className="dim">{fmt(k, v)}</Text>))}
+    <Stack spacing={1} sx={{ p: 1.5 }}>
+      {entries.map(([k, v]) => (<Text key={k} style={{ color: "var(--text-dim)" }}>{fmt(k, v)}</Text>))}
       <Text style={{ fontWeight: 600 }}>影响 {count} 项任务</Text>
       <DialogActions>
         <Button minimal onClick={onClose}>取消</Button>
         <Button intent="primary" onClick={onConfirm}>确认</Button>
       </DialogActions>
-    </div>
+    </Stack>
   </Dialog>)
 }

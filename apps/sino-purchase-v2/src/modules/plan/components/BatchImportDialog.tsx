@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Dialog, Button, TextArea, Text, Card, DialogActions } from "../../../components/ui"
+import { Dialog, Button, TextArea, Text, Card, DialogActions, Stack } from "../../../components/ui"
 import type { PurchaseTask, SupportedCurrency, TaskStatus, Urgency } from "../types"
 import { todayISO } from "../helpers"
 import "../plan.css"
@@ -67,17 +67,17 @@ export function BatchImportDialog({ isOpen, onClose, onImport }: Props) {
   function handleClose() { setInput(""); setParsed([]); onClose() }
 
   return (<Dialog isOpen={isOpen} onClose={handleClose} title="批量导入" style={{ width: 480 }}>
-    <div className="col-gap" style={{ padding: 12 }}>
-      <Text className="dim">从 Google Sheets 或 Excel 复制数据粘贴到下方。表头会自动识别列对应关系。</Text>
+    <Stack spacing={1} sx={{ p: 1.5 }}>
+      <Text style={{ color: "var(--text-dim)" }}>从 Google Sheets 或 Excel 复制数据粘贴到下方。表头会自动识别列对应关系。</Text>
       <TextArea large value={input} onChange={e => handleInput(e.target.value)} placeholder="名称\t品牌\t型号\t单位\t数量\t用途\t申请人\n油漆\t\t灰色\t桶\t4\t\t备货\n..." rows={6} style={{ width: "100%", fontFamily: "monospace" }} />
       {parsed.length > 0 && (<>
-        <Text className="dim">已解析 <strong>{parsed.length}</strong> 条任务</Text>
+        <Text style={{ color: "var(--text-dim)" }}>已解析 <strong>{parsed.length}</strong> 条任务</Text>
         <Card style={{ maxHeight: 150, overflowY: "auto", padding: 4 }}>{parsed.map((t, i) => <PreviewTask key={i} task={t} />)}</Card>
       </>)}
       <DialogActions>
         <Button minimal onClick={handleClose}>取消</Button>
         <Button intent="primary" onClick={handleImport} disabled={parsed.length === 0}>导入 ({parsed.length})</Button>
       </DialogActions>
-    </div>
+    </Stack>
   </Dialog>)
 }
