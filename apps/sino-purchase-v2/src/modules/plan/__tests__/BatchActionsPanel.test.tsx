@@ -72,3 +72,34 @@ describe("批量操作面板：选中任务后操作按钮 + 自动展开详情"
     })
   })
 })
+
+/**
+ * 回归保护：批量编辑界面只应出现在右侧「批量操作」面板的 slot 中。
+ * 当 slot 不存在（例如停在「计划设置」tab，或右侧面板尚未就绪）时，
+ * 必须隐藏——绝不能回退渲染到中间区（PlanManagement 本身）。
+ */
+describe("批量编辑绝不渲染到中间区（仅右侧面板 slot）", () => {
+  beforeEach(() => {
+    // 关键：本组不挂载 #plan-batch-actions-slot，模拟停在「计划设置」tab
+  })
+
+  afterEach(() => {
+    cleanup()
+    usePlanStore.setState({ editingTaskId: null, isAdding: false, batchEdit: false, selectedIds: [] })
+  })
+
+  it("slot 不存在时，选中任务后批量编辑 UI 不出现在任何位置", async () => {
+    render(<PlanManagement />)
+    await waitFor(() => expect(screen.getAllByText("安全帽").length).toBeGreaterThan(0))
+
+    const checkbox = document.querySelector<HTMLInputElement>('input[type="checkbox"]')!
+    fireEvent.click(checkbox!)
+    // 等待自动展开逻辑跑完（useEffect → setShowBatchEdit(true)）
+    await new Promise(r => setTimeout(r, 50))
+
+    // 批量操作条与批量编辑表单由 batchActions 独家渲染，其独有标记为「复制信息」「取消选择」。
+    // 整份文档都不应出现——证明无 slot 时隐藏，不会回退到中间区。
+    expect(screen.queryByText("复制信息"), "操作条按钮不应出现").toBeNull()
+    expect(screen.queryByText("取消选择"), "操作条按钮不应出现").toBeNull()
+  })
+})

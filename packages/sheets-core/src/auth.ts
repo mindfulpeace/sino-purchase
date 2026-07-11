@@ -71,14 +71,13 @@ export function initAuth(): Promise<void> {
       },
       error_callback: () => {},
     })
-    // 尝试静默重认证以恢复会话（仅当浏览器仍保有有效 Google 会话且此前已授权时成功）。
-    // 关键：必须 fire-and-forget，绝不能 await —— 否则静默失败时 GSI 走 error_callback，
-    // 会让 requestAccessToken 的 Promise 永久挂起，阻塞 initAuth resolve，导致 `ready`
-    // 永远为 false，整页卡在"加载 Google 认证..."。这里只在后台尝试恢复会话，
-    // 失败则静默保持演示模式；成功则通过 setToken → onTokenChange 翻转 loggedIn。
-    requestAccessToken({ prompt: "none" }).catch(() => {
-      /* 未登录 / 无授权 —— 保持演示模式 */
-    })
+    // 注意：这里【不再】在初始化时调用 `requestAccessToken({ prompt: "none" })` 做静默重认证。
+    // 原因：GSI 的 token 模型在用户没有活跃 Google 会话 / 此前未授权时，会尝试弹出窗口并失败，
+    // 在控制台打印 "Failed to open popup window ... Maybe blocked by the browser?"，
+    // 误导用户以为登录功能已损坏。该日志由 Google 客户端内部输出，业务侧无法捕获或抑制。
+    // 改为由用户主动点击「登录」触发可见的授权弹窗，流程更可控、不会有噪音日志。
+    // 若日后需要「刷新页面自动恢复会话」，应改用 One Tap（google.accounts.id）而非 token 模型的
+    // prompt=none；目前每次刷新后回到演示模式，点一次「登录」即可。
   })()
   return initPromise
 }

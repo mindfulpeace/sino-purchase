@@ -12,6 +12,7 @@ import AccountingSettings from "./modules/accounting/AccountingSettings"
 import { PlanSettingsPanel } from "./modules/plan/components/PlanSettingsPanel"
 import { SyncIndicator } from "./components/SyncIndicator"
 import { ErrorBoundary } from "./components/ErrorBoundary"
+import { LoginGate } from "./components/LoginGate"
 
 const PlanManagement = lazy(() => import("./pages/PlanManagement"))
 const MaterialInfo = lazy(() => import("./pages/MaterialInfo"))
@@ -253,7 +254,9 @@ function App() {
     <MuiThemeProvider theme={muiTheme}>
       <CssBaseline />
       <SheetsProvider clientId={CLIENT_ID} spreadsheetId={SPREADSHEET_ID}>
-        <PlanAwareApp />
+        <LoginGate>
+          <PlanAwareApp />
+        </LoginGate>
       </SheetsProvider>
     </MuiThemeProvider>
   )

@@ -56,7 +56,7 @@ export default function AccountingSettings() {
             <InputGroup placeholder="申请人" value={settings.applicant} onChange={(e) => setApplicant(e.target.value)} />
           </Box>
           <Box sx={{ flex: 1 }}>
-            <Button icon={IconNames.PRINT} text="打印" intent="primary" variant="contained" onClick={handlePrint} fill />
+            <Button small icon={IconNames.PRINT} text="打印" intent="primary" variant="contained" onClick={handlePrint} fill style={{ height: 24 }} />
           </Box>
         </Stack>
       </Box>

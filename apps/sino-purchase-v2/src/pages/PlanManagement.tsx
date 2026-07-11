@@ -305,10 +305,9 @@ export default function PlanManagement() {
           )}
         </Box>
 
-        {/* 批量操作（选中操作条 + 批量编辑表单）已通过 Portal 移至右侧「批量操作」面板 */}
-        {batchSlot
-          ? createPortal(batchActions, batchSlot)
-          : /* slot 未就绪时兜底：仍在原位渲染，避免功能不可用 */ (selectedIds.length > 0 || showBatchEdit) && batchActions}
+        {/* 批量操作（选中操作条 + 批量编辑表单）仅通过 Portal 渲染到右侧「批量操作」面板。
+            右侧 slot 不存在（切到「计划设置」或面板未就绪）时不渲染——隐藏，绝不出现在中间区。 */}
+        {batchSlot && createPortal(batchActions, batchSlot)}
 
         {/* Quick add bar */}
         <Box className="plan-addbar" sx={{ flexShrink: 0, display: "flex", gap: 1, alignItems: "center", p: "4px 3px", borderTop: "1px solid var(--dv-separator-border, var(--border))" }}>
