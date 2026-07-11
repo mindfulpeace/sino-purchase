@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { Dialog, Button, TextArea, Text, Card, DialogActions, Stack, Box } from "../../../components/ui"
 import type { PurchaseTask, SupportedCurrency, TaskStatus, Urgency } from "../types"
-import { todayISO } from "../helpers"
+import { defaultTaskFields } from "../helpers"
 
 function PreviewTask({ task }: { task: Partial<PurchaseTask> }) {
   return (<Box style={{ fontSize: 12, padding: "2px 0", borderBottom: "1px solid var(--border)", display: "flex", gap: "4px" }}>
@@ -54,9 +54,9 @@ export function BatchImportDialog({ isOpen, onClose, onImport }: Props) {
     for (let i = 1; i < lines.length; i++) {
       const cells = lines[i].split("\t").map(c => c.trim())
       if (cells.length <= nameIdx || !cells[nameIdx]) continue
-      const task: Record<string, unknown> = {}
+      // 先套用默认值（status/urgency 等），再用解析到的列覆盖，避免缺字段被默认筛选器过滤掉
+      const task: Record<string, unknown> = { ...defaultTaskFields() }
       for (let j = 0; j < mapping.length; j++) { const field = mapping[j]; if (!field) continue; if (j < cells.length && cells[j]) task[field] = parseValue(cells[j], field) }
-      task.plannedDate ||= todayISO()
       tasks.push(task as Partial<PurchaseTask>)
     }
     setParsed(tasks)

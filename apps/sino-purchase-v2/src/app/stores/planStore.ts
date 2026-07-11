@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import type { PurchaseTask, TaskStatus, SortBy, GroupBy } from "../../modules/plan/types"
 
-interface FilterState {
+export interface FilterState {
   statusFilter: TaskStatus[]
   urgencyFilter: number[]
   supplierFilter: string
@@ -20,8 +20,8 @@ function loadFilter(): FilterState {
     urgencyFilter: [2, 3, 4, 5],
     supplierFilter: "",
     bookerFilter: "",
-    sortBy: "plannedDate",
-    groupBy: "plannedDate",
+    sortBy: "createdAt",
+    groupBy: "none",
     searchQuery: "",
     dateStart: "",
     dateEnd: "",
@@ -29,18 +29,31 @@ function loadFilter(): FilterState {
   }
   try {
     const s = localStorage.getItem("sino-plan-filter")
-    if (s) return { ...def, ...JSON.parse(s) }
+    if (s) {
+      const parsed = JSON.parse(s) as Record<string, unknown>
+      const merged = { ...def, ...parsed } as FilterState
+      // 版本迁移：旧存档（无 v 字段）视为「从未主动改过视图」，其 legacy 默认
+      // sortBy=plannedDate、groupBy=plannedDate 升为新的默认（createdAt 排序 + 不分组），
+      // 以保证「默认顺序 = 导入/创建顺序」。用户之后显式选择的排序/分组会带 v 字段，不被覆盖。
+      if (!("v" in parsed)) {
+        if (merged.sortBy === "plannedDate") merged.sortBy = "createdAt"
+        if (merged.groupBy === "plannedDate") merged.groupBy = "none"
+      }
+      return merged
+    }
   } catch { /* empty */ }
   return def
 }
 
 function saveFilter(f: FilterState) {
   try {
-    localStorage.setItem("sino-plan-filter", JSON.stringify(f))
+    // 带版本号，区分「显式选择」与「legacy 默认」，便于迁移逻辑不误伤主动选择
+    localStorage.setItem("sino-plan-filter", JSON.stringify({ v: 1, ...f }))
   } catch { /* empty */ }
 }
 
-function filterAndSortTasks(tasks: PurchaseTask[], filter: FilterState): PurchaseTask[] {
+/** 纯函数：按筛选态过滤 + 排序。P0-1 起由组件层调用，数据来源为 useSheetData。 */
+export function filterAndSortTasks(tasks: PurchaseTask[], filter: FilterState): PurchaseTask[] {
   const { statusFilter, urgencyFilter, supplierFilter, bookerFilter, dateStart, dateEnd, dateEndToday, searchQuery, sortBy } = filter
   let result = tasks
 
@@ -74,41 +87,39 @@ function filterAndSortTasks(tasks: PurchaseTask[], filter: FilterState): Purchas
     )
   }
 
+  // 统一兜底排序键：createdAt 升序（即粘贴/创建顺序，先入的在前）。
+  // 批量导入时 batchAdd 已让 createdAt 随粘贴下标单调递增，故任意主排序键相等时，
+  // 导入的多行严格保持粘贴相对顺序。
+  const tiebreak = (a: PurchaseTask, b: PurchaseTask) => a.createdAt - b.createdAt
   result = [...result].sort((a, b) => {
+    let primary = 0
     switch (sortBy) {
-      case "plannedDate": return (a.plannedDate || "Z").localeCompare(b.plannedDate || "Z")
-      case "status": return a.status - b.status
-      case "urgency": return b.urgency - a.urgency
-      case "supplierId": return (a.supplierId || "").localeCompare(b.supplierId || "")
-      case "bookerId": return (a.bookerId || "").localeCompare(b.bookerId || "")
-      case "receivedDate": return (a.receivedDate || "Z").localeCompare(b.receivedDate || "Z")
-      case "reimbursementDate": return (a.reimbursementDate || "Z").localeCompare(b.reimbursementDate || "Z")
-      case "unitPrice": return b.unitPrice - a.unitPrice
-      case "currency": return a.currency.localeCompare(b.currency)
-      case "taxStatus": return a.taxStatus.localeCompare(b.taxStatus)
-      case "name": return a.name.localeCompare(b.name)
-      case "brand": return a.brand.localeCompare(b.brand)
-      case "spec": return a.spec.localeCompare(b.spec)
-      case "quantity": return b.quantity - a.quantity
-      case "unit": return a.unit.localeCompare(b.unit)
-      case "updatedAt": return b.updatedAt - a.updatedAt
-      default: return b.createdAt - a.createdAt
+      case "createdAt": primary = a.createdAt - b.createdAt; break
+      case "plannedDate": primary = (a.plannedDate || "Z").localeCompare(b.plannedDate || "Z"); break
+      case "status": primary = a.status - b.status; break
+      case "urgency": primary = b.urgency - a.urgency; break
+      case "supplierId": primary = (a.supplierId || "").localeCompare(b.supplierId || ""); break
+      case "bookerId": primary = (a.bookerId || "").localeCompare(b.bookerId || ""); break
+      case "receivedDate": primary = (a.receivedDate || "Z").localeCompare(b.receivedDate || "Z"); break
+      case "reimbursementDate": primary = (a.reimbursementDate || "Z").localeCompare(b.reimbursementDate || "Z"); break
+      case "unitPrice": primary = b.unitPrice - a.unitPrice; break
+      case "currency": primary = a.currency.localeCompare(b.currency); break
+      case "taxStatus": primary = a.taxStatus.localeCompare(b.taxStatus); break
+      case "name": primary = a.name.localeCompare(b.name); break
+      case "brand": primary = a.brand.localeCompare(b.brand); break
+      case "spec": primary = a.spec.localeCompare(b.spec); break
+      case "quantity": primary = b.quantity - a.quantity; break
+      case "unit": primary = a.unit.localeCompare(b.unit); break
+      case "updatedAt": primary = b.updatedAt - a.updatedAt; break
+      default: primary = b.createdAt - a.createdAt
     }
+    return primary !== 0 ? primary : tiebreak(a, b)
   })
 
   return result
 }
 
 interface PlanState {
-  // Data (来自 sheets-api, 通过 setAllTasks 注入)
-  allTasks: PurchaseTask[]
-  loading: boolean
-  /** 数据版本号：每次 allTasks 内容变化 +1，用作过滤缓存签名的一部分，
-   * 避免"更新单条任务（length 不变）时 applyFilter 命中旧缓存导致 UI 不刷新"。 */
-  dataVersion: number
-  setAllTasks: (tasks: PurchaseTask[]) => void
-  setLoading: (loading: boolean) => void
-
   // Filter state (flat for easy access)
   searchQuery: string
   statusFilter: TaskStatus[]
@@ -132,14 +143,6 @@ interface PlanState {
   setDateEnd: (v: string) => void
   setDateEndToday: (v: boolean) => void
 
-  // Computed
-  filteredTasks: PurchaseTask[]
-  urgentAll: number
-  urgentHigh: number
-  urgentMid: number
-  urgentLow: number
-  completed: number
-
   // UI state
   editingTaskId: string | null
   setEditingTaskId: (id: string | null) => void
@@ -153,83 +156,33 @@ interface PlanState {
   setShowSettings: (v: boolean) => void
   showFilter: "status" | "urgency" | "supplier" | "booker" | null
   setShowFilter: (v: "status" | "urgency" | "supplier" | "booker" | null) => void
-  selectedIds: Set<string>
+
+  // Selection (string[] per P2-2 — serialization-friendly, useShallow-friendly)
+  selectedIds: string[]
   onToggleSelect: (id: string) => void
   clearSelection: () => void
   selectAll: (ids: string[]) => void
   pendingBatchChanges: Partial<PurchaseTask>
   setPendingBatchChanges: (v: Partial<PurchaseTask>) => void
-  confirmBatchApply: () => void
-
-  // CRUD actions (set by PlanManagement via useSheetData)
-  addTask: (data: Partial<PurchaseTask>) => void
-  updateTask: (id: string, changes: Partial<PurchaseTask>) => void
-  deleteTask: (id: string) => void
-  reload: () => void
-  setCrudActions: (actions: {
-    add: (data: Partial<PurchaseTask>) => void
-    update: (id: string, changes: Partial<PurchaseTask>) => void
-    remove: (id: string) => void
-    reload: () => void
-  }) => void
 }
 
 export const usePlanStore = create<PlanState>((set, get) => {
   const saved = loadFilter()
 
-  // 缓存 filter 结果：只有当 allTasks 或 filter 字段真正变化时才重算，
-  // 否则返回同一数组引用，避免下游 useMemo 无谓重算。
-  let cachedSig = ""
-  let cachedResult: PurchaseTask[] = []
-
-  function applyFilter(): Partial<PlanState> {
-    const s = get()
-    const f: FilterState = {
-      statusFilter: s.statusFilter,
-      urgencyFilter: s.urgencyFilter,
-      supplierFilter: s.supplierFilter,
-      bookerFilter: s.bookerFilter,
-      sortBy: s.sortBy,
-      groupBy: s.groupBy,
-      searchQuery: s.searchQuery,
-      dateStart: s.dateStart,
-      dateEnd: s.dateEnd,
-      dateEndToday: s.dateEndToday,
-    }
-    saveFilter(f)
-    // 用 dataVersion（数据内容变化）而非 allTasks.length（仅数量变化）作为缓存签名，
-    // 否则"更新单条任务字段但数组长度不变"时命中旧缓存，UI 不刷新。
-    const sig = s.dataVersion + "|" + JSON.stringify(f)
-    let filteredTasks: PurchaseTask[]
-    if (sig === cachedSig) {
-      filteredTasks = cachedResult
-    } else {
-      filteredTasks = filterAndSortTasks(s.allTasks, f)
-      cachedSig = sig
-      cachedResult = filteredTasks
-    }
-    return { filteredTasks }
-  }
-
+  // P2-3：用映射类型 setter 替代 `as any`，保留 TS 严格性
   function setter<K extends keyof FilterState>(key: K) {
     return (value: FilterState[K]) => {
-      set({ [key]: value } as any)
-      set(applyFilter())
+      set({ [key]: value } as Partial<PlanState>)
+      const s = get()
+      saveFilter({
+        statusFilter: s.statusFilter, urgencyFilter: s.urgencyFilter, supplierFilter: s.supplierFilter,
+        bookerFilter: s.bookerFilter, sortBy: s.sortBy, groupBy: s.groupBy, searchQuery: s.searchQuery,
+        dateStart: s.dateStart, dateEnd: s.dateEnd, dateEndToday: s.dateEndToday,
+      })
     }
   }
 
   return {
-    // Data
-    allTasks: [],
-    loading: false,
-    dataVersion: 0,
-    setAllTasks: (allTasks) => {
-      set({ allTasks, dataVersion: get().dataVersion + 1 })
-      set(applyFilter())
-      set(computeStats(allTasks))
-    },
-    setLoading: (loading) => set({ loading }),
-
     // Filter (flat)
     searchQuery: saved.searchQuery,
     statusFilter: saved.statusFilter,
@@ -253,10 +206,6 @@ export const usePlanStore = create<PlanState>((set, get) => {
     setDateEnd: setter("dateEnd"),
     setDateEndToday: setter("dateEndToday"),
 
-    // Computed
-    filteredTasks: [],
-    urgentAll: 0, urgentHigh: 0, urgentMid: 0, urgentLow: 0, completed: 0,
-
     // UI state
     editingTaskId: null,
     setEditingTaskId: (editingTaskId) => set({ editingTaskId, detailReadOnly: true }),
@@ -270,56 +219,18 @@ export const usePlanStore = create<PlanState>((set, get) => {
     setShowSettings: (showSettings) => set({ showSettings }),
     showFilter: null,
     setShowFilter: (showFilter) => set({ showFilter }),
-    selectedIds: new Set<string>(),
-    onToggleSelect: (id) => {
-      set((s) => {
-        const next = new Set(s.selectedIds)
-        if (next.has(id)) next.delete(id); else next.add(id)
-        return { batchEdit: false, selectedIds: next }
-      })
-    },
-    clearSelection: () => set({ selectedIds: new Set<string>() }),
-    selectAll: (ids) => { set({ batchEdit: false, selectedIds: new Set(ids) }) },
+
+    // Selection
+    selectedIds: [],
+    onToggleSelect: (id) => set(s => {
+      const next = s.selectedIds.includes(id)
+        ? s.selectedIds.filter(x => x !== id)
+        : [...s.selectedIds, id]
+      return { batchEdit: false, selectedIds: next }
+    }),
+    clearSelection: () => set({ selectedIds: [] }),
+    selectAll: (ids) => set({ batchEdit: false, selectedIds: ids }),
     pendingBatchChanges: {},
     setPendingBatchChanges: (pendingBatchChanges) => set({ pendingBatchChanges }),
-
-    confirmBatchApply: () => {
-      const s = get()
-      const { selectedIds, pendingBatchChanges } = s
-      if (Object.keys(pendingBatchChanges).length === 0) return
-      selectedIds.forEach((id) => {
-        s.updateTask(id, pendingBatchChanges)
-      })
-      set({ selectedIds: new Set<string>(), pendingBatchChanges: {}, batchEdit: false })
-    },
-
-    // CRUD actions (will be set by PlanManagement)
-    addTask: () => {},
-    updateTask: () => {},
-    deleteTask: () => {},
-    reload: () => {},
-    setCrudActions: (actions) => {
-      set({
-        addTask: (data) => { actions.add(data); set({ isAdding: false, editingTaskId: null }) },
-        updateTask: (id, changes) => { actions.update(id, changes); set({ editingTaskId: null }) },
-        deleteTask: (id) => { actions.remove(id); set({ editingTaskId: null }) },
-        reload: actions.reload,
-      })
-    },
   }
 })
-
-function computeStats(tasks: PurchaseTask[]) {
-  let uAll = 0, uHigh = 0, uMid = 0, uLow = 0, done = 0
-  for (const t of tasks) {
-    if (t.status < 3) {
-      uAll++
-      if (t.urgency > 3) uHigh++
-      else if (t.urgency === 3) uMid++
-      else uLow++
-    } else {
-      done++
-    }
-  }
-  return { urgentAll: uAll, urgentHigh: uHigh, urgentMid: uMid, urgentLow: uLow, completed: done }
-}

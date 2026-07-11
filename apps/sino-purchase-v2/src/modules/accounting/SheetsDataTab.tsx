@@ -1,6 +1,10 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { useVirtualizer } from "@tanstack/react-virtual"
-import { Select, Spinner, Button, MenuItem, MultiSelect, Icon, IconNames, Box, Stack } from "../../components/ui"
+import { Select, Spinner, Button, Icon, IconNames, Box, Stack } from "../../components/ui"
+import MuiSelect from "@mui/material/Select"
+import MuiMenuItem from "@mui/material/MenuItem"
+import MuiCheckbox from "@mui/material/Checkbox"
+import MuiListItemText from "@mui/material/ListItemText"
 import { useAuth, listSheets, loadTable } from "@sino-purchase/sheets-react"
 import { SPREADSHEET_ID } from "../../config/sheets"
 import { useAccountingStore } from "../../app/stores/accountingStore"
@@ -143,7 +147,7 @@ export default function SheetsDataTab({ batch, onBatchChange }: SheetsDataTabPro
         <Box sx={{ flex: 1, overflow: "auto", minHeight: 0, width: "100%" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
             <thead>
-              <tr style={{ borderBottom: "2px solid var(--border)", background: "var(--bg-hover)", position: "sticky", top: 0, zIndex: 1 }}>
+              <tr style={{ borderBottom: "2px solid var(--border)", background: "var(--bg-surface)", position: "sticky", top: 0, zIndex: 2 }}>
                 <th style={{ padding: "6px 8px", textAlign: "left", fontWeight: 600, fontSize: 11 }}>#</th>
                 {demoHeaders.map(h => (<th key={h} style={{ padding: "6px 8px", textAlign: "left", fontWeight: 600, fontSize: 11 }}>{h}</th>))}
               </tr>
@@ -167,16 +171,43 @@ export default function SheetsDataTab({ batch, onBatchChange }: SheetsDataTabPro
       <Stack direction="row" alignItems="center" spacing={1} sx={{ p: "4px 8px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
         <Select value={selectedSheet} options={sheets.map(s => ({ value: s, label: s }))} onChange={setSelectedSheet} />
         <Box sx={{ maxWidth: 200 }}>
-          <MultiSelect
-            items={batchOptions}
-            selectedItems={batch}
-            onItemSelect={v => { onBatchChange(batch.includes(v) ? batch.filter(x => x !== v) : [...batch, v]) }}
-            tagRenderer={v => v}
-            tagInputProps={{ onRemove: (v) => onBatchChange(batch.filter(x => x !== v)), placeholder: "批次" }}
-            itemRenderer={(v, { handleClick }) => (<MenuItem key={v} text={v} selected={batch.includes(v)} shouldDismissPopover={false} onClick={(e: any) => { e.stopPropagation(); handleClick() }} icon={batch.includes(v) ? IconNames.TICK : IconNames.BLANK} />)}
-            popoverProps={{ matchTargetWidth: true }}
-            noResults={<span style={{ fontSize: 12, color: "var(--text-dim)", padding: "6px 8px", display: "block" }}>无匹配</span>}
-          />
+          <MuiSelect
+            multiple
+            value={batch}
+            displayEmpty
+            onChange={(e: any) => {
+              const v = e.target.value
+              onBatchChange(Array.isArray(v) ? v : v.split(","))
+            }}
+            renderValue={(selected: any) =>
+              (selected as string[]).length === 0 ? "批次" : (selected as string[]).join(", ")
+            }
+            size="small"
+            sx={{
+              fontSize: 12,
+              fontFamily: "inherit",
+              height: 24,
+              "& .MuiInputBase-root": { height: 24, padding: 0 },
+              "& .MuiOutlinedInput-root": { padding: 0 },
+              "& .MuiSelect-select": { padding: "2px 8px" },
+              "& fieldset": { borderColor: "var(--border, #3a3a5a)" },
+            }}
+          >
+            {batchOptions.length === 0 ? (
+              <MuiMenuItem disabled sx={{ fontSize: 12 }}>无批次数据</MuiMenuItem>
+            ) : (
+              batchOptions.map((b) => (
+                <MuiMenuItem key={b} value={b} sx={{ fontSize: 12 }}>
+                  <MuiCheckbox
+                    checked={batch.indexOf(b) > -1}
+                    size="small"
+                    sx={{ p: 0, mr: 0.5, "& .MuiSvgIcon-root": { fontSize: 16 } }}
+                  />
+                  <MuiListItemText primary={b} sx={{ my: 0, "& .MuiTypography-root": { fontSize: 12 } }} />
+                </MuiMenuItem>
+              ))
+            )}
+          </MuiSelect>
         </Box>
         <Button icon="database" text="导入数据源" intent="primary" onClick={handleImport} disabled={filteredData.length === 0} small />
         <Box sx={{ flex: 1 }} />
@@ -193,7 +224,7 @@ export default function SheetsDataTab({ batch, onBatchChange }: SheetsDataTabPro
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
             <thead>
-              <tr style={{ borderBottom: "2px solid var(--border)", background: "var(--bg-hover)", position: "sticky", top: 0, zIndex: 1 }}>
+              <tr style={{ borderBottom: "2px solid var(--border)", background: "var(--bg-surface)", position: "sticky", top: 0, zIndex: 2 }}>
                 <th style={{ padding: "6px 8px", textAlign: "left", fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.5px" }}>#</th>
                 {displayHeaders.map(h => (<th key={h} style={{ padding: "6px 8px", textAlign: "left", fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.5px" }}>{h}</th>))}
               </tr>

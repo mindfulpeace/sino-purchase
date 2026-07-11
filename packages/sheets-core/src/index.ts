@@ -10,7 +10,8 @@ export {
 export type { GoogleUserInfo } from "./auth"
 
 export {
-  loadTable, insertRow, updateRow, deleteRow, processQueue, findRow, listSheets,
+  loadTable, insertRow, updateRow, deleteRow, appendRows, batchUpdateRows,
+  processQueue, findRow, listSheets,
   isRetryableStatus, SheetsApiError,
 } from "./db"
 

@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react"
 import { Button, InputGroup, NumericInput, Select, Alert, Text, Box, ToggleButtonGroup, ToggleButton } from "../../../components/ui"
 import DeleteIcon from "@mui/icons-material/Delete"
 import CloseIcon from "@mui/icons-material/Close"
-import { usePlanStore } from "../../../app/stores/planStore"
+import { usePlanData } from "../../../app/stores/PlanDataContext"
 import type { PurchaseTask, SupportedCurrency, TaxStatus, TaskStatus, Urgency } from "../types"
 import { TAX_STATUS_OPTIONS, ALL_STATUSES, STATUS_LABEL_CN } from "../types"
 import { nameListOptions } from "../helpers"
@@ -18,7 +18,7 @@ interface Props {
 }
 
 export function TaskDetail({ initial, mode, onSave, onCancel, onDelete, selectedCount, readOnly }: Props) {
-  const allTasks = usePlanStore(s => s.allTasks)
+  const { tasks: allTasks } = usePlanData()
   const [d, setD] = useState<Partial<PurchaseTask>>({ ...initial })
   const [confirmDel, setConfirmDel] = useState(false)
   // 始终持有最新草稿，供折叠时提交
@@ -140,8 +140,8 @@ export function TaskDetail({ initial, mode, onSave, onCancel, onDelete, selected
               </Alert>
             </>
           )}
-          {/* 取消 / 放弃保存：窄图标按钮，置于删除右侧 */}
-          {!readOnly && (mode === "add" || mode === "batch") && (
+          {/* 取消 / 放弃保存：窄图标按钮（仅 add 模式；batch 模式详情随选中自动出现，收起由「取消选择/应用/删除」负责） */}
+          {!readOnly && mode === "add" && (
             <Button small variant="outlined" title="取消" onClick={onCancel} style={{ minWidth: 28, padding: "2px 4px", color: "var(--text-dim, #858585)", borderColor: "var(--border, #3a3a5a)" }}>
               <CloseIcon style={{ fontSize: 15 }} />
             </Button>

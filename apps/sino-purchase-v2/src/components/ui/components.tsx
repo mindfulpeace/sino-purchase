@@ -25,7 +25,6 @@ import MuiDialogContent from "@mui/material/DialogContent"
 import MuiDialogActions from "@mui/material/DialogActions"
 import MuiCollapse from "@mui/material/Collapse"
 import MuiAutocomplete from "@mui/material/Autocomplete"
-import MuiMenuList from "@mui/material/MenuList"
 import MuiToggleButtonGroup from "@mui/material/ToggleButtonGroup"
 import MuiToggleButton from "@mui/material/ToggleButton"
 import MuiCheckbox from "@mui/material/Checkbox"
@@ -541,7 +540,6 @@ interface MultiSelectProps {
   items: string[]
   selectedItems: string[]
   onItemSelect: (item: string) => void
-  tagRenderer: (item: string) => string
   tagInputProps: {
     onRemove: (item: string) => void
     placeholder?: string
@@ -552,7 +550,7 @@ interface MultiSelectProps {
   style?: CSSProperties
 }
 
-export function MultiSelect({ items, selectedItems, onItemSelect, tagRenderer, tagInputProps, itemRenderer, noResults, style }: MultiSelectProps) {
+export function MultiSelect({ items, selectedItems, onItemSelect, tagInputProps, itemRenderer, noResults, style }: MultiSelectProps) {
   const handleChange = (_: any, newVal: string[]) => {
     const added = newVal.find((v: string) => !selectedItems.includes(v))
     const removed = selectedItems.find((v) => !newVal.includes(v))
@@ -564,48 +562,34 @@ export function MultiSelect({ items, selectedItems, onItemSelect, tagRenderer, t
   const AutocompleteAny = MuiAutocomplete as any
 
   return (
-    <AutocompleteAny
-      multiple
-      disableCloseOnSelect
-      options={items}
-      value={selectedItems}
-      onChange={handleChange}
-      renderInput={(params: any) => (
-        <MuiTextField
-          {...params}
-          size="small"
-          placeholder={tagInputProps.placeholder ?? "选择..."}
-          sx={{ "& .MuiInputBase-root": { fontSize: 11, fontFamily: "inherit" }, ...(style as any) }}
-        />
-      )}
-      renderTags={(value: string[], getTagProps: any) =>
-        value.map((item: string, index: number) => {
-          const { key, ...rest } = getTagProps({ index })
+    <>
+      <AutocompleteAny
+        multiple
+        disableCloseOnSelect
+        options={items}
+        value={selectedItems}
+        onChange={handleChange}
+        renderInput={(params: any) => (
+          <MuiTextField
+            {...params}
+            size="small"
+            placeholder={tagInputProps.placeholder ?? "选择..."}
+            sx={{ "& .MuiInputBase-root": { fontSize: 11, fontFamily: "inherit" }, ...(style as any) }}
+          />
+        )}
+        renderOption={(props: any, option: string) => {
+          const { key, ...rest } = props
           return (
-            <MuiChip
-              key={key}
-              label={tagRenderer(item)}
-              size="small"
-              {...rest}
-              sx={{ height: 18, fontSize: 10, "& .MuiChip-label": { px: 0.5 } }}
-            />
-          )
-        })
-      }
-      renderOption={(props: any, option: string) => {
-        const { key, ...rest } = props
-        return (
-          <li key={key} {...rest}>
-            <MuiMenuList disablePadding>
+            <li key={key} {...rest}>
               {itemRenderer(option, { handleClick: () => onItemSelect(option) })}
-            </MuiMenuList>
-          </li>
-        )
-      }}
-      noOptionsText={noResults}
-      isOptionEqualToValue={(o: string, v: string) => o === v}
-      size="small"
-    />
+            </li>
+          )
+        }}
+        noOptionsText={noResults}
+        isOptionEqualToValue={(o: string, v: string) => o === v}
+        size="small"
+      />
+    </>
   )
 }
 

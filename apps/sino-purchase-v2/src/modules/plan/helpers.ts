@@ -2,6 +2,16 @@ export function todayISO(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
+// 新任务默认值（快速添加 / 批量导入共用），确保新建任务带上 status/urgency 等
+// 字段，否则会被计划页默认筛选器（状态[1,2,3]、紧急[2,3,4,5]）过滤掉而看不到。
+export function defaultTaskFields() {
+  return {
+    quantity: 1, unit: "个", urgency: 2 as const,
+    currency: "ZMW" as const, exchangeRate: 1, taxStatus: "可抵扣" as const,
+    plannedDate: todayISO(), status: 1 as const,
+  }
+}
+
 export function nameListOptions(
   tasks: { supplierId: string; bookerId: string }[],
   field: "supplierId" | "bookerId",

@@ -7,7 +7,7 @@ import { usePlanStore } from "../../../app/stores/planStore"
 describe("UI 渲染层：折叠后 item-body 应显示新值", () => {
   afterEach(() => {
     cleanup()
-    usePlanStore.setState({ allTasks: [], editingTaskId: null, isAdding: false, batchEdit: false })
+    usePlanStore.setState({ editingTaskId: null, isAdding: false, batchEdit: false })
   })
 
   it("编辑折叠后，界面(渲染的 tasks)应出现『安全帽改了』文本", async () => {

@@ -4,7 +4,6 @@ import { useImportClipboard } from "./useImportClipboard"
 import { useImportExcel } from "./useImportExcel"
 import { exportExcel } from "./sheetjs"
 import { formatDataSummary } from "./helpers"
-import { useDocSettingsStore } from "../../app/stores/docSettingsStore"
 import type { CashRecord } from "./types"
 
 interface ToolbarProps {
@@ -14,7 +13,6 @@ interface ToolbarProps {
 }
 
 export default function Toolbar({ records, showSheets, onSheetsToggle }: ToolbarProps) {
-  const { propertiesVisible, setPropertiesVisible } = useDocSettingsStore()
   const { importFromClipboard } = useImportClipboard()
   const { triggerImport, inputRef, handleFileChange } = useImportExcel()
   const handleClipboard = useCallback(async () => {
@@ -48,10 +46,6 @@ export default function Toolbar({ records, showSheets, onSheetsToggle }: Toolbar
 
   const summary = formatDataSummary(records)
 
-  const handlePrintSettings = useCallback(() => {
-    setPropertiesVisible((v) => !v)
-  }, [setPropertiesVisible])
-
   return (
     <Box className="no-print" sx={{ display: "flex", alignItems: "center", gap: 0.5, p: "4px 8px", borderBottom: "1px solid var(--border)" }}>
       <ButtonGroup minimal>
@@ -72,10 +66,6 @@ export default function Toolbar({ records, showSheets, onSheetsToggle }: Toolbar
       <Box sx={{ flex: 1 }} />
 
       <span style={{ fontSize: 12, color: "var(--text-dim)", marginRight: 8 }}>{summary}</span>
-
-      <Tooltip content={propertiesVisible ? "关闭打印设置" : "打开打印设置"}>
-        <Button icon="print" intent={propertiesVisible ? "primary" : "none"} onClick={handlePrintSettings} />
-      </Tooltip>
 
       <input ref={inputRef} type="file" accept=".xlsx,.xls" onChange={handleExcel} style={{ display: "none" }} title="导入Excel文件" aria-label="选择Excel文件进行导入" />
     </Box>

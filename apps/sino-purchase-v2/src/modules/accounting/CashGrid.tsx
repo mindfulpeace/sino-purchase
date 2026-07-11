@@ -55,7 +55,7 @@ export default function CashGrid({ records }: { records: CashRecord[] }) {
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
             <thead>
-              <tr style={{ borderBottom: "2px solid var(--border)", background: "var(--bg-hover)", position: "sticky", top: 0, zIndex: 1 }}>
+              <tr style={{ borderBottom: "2px solid var(--border)", background: "var(--bg-surface)", position: "sticky", top: 0, zIndex: 2 }}>
                 {COLUMNS.map(col => (
                   <th key={col.key} style={{ padding: "6px 8px", textAlign: "left", fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.5px" }}>
                     {col.label}

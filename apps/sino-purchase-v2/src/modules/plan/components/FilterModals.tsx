@@ -3,6 +3,7 @@ import { ToggleButtonGroup, ToggleButton, Select } from "../../../components/ui"
 import type { TaskStatus } from "../types"
 import { STATUS_BADGE } from "../types"
 import { usePlanStore } from "../../../app/stores/planStore"
+import { usePlanData } from "../../../app/stores/PlanDataContext"
 import { nameListOptions } from "../helpers"
 
 /* ── Status toggle buttons (MUI ToggleButtonGroup, multiple) ── */
@@ -44,7 +45,8 @@ export function UrgencyFilter() {
 /* ── Supplier MUI Select ── */
 
 export function SupplierFilter() {
-  const { supplierFilter, setSupplierFilter, allTasks } = usePlanStore()
+  const { supplierFilter, setSupplierFilter } = usePlanStore()
+  const { tasks: allTasks } = usePlanData()
   const opts = useMemo(() => nameListOptions(allTasks, "supplierId"), [allTasks])
 
   return (
@@ -60,7 +62,8 @@ export function SupplierFilter() {
 /* ── Booker MUI Select ── */
 
 export function BookerFilter() {
-  const { bookerFilter, setBookerFilter, allTasks } = usePlanStore()
+  const { bookerFilter, setBookerFilter } = usePlanStore()
+  const { tasks: allTasks } = usePlanData()
   const opts = useMemo(() => nameListOptions(allTasks, "bookerId"), [allTasks])
 
   return (

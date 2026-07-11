@@ -5,7 +5,7 @@ import MenuItem from "@mui/material/MenuItem"
 import type { PurchaseTask, TaskStatus } from "../types"
 import { STATUS_BADGE, STATUS_LABEL_CN, STATUS_COLORS, URGENCY_COLORS } from "../types"
 import { urgencyLabel } from "../helpers"
-import { usePlanStore } from "../../../app/stores/planStore"
+import { usePlanData } from "../../../app/stores/PlanDataContext"
 import { TaskDetail } from "./TaskDetail"
 
 interface Props {
@@ -50,7 +50,7 @@ function TaskBody({ task, onClick }: { task: PurchaseTask; onClick?: (e: MouseEv
 }
 
 export const TaskItem = memo(function TaskItem({ task, onRequestEdit, isEditing, selected, onToggleSelect, onSave, onCancel, onDelete }: Props) {
-  const updateTask = usePlanStore(s => s.updateTask)
+  const { update: updateTask } = usePlanData()
   const [menu, setMenu] = useState<null | "status" | "urgency">(null)
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
 

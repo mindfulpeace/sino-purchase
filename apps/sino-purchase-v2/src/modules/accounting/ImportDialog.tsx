@@ -40,7 +40,7 @@ export default function ImportDialog({ open, records, onConfirm, onCancel }: Imp
       <Box className={Classes.DIALOG_BODY} sx={{ maxHeight: 420, overflow: "auto", p: 0 }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
           <thead>
-            <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-hover)", position: "sticky", top: 0, zIndex: 1 }}>
+            <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-surface)", position: "sticky", top: 0, zIndex: 2 }}>
               <th style={{ padding: "6px 8px", textAlign: "left", fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.5px" }}>#</th>
               {FIELDS.map(f => <th key={f.key} style={{ padding: "6px 8px", textAlign: "left", fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.5px", width: f.width }}>{f.label}</th>)}
             </tr>

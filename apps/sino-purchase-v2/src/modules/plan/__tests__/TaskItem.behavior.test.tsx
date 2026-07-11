@@ -4,6 +4,7 @@ import { render, screen, fireEvent, cleanup } from "@testing-library/react"
 import { useState } from "react"
 import { TaskItem } from "../components/TaskItem"
 import type { PurchaseTask } from "../types"
+import { PlanDataContext } from "../../../app/stores/PlanDataContext"
 
 // jsdom 缺省没有 MUI 依赖的浏览器 API，补一下
 beforeAll(() => {
@@ -45,21 +46,25 @@ const mk = (id: string, name: string): PurchaseTask => ({
 function Multi({ tasks, onSave }: { tasks: PurchaseTask[]; onSave: ReturnType<typeof vi.fn> }) {
   const [editingId, setEditingId] = useState<string | null>(null)
   return (
-    <div>
-      {tasks.map(t => (
-        <TaskItem
-          key={t.id}
-          task={t}
-          isEditing={editingId === t.id}
-          selected={false}
-          onRequestEdit={(id) => setEditingId(id)}
-          onToggleSelect={() => {}}
-          onSave={onSave}
-          onCancel={() => setEditingId(null)}
-          onDelete={() => {}}
-        />
-      ))}
-    </div>
+    <PlanDataContext.Provider
+      value={{ tasks: [], loading: false, add: vi.fn(), update: vi.fn(), remove: vi.fn(), reload: vi.fn() }}
+    >
+      <div>
+        {tasks.map(t => (
+          <TaskItem
+            key={t.id}
+            task={t}
+            isEditing={editingId === t.id}
+            selected={false}
+            onRequestEdit={(id) => setEditingId(id)}
+            onToggleSelect={() => {}}
+            onSave={onSave}
+            onCancel={() => setEditingId(null)}
+            onDelete={() => {}}
+          />
+        ))}
+      </div>
+    </PlanDataContext.Provider>
   )
 }
 

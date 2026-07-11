@@ -6,6 +6,8 @@ import { queueLen, loadQueue, saveRemaining, SYNC_ERROR_EVENT } from "./sync-que
 const BASE = "https://sheets.googleapis.com/v4/spreadsheets"
 const SHEET_META_TTL = 60_000
 const REQUEST_TIMEOUT = 15_000
+/** loadTable 单次拉取的最大行数（避免超长表无限读取） */
+const MAX_SHEET_ROWS = 10_000
 
 /** 携带 HTTP 状态的 API 错误，便于队列按错误类型分流（审计 P0-4） */
 export class SheetsApiError extends Error {
@@ -200,7 +202,7 @@ export async function loadTable<T extends Record<string, unknown>>(
   const { spreadsheetId } = getConfig()
   await ensureSheet(sheetName, headers)
   const res = await fetchWithAuth<{ values?: string[][] }>(
-    `${BASE}/${spreadsheetId}/values/${sheetName}!1:10000`
+    `${BASE}/${spreadsheetId}/values/${sheetName}!1:${MAX_SHEET_ROWS}`
   )
   const rows: string[][] = res.values || []
   if (rows.length < 2) return { data: [], rowMap: new Map(), rowHeaders: [] }
@@ -302,4 +304,65 @@ export async function deleteRow(sheetName: string, rowIndex: number): Promise<vo
       }),
     },
   )
+}
+
+/**
+ * 审计 P1-5：批量追加多行——一次 `:append` 请求写入所有行，替代逐条 insertRow。
+ * 返回首行号（云端行号连续），便于调用方回填 rowMap。
+ */
+export async function appendRows(
+  sheetName: string,
+  rows: Record<string, unknown>[],
+  headersArg?: string[],
+): Promise<number> {
+  const { spreadsheetId } = getConfig()
+  const headers = (headersArg && headersArg.length > 0) ? headersArg : await getHeaders(sheetName)
+  if (headers.length === 0 || rows.length === 0) return 0
+  const values = rows.map(r => headers.map(h => {
+    const v = r[h]
+    return v === undefined || v === null ? "" : String(v)
+  }))
+  const res = await fetchWithAuth<{ updates?: { updatedRange?: string } }>(
+    `${BASE}/${spreadsheetId}/values/${sheetName}!A:Z:append?valueInputOption=USER_ENTERED`,
+    { method: "POST", body: JSON.stringify({ values }) },
+  )
+  const range = res.updates?.updatedRange || ""
+  const m = range.match(/!([A-Z]+\d+):/i) ?? range.match(/!([A-Z]+\d+)$/i)
+  const firstRow = m ? parseInt(m[1].replace(/[A-Z]/g, ""), 10) : 0
+  if (firstRow) headerCache.set(sheetName, headers)
+  return firstRow
+}
+
+/**
+ * 审计 P1-5：批量更新多行——一次 `values:batchUpdate` 请求写入多个指定行，
+ * 替代逐条 updateRow。写失败立即重试一次（与 updateRow 一致的自愈逻辑）。
+ */
+export async function batchUpdateRows(
+  sheetName: string,
+  writes: { rowIndex: number; values: Record<string, unknown> }[],
+  headersArg?: string[],
+): Promise<void> {
+  const { spreadsheetId } = getConfig()
+  const headers = (headersArg && headersArg.length > 0) ? headersArg : await getHeaders(sheetName)
+  if (headers.length === 0 || writes.length === 0) return
+  const col = rowKey(headers.length - 1)
+  const data = writes.map(w => {
+    const row = headers.map(h => {
+      const v = w.values[h]
+      return v === undefined || v === null ? "" : String(v)
+    })
+    return { range: `${sheetName}!A${w.rowIndex}:${col}${w.rowIndex}`, values: [row] }
+  })
+  try {
+    await fetchWithAuth(
+      `${BASE}/${spreadsheetId}/values:batchUpdate?valueInputOption=USER_ENTERED`,
+      { method: "POST", body: JSON.stringify({ data }) },
+    )
+  } catch (e) {
+    if (e instanceof SheetsApiError && !isRetryableStatus(e.status)) throw e
+    await fetchWithAuth(
+      `${BASE}/${spreadsheetId}/values:batchUpdate?valueInputOption=USER_ENTERED`,
+      { method: "POST", body: JSON.stringify({ data }) },
+    )
+  }
 }

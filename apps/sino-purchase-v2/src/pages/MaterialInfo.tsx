@@ -6,10 +6,10 @@ export default function MaterialInfo() {
   const { materials, deleteMaterial } = useMaterialStore()
   const [search, setSearch] = useState("")
 
-  const filtered = materials.filter(m => 
-    m.name.toLowerCase().includes(search.toLowerCase()) || 
-    m.code.toLowerCase().includes(search.toLowerCase()) ||
-    m.category.toLowerCase().includes(search.toLowerCase())
+  const filtered = materials.filter(m =>
+    (m.name ?? "").toLowerCase().includes(search.toLowerCase()) ||
+    (m.code ?? "").toLowerCase().includes(search.toLowerCase()) ||
+    (m.category ?? "").toLowerCase().includes(search.toLowerCase())
   )
 
   return (
@@ -48,7 +48,7 @@ export default function MaterialInfo() {
                 <td>{m.name}</td>
                 <td>{m.category}</td>
                 <td>{m.unit}</td>
-                <td>{m.price.toLocaleString()}</td>
+                <td>{m.price != null ? m.price.toLocaleString() : "—"}</td>
                 <td>
                   <Button small minimal icon="edit" />
                   <Button small minimal icon="trash" intent="danger" style={{ marginLeft: 8 }} onClick={() => deleteMaterial(m.id)} />

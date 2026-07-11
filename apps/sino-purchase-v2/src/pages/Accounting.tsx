@@ -15,7 +15,7 @@ import { DEMO_RECORDS } from "../config/demo-data"
 
 export default function Accounting() {
   const { records, activeTab, importDialog, setRecords, addRecords, hideImportDialog, switchTab } = useAccountingStore()
-  const { propertiesVisible, setPropertiesVisible, setReimburseRecords } = useDocSettingsStore()
+  const { setReimburseRecords } = useDocSettingsStore()
   const { loggedIn } = useAuth()
   const { importFromClipboard } = useImportClipboard()
   const { triggerImport, inputRef, handleFileChange } = useImportExcel()
@@ -94,14 +94,6 @@ export default function Accounting() {
           </Tooltip>
           <Box sx={{ width: 1, height: 16, background: "var(--border)", mx: "4px" }} />
           <span style={{ fontSize: 12, color: "var(--text-dim)", whiteSpace: "nowrap" }}>{summary}</span>
-          <Tooltip content={propertiesVisible ? "关闭打印设置" : "打开打印设置"}>
-            <Button
-              icon="print"
-              intent={propertiesVisible ? "primary" : "none"}
-              onClick={() => setPropertiesVisible(v => !v)}
-              small
-            />
-          </Tooltip>
         </Stack>
 
         <input ref={inputRef} type="file" accept=".xlsx,.xls" onChange={handleExcel} style={{ display: "none" }} title="导入Excel文件" aria-label="导入Excel文件" />

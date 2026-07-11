@@ -3,10 +3,11 @@ declare namespace google.accounts.oauth2 {
     client_id: string
     scope: string
     callback: (response: { access_token: string; expires_in: number; scope: string; token_type: string }) => void
-    error_callback?: () => void
+    error_callback?: (error?: { type?: string; message?: string }) => void
   }
   interface TokenClient {
     callback: (response: { access_token: string; expires_in: number; scope: string; token_type: string }) => void
+    error_callback?: (error?: { type?: string; message?: string }) => void
     requestAccessToken: (config?: { prompt?: string }) => void
   }
   function initTokenClient(config: TokenClientConfig): TokenClient

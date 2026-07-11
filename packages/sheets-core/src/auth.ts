@@ -71,13 +71,14 @@ export function initAuth(): Promise<void> {
       },
       error_callback: () => {},
     })
-    // 尝试静默重认证以恢复会话（仅当浏览器仍保有有效 Google 会话时成功）；
-    // 失败则保持演示模式，不弹出、不阻塞。
-    try {
-      await requestAccessToken({ prompt: "none" })
-    } catch {
+    // 尝试静默重认证以恢复会话（仅当浏览器仍保有有效 Google 会话且此前已授权时成功）。
+    // 关键：必须 fire-and-forget，绝不能 await —— 否则静默失败时 GSI 走 error_callback，
+    // 会让 requestAccessToken 的 Promise 永久挂起，阻塞 initAuth resolve，导致 `ready`
+    // 永远为 false，整页卡在"加载 Google 认证..."。这里只在后台尝试恢复会话，
+    // 失败则静默保持演示模式；成功则通过 setToken → onTokenChange 翻转 loggedIn。
+    requestAccessToken({ prompt: "none" }).catch(() => {
       /* 未登录 / 无授权 —— 保持演示模式 */
-    }
+    })
   })()
   return initPromise
 }
@@ -92,6 +93,11 @@ export function requestAccessToken(options?: { prompt?: string }): Promise<Token
       } else {
         reject(new Error("Login failed"))
       }
+    }
+    // 必须同时挂 error_callback：GSI 在静默失败 / 用户取消 / 弹窗被拦时只调用
+    // error_callback（不调用 callback），若不 reject，此 Promise 将永久挂起。
+    tokenClient.error_callback = (err?: { type?: string }) => {
+      reject(new Error(err?.type || "Auth error"))
     }
     tokenClient.requestAccessToken(options)
   })

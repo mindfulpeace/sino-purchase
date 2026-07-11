@@ -7,7 +7,7 @@ import { usePlanStore } from "../../../app/stores/planStore"
 describe("taskItem detail 展开→折叠 应保存编辑内容", () => {
   afterEach(() => {
     cleanup()
-    usePlanStore.setState({ allTasks: [], editingTaskId: null, isAdding: false, batchEdit: false })
+    usePlanStore.setState({ editingTaskId: null, isAdding: false, batchEdit: false })
   })
 
   it("展开某任务 detail → 改数量/品名 → 折叠（isEditing=false）→ store 应保存新值", async () => {
@@ -25,10 +25,9 @@ describe("taskItem detail 展开→折叠 应保存编辑内容", () => {
     // 折叠：再次点 task-body → isEditing 由 true 变 false → detail 卸载 → cleanup 保存
     fireEvent.click(body)
 
-    // 断言：折叠后 store 里存在新值（即"折叠时保存编辑内容"生效）
+    // 断言：折叠后界面渲染出「安全帽改了」（数据已更新并重算渲染）
     await waitFor(() => {
-      const t = usePlanStore.getState().allTasks.find(x => x.name === "安全帽改了")
-      expect(t, "折叠后 store 应存在 name=安全帽改了（保存生效）").toBeTruthy()
+      expect(screen.queryAllByText(/安全帽改了/).length, "折叠后界面应渲染出「安全帽改了」（保存生效）").toBeGreaterThan(0)
     }, { timeout: 3000 })
   })
 })

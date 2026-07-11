@@ -1,7 +1,7 @@
 import { useState, useRef } from "react"
 import { Button, ButtonGroup, InputGroup, Icon, IconNames, Box } from "../../../components/ui"
 import type { PurchaseTask } from "../types"
-import { todayISO } from "../helpers"
+import { defaultTaskFields } from "../helpers"
 
 interface Props {
   onAdd: (data: Partial<PurchaseTask>) => void
@@ -9,11 +9,7 @@ interface Props {
   onBatch: () => void
 }
 
-const defaultInitial: Partial<PurchaseTask> = {
-  name: "", quantity: 1, unit: "个", urgency: 2,
-  currency: "ZMW", exchangeRate: 1, taxStatus: "可抵扣",
-  plannedDate: todayISO(), status: 1,
-}
+const defaultInitial: Partial<PurchaseTask> = { name: "", ...defaultTaskFields() }
 
 export function AddNewTaskBar({ onAdd, onOpenAdd, onBatch }: Props) {
   const [text, setText] = useState("")

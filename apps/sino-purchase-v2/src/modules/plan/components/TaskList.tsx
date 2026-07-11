@@ -113,7 +113,7 @@ export function TaskList({ tasks, groupBy, onRequestEdit, editingId, onSave, onC
             task={row.task}
             onRequestEdit={onRequestEdit}
             isEditing={editingId === row.task.id}
-            selected={selectedIds.has(row.task.id)}
+            selected={selectedIds.includes(row.task.id)}
             onToggleSelect={onToggleSelect}
             onSave={onSave}
             onCancel={onCancel}
